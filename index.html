@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Bizim Ev">
+  <title>Bizim Ev</title>
+  
+  <!-- Tailwind CSS & FontAwesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Kamera Barkod Kütüphanesi -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      padding-bottom: 110px;
+    }
+    .safe-top {
+      padding-top: env(safe-area-inset-top, 20px);
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 20px);
+    }
+    /* iOS Yay Etkisi & Akıcı Kaydırma */
+    .smooth-scroll {
+      -webkit-overflow-scrolling: touch;
+    }
+  </style>
+</head>
+<body class="bg-[#F2F2F7] text-slate-900 antialiased min-h-screen">
+
+  <!-- iOS Üst Bar -->
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 safe-top transition-all">
+    <div class="flex justify-between items-center px-5 py-3">
+      <div>
+        <p class="text-[11px] font-semibold tracking-wider uppercase text-slate-400">Bizim Ev Yönetimi</p>
+        <h1 id="sayfaBaslik" class="text-2xl font-bold tracking-tight text-slate-900">Kiler & Stok</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="verileriYukle()" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 active:scale-95 transition-transform">
+          <i id="yenileIcon" class="fa-solid fa-arrows-rotate text-sm"></i>
+        </button>
+        <button onclick="modalAc()" class="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-sm active:scale-95 transition-transform">
+          <i class="fa-solid fa-plus text-sm"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Yükleniyor Uyarısı -->
+  <div id="yukleniyor" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white/90 p-4 rounded-2xl shadow-xl flex items-center gap-3">
+      <div class="animate-spin rounded-full h-5 w-5 border-2 border-indigo-600 border-t-transparent"></div>
+      <span class="text-sm font-medium text-slate-700">Senkronize ediliyor...</span>
+    </div>
+  </div>
+
+  <!-- Ana İçerik Konteyneri -->
+  <main class="p-4 space-y-4 max-w-lg mx-auto smooth-scroll">
+
+    <!-- 1. KİLER & STOK SEKME -->
+    <section id="tab-kiler" class="space-y-3">
+      <div id="kilerUyariKutusu"></div>
+      <div id="kilerListe" class="space-y-2.5"></div>
+    </section>
+
+    <!-- 2. ALIŞVERİŞ LİSTESİ SEKME -->
+    <section id="tab-alisveris" class="space-y-3 hidden">
+      <div id="alisverisListe" class="space-y-2.5"></div>
+    </section>
+
+    <!-- 3. EV BÜTÇESİ SEKME -->
+    <section id="tab-butce" class="space-y-4 hidden">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
+          <div class="flex items-center gap-2 text-emerald-600 mb-1">
+            <i class="fa-solid fa-arrow-down-left text-xs"></i>
+            <span class="text-[11px] font-bold tracking-wider uppercase">Toplam Gelir</span>
+          </div>
+          <p id="toplamGelir" class="text-xl font-extrabold text-slate-900 tracking-tight">₺0</p>
+        </div>
+        <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
+          <div class="flex items-center gap-2 text-rose-500 mb-1">
+            <i class="fa-solid fa-arrow-up-right text-xs"></i>
+            <span class="text-[11px] font-bold tracking-wider uppercase">Toplam Gider</span>
+          </div>
+          <p id="toplamGider" class="text-xl font-extrabold text-slate-900 tracking-tight">₺0</p>
+        </div>
+      </div>
+      <div class="space-y-2.5">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Son İşlemler</h3>
+        <div id="butceListe" class="space-y-2.5"></div>
+      </div>
+    </section>
+
+    <!-- 4. FATURALAR & AİDAT SEKME -->
+    <section id="tab-faturalar" class="space-y-3 hidden">
+      <div id="faturaListe" class="space-y-2.5"></div>
+    </section>
+
+    <!-- 5. İSTEK LİSTESİ (WISHLIST) SEKME -->
+    <section id="tab-istekler" class="space-y-3 hidden">
+      <div id="istekListe" class="space-y-2.5"></div>
+    </section>
+
+  </main>
+
+  <!-- iOS Alt Tab Çubuğu -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-slate-200/80 safe-bottom">
+    <div class="max-w-lg mx-auto px-4 py-2 flex justify-between">
+      <button onclick="sekmeDegistir('kiler', 'Kiler & Stok')" class="nav-btn active flex-1 flex flex-col items-center py-1 text-indigo-600" data-tab="kiler">
+        <i class="fa-solid fa-boxes-stacked text-lg mb-1"></i>
+        <span class="text-[10px] font-medium tracking-tight">Kiler</span>
+      </button>
+      <button onclick="sekmeDegistir('alisveris', 'Alışveriş')" class="nav-btn flex-1 flex flex-col items-center py-1 text-slate-400" data-tab="alisveris">
+        <i class="fa-solid fa-basket-shopping text-lg mb-1"></i>
+        <span class="text-[10px] font-medium tracking-tight">Alışveriş</span>
+      </button>
+      <button onclick="sekmeDegistir('butce', 'Bütçe & Harcama')" class="nav-btn flex-1 flex flex-col items-center py-1 text-slate-400" data-tab="butce">
+        <i class="fa-solid fa-wallet text-lg mb-1"></i>
+        <span class="text-[10px] font-medium tracking-tight">Bütçe</span>
+      </button>
+      <button onclick="sekmeDegistir('faturalar', 'Aidat & Fatura')" class="nav-btn flex-1 flex flex-col items-center py-1 text-slate-400" data-tab="faturalar">
+        <i class="fa-solid fa-file-invoice-dollar text-lg mb-1"></i>
+        <span class="text-[10px] font-medium tracking-tight">Faturalar</span>
+      </button>
+      <button onclick="sekmeDegistir('istekler', 'İstek Listesi')" class="nav-btn flex-1 flex flex-col items-center py-1 text-slate-400" data-tab="istekler">
+        <i class="fa-solid fa-gift text-lg mb-1"></i>
+        <span class="text-[10px] font-medium tracking-tight">İstekler</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Form Modalı -->
+  <div id="formModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
+    <div class="bg-white rounded-t-[32px] sm:rounded-3xl w-full max-w-md p-6 max-h-[88vh] overflow-y-auto space-y-4 shadow-2xl safe-bottom">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 id="modalBaslik" class="font-bold text-lg text-slate-900">Yeni Ekle</h3>
+        <button onclick="modalKapat()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center font-bold">&times;</button>
+      </div>
+
+      <div id="modalGovde" class="space-y-3"></div>
+
+      <!-- Kamera Tarayıcı Penceresi -->
+      <div id="kameraAlani" class="hidden rounded-2xl overflow-hidden border border-slate-200">
+        <div id="reader" style="width: 100%;"></div>
+        <button onclick="kameraKapat()" class="w-full bg-slate-100 py-2.5 text-xs font-semibold text-slate-700">Kamerayı Kapat</button>
+      </div>
+
+      <button id="kaydetBtn" onclick="formKaydet()" class="w-full bg-indigo-600 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-indigo-200 active:scale-95 transition-all">
+        Kaydet
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // ⚙️ APPS SCRIPT /EXEC BAĞLANTINIZI BURAYA GİRİN:
+    // ==========================================
+    const API_URL = "https://script.google.com/macros/s/AKfycbyj-JeihPLblAAlZxZ21OnCtKFH9jtVxf3ihsRvcXlqpq1V_3zpJuX1HWHqI2Ao4Q5J/exec";
+
+    let aktifSekme = 'kiler';
+    let html5QrCode = null;
+
+    // Örnek Test Veritabanı (API_URL girilene kadar çalışır)
+    let appVerisi = {
+      kiler: [
+        ["Süt", "8691234567890", "1", "Litre", "2"],
+        ["Yumurta", "8690987654321", "12", "Adet", "6"],
+        ["Zeytinyağı", "8695554443322", "3", "Litre", "1"]
+      ],
+      alisveris: [
+        ["Kaşar Peyniri", "1", "Eşim", "24.10.2026"],
+        ["Bulaşık Tableti", "1", "Ben", "23.10.2026"]
+      ],
+      butce: [
+        ["24.10.2026", "Gelir", "Maaş", "55000", "Eşim"],
+        ["23.10.2026", "Gider", "Market", "1250", "Ben"],
+        ["22.10.2026", "Gider", "Benzin", "1600", "Ben"]
+      ],
+      faturalar: [
+        ["Ekim 2026", "Aidat", "2850", "Doğalgaz ortak payölçer dahil"],
+        ["Ekim 2026", "Elektrik", "620", "Otomatik ödeme yapıldı"]
+      ],
+      istekler: [
+        ["https://trendyol.com", "Kahve Makinesi", "4500", "Eşim"],
+        ["https://amazon.com.tr", "Kablosuz Kulaklık", "2200", "Ben"]
+      ]
+    };
+
+    window.onload = function() {
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
+        verileriYukle();
+      } else {
+        ekraniGuncelle();
+      }
+    };
+
+    function verileriYukle() {
+      if (!API_URL || API_URL.includes("BURAYA_EXEC")) return;
+      yukleniyorGoster(true);
+      document.getElementById('yenileIcon').classList.add('animate-spin');
+
+      fetch(`${API_URL}?islem=verileriGetir`, { method: 'GET', redirect: 'follow' })
+        .then(res => res.json())
+        .then(data => {
+          appVerisi = data;
+          ekraniGuncelle();
+        })
+        .catch(err => {
+          console.warn("Veri bağlantısı hatası, yerel veriler kullanılıyor:", err);
+        })
+        .finally(() => {
+          yukleniyorGoster(false);
+          document.getElementById('yenileIcon').classList.remove('animate-spin');
+        });
+    }
+
+    function sekmeDegistir(sekme, baslik) {
+      aktifSekme = sekme;
+      document.getElementById('sayfaBaslik').innerText = baslik;
+      ['kiler', 'alisveris', 'butce', 'faturalar', 'istekler'].forEach(s => {
+        document.getElementById('tab-' + s).classList.add('hidden');
+      });
+      document.getElementById('tab-' + sekme).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if(btn.dataset.tab === sekme) {
+          btn.classList.add('text-indigo-600');
+          btn.classList.remove('text-slate-400');
+        } else {
+          btn.classList.remove('text-indigo-600');
+          btn.classList.add('text-slate-400');
+        }
+      });
+    }
+
+    function ekraniGuncelle() {
+      // 1. KİLER
+      const kilerBox = document.getElementById('kilerListe');
+      const uyariBox = document.getElementById('kilerUyariKutusu');
+      kilerBox.innerHTML = '';
+      uyariBox.innerHTML = '';
+
+      let azalanlar = [];
+
+      (appVerisi.kiler || []).forEach(item => {
+        const stok = Number(item[2]) || 0;
+        const kritik = Number(item[4]) || 0;
+        const azaldi = stok <= kritik;
+
+        if (azaldi) azalanlar.push(item[0]);
+
+        kilerBox.innerHTML += `
+          <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
+            <div class="space-y-0.5">
+              <p class="font-bold text-slate-900 text-sm">${item[0]}</p>
+              <p class="text-[11px] text-slate-400 font-medium">${item[1] ? 'Barkod: ' + item[1] : 'Barkodsuz'}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1.5 rounded-full text-xs font-bold ${azaldi ? 'bg-amber-100 text-amber-900' : 'bg-slate-100 text-slate-700'}">
+                ${stok} ${item[3] || 'adet'}
+              </span>
+            </div>
+          </div>`;
+      });
+
+      if (azalanlar.length > 0) {
+        uyariBox.innerHTML = `
+          <div class="bg-amber-50 border border-amber-200/60 p-3.5 rounded-2xl flex items-center gap-3 text-amber-900">
+            <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+            <p class="text-xs font-medium"><strong>Kritik Stok:</strong> ${azalanlar.join(', ')} tükenmek üzere!</p>
+          </div>`;
+      }
+
+      // 2. ALIŞVERİŞ
+      const aliBox = document.getElementById('alisverisListe');
+      aliBox.innerHTML = '';
+      (appVerisi.alisveris || []).forEach((item, index) => {
+        aliBox.innerHTML += `
+          <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
+            <div class="flex items-center gap-3.5">
+              <button onclick="alisverisTamamla(${index})" class="w-7 h-7 rounded-full border-2 border-slate-300 hover:border-emerald-500 hover:bg-emerald-50 text-emerald-600 flex items-center justify-center transition-all">
+                <i class="fa-solid fa-check text-xs"></i>
+              </button>
+              <div>
+                <p class="font-bold text-slate-900 text-sm">${item[0]}</p>
+                <p class="text-[11px] text-slate-400">${item[1]} adet • Ekleyen: ${item[2] || 'Hane'}</p>
+              </div>
+            </div>
+          </div>`;
+      });
+
+      // 3. BÜTÇE
+      let gelir = 0, gider = 0;
+      const butceBox = document.getElementById('butceListe');
+      butceBox.innerHTML = '';
+
+      (appVerisi.butce || []).forEach(item => {
+        const tutar = Number(item[3]) || 0;
+        if(item[1] === 'Gelir') gelir += tutar; else gider += tutar;
+
+        butceBox.innerHTML += `
+          <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="font-bold text-slate-800 text-sm">${item[2]}</p>
+              <p class="text-[11px] text-slate-400">${item[0]} • ${item[4] || ''}</p>
+            </div>
+            <span class="font-extrabold text-sm ${item[1] === 'Gelir' ? 'text-emerald-600' : 'text-slate-900'}">
+              ${item[1] === 'Gelir' ? '+' : '-'}₺${tutar.toLocaleString('tr-TR')}
+            </span>
+          </div>`;
+      });
+
+      document.getElementById('toplamGelir').innerText = '₺' + gelir.toLocaleString('tr-TR');
+      document.getElementById('toplamGider').innerText = '₺' + gider.toLocaleString('tr-TR');
+
+      // 4. FATURALAR
+      const fatBox = document.getElementById('faturaListe');
+      fatBox.innerHTML = '';
+      (appVerisi.faturalar || []).forEach(item => {
+        fatBox.innerHTML += `
+          <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
+            <div class="space-y-0.5">
+              <p class="font-bold text-slate-900 text-sm">${item[1]}</p>
+              <p class="text-[11px] text-slate-400">${item[0]} ${item[3] ? '• ' + item[3] : ''}</p>
+            </div>
+            <p class="font-extrabold text-sm text-indigo-900">₺${Number(item[2]).toLocaleString('tr-TR')}</p>
+          </div>`;
+      });
+
+      // 5. İSTEKLER / WISHLIST
+      const istBox = document.getElementById('istekListe');
+      istBox.innerHTML = '';
+      (appVerisi.istekler || []).forEach(item => {
+        istBox.innerHTML += `
+          <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
+            <div class="space-y-0.5">
+              <p class="font-bold text-slate-900 text-sm">${item[1]}</p>
+              <p class="text-[11px] text-slate-400">Ekleyen: ${item[3] || 'Biri'}</p>
+              ${item[0] ? `<a href="${item[0]}" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-indigo-600 font-semibold mt-1">Ürünü İncele <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i></a>` : ''}
+            </div>
+            <p class="font-extrabold text-sm text-slate-900">₺${Number(item[2]).toLocaleString('tr-TR')}</p>
+          </div>`;
+      });
+    }
+
+    function modalAc() {
+      const g = document.getElementById('modalGovde');
+      g.innerHTML = '';
+      document.getElementById('kameraAlani').classList.add('hidden');
+
+      if (aktifSekme === 'kiler') {
+        document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
+        g.innerHTML = `
+          <input id="f_ad" type="text" placeholder="Ürün Adı (örn: Süt)" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+          <div class="flex gap-2">
+            <input id="f_barkod" type="text" placeholder="Barkod Numarası" class="flex-1 bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+            <button onclick="kameraAc()" class="bg-indigo-50 text-indigo-600 px-4 rounded-2xl active:scale-95"><i class="fa-solid fa-barcode text-lg"></i></button>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input id="f_stok" type="number" placeholder="Stok Adedi" class="bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+            <input id="f_kritik" type="number" placeholder="Kritik Limit" class="bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+          </div>
+          <input id="f_birim" type="text" placeholder="Birim (Adet, Paket, Kg, Lt)" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">`;
+      } else if (aktifSekme === 'alisveris') {
+        document.getElementById('modalBaslik').innerText = 'Alışverişe Ekle';
+        g.innerHTML = `
+          <input id="f_urun" type="text" placeholder="Alınacak Ürün" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+          <input id="f_adet" type="number" value="1" placeholder="Adet" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+          <select id="f_ekleyen" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+            <option value="Ben">Ekleyen: Ben</option>
+            <option value="Eşim">Ekleyen: Eşim</option>
+          </select>`;
+      } else if (aktifSekme === 'butce') {
+        document.getElementById('modalBaslik').innerText = 'Harcama / Gelir Ekle';
+        g.innerHTML = `
+          <select id="f_tur" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+            <option value="Gider">Gider</option>
+            <option value="Gelir">Gelir</option>
+          </select>
+          <input id="f_kat" type="text" placeholder="Kategori (Market, Benzin, Maaş)" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+          <input id="f_tutar" type="number" placeholder="Tutar (₺)" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+          <select id="f_kisi" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+            <option value="Ben">Kişi: Ben</option>
+            <option value="Eşim">Kişi: Eşim</option>
+          </select>`;
+      } else if (aktifSekme === 'faturalar') {
+        document.getElementById('modalBaslik').innerText = 'Fatura / Aidat Ekle';
+        g.innerHTML = `
+          <input id="f_donem" type="text" placeholder="Dönem (örn: Ekim 2026)" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+          <input id="f_tur" type="text" placeholder="Tür (Aidat, Elektrik, Doğalgaz)" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+          <input id="f_tutar" type="number" placeholder="Tutar (₺)" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+          <input id="f_not" type="text" placeholder="Açıklama / Not" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">`;
+      } else if (aktifSekme === 'istekler') {
+        document.getElementById('modalBaslik').innerText = 'İstek / Wishlist Ekle';
+        g.innerHTML = `
+          <input id="f_link" type="text" placeholder="Ürün Linki (Trendyol, Amazon)" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+          <input id="f_ad" type="text" placeholder="Ürün Adı" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+          <input id="f_fiyat" type="number" placeholder="Fiyatı (₺)" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+          <select id="f_ekleyen" class="w-full bg-slate-100 p-3.5 rounded-2xl text-sm font-medium outline-none">
+            <option value="Ben">Ekleyen: Ben</option>
+            <option value="Eşim">Ekleyen: Eşim</option>
+          </select>`;
+      }
+      document.getElementById('formModal').classList.remove('hidden');
+    }
+
+    function modalKapat() {
+      kameraKapat();
+      document.getElementById('formModal').classList.add('hidden');
+    }
+
+    function formKaydet() {
+      let params = new URLSearchParams();
+
+      if(aktifSekme === 'kiler') {
+        params.append('islem', 'kilerEkle');
+        params.append('ad', document.getElementById('f_ad').value);
+        params.append('barkod', document.getElementById('f_barkod').value);
+        params.append('stok', document.getElementById('f_stok').value);
+        params.append('birim', document.getElementById('f_birim').value);
+        params.append('kritik', document.getElementById('f_kritik').value);
+      } else if(aktifSekme === 'alisveris') {
+        params.append('islem', 'alisverisEkle');
+        params.append('urun', document.getElementById('f_urun').value);
+        params.append('adet', document.getElementById('f_adet').value);
+        params.append('ekleyen', document.getElementById('f_ekleyen').value);
+      } else if(aktifSekme === 'butce') {
+        params.append('islem', 'butceEkle');
+        params.append('tur', document.getElementById('f_tur').value);
+        params.append('kat', document.getElementById('f_kat').value);
+        params.append('tutar', document.getElementById('f_tutar').value);
+        params.append('kisi', document.getElementById('f_kisi').value);
+      } else if(aktifSekme === 'faturalar') {
+        params.append('islem', 'faturaEkle');
+        params.append('donem', document.getElementById('f_donem').value);
+        params.append('tur', document.getElementById('f_tur').value);
+        params.append('tutar', document.getElementById('f_tutar').value);
+        params.append('not', document.getElementById('f_not').value);
+      } else if(aktifSekme === 'istekler') {
+        params.append('islem', 'istekEkle');
+        params.append('link', document.getElementById('f_link').value);
+        params.append('ad', document.getElementById('f_ad').value);
+        params.append('fiyat', document.getElementById('f_fiyat').value);
+        params.append('ekleyen', document.getElementById('f_ekleyen').value);
+      }
+
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
+        yukleniyorGoster(true);
+        fetch(`${API_URL}?${params.toString()}`, { method: 'GET', redirect: 'follow' })
+          .then(res => res.json())
+          .then(data => {
+            appVerisi = data;
+            ekraniGuncelle();
+            modalKapat();
+          })
+          .catch(err => {
+            alert("İşlem kaydedildi!");
+            modalKapat();
+            verileriYukle();
+          })
+          .finally(() => yukleniyorGoster(false));
+      } else {
+        modalKapat();
+      }
+    }
+
+    function alisverisTamamla(index) {
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
+        yukleniyorGoster(true);
+        fetch(`${API_URL}?islem=alisverisSil&index=${index}`, { method: 'GET', redirect: 'follow' })
+          .then(res => res.json())
+          .then(data => {
+            appVerisi = data;
+            ekraniGuncelle();
+          })
+          .finally(() => yukleniyorGoster(false));
+      } else {
+        appVerisi.alisveris.splice(index, 1);
+        ekraniGuncelle();
+      }
+    }
+
+    function kameraAc() {
+      document.getElementById('kameraAlani').classList.remove('hidden');
+      html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        (decodedText) => {
+          document.getElementById('f_barkod').value = decodedText;
+          kameraKapat();
+        },
+        () => {}
+      ).catch(() => alert("Kamera açılamadı, izin verdiğinizden emin olun."));
+    }
+
+    function kameraKapat() {
+      if(html5QrCode) {
+        html5QrCode.stop().then(() => {
+          html5QrCode.clear();
+          document.getElementById('kameraAlani').classList.add('hidden');
+        }).catch(() => {});
+      }
+    }
+
+    function yukleniyorGoster(durum) {
+      document.getElementById('yukleniyor').classList.toggle('hidden', !durum);
+    }
+  </script>
+</body>
+</html>
