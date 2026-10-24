@@ -7,9 +7,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Bizim Ev PRO</title>
   
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+  <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css)">
+  <script src="[https://unpkg.com/html5-qrcode](https://unpkg.com/html5-qrcode)"></script>
 
   <style>
     :root { color-scheme: dark; }
@@ -151,9 +151,9 @@
     // ==========================================
     // ⚙️ GEREKLİ ANAHTARLARI BURAYA YAPIŞTIRIN:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbzwRvAkXxlTATW7r0rFCk2nPIwMfYbjZwLtT5F1Aslqfm3PJdQf-9aCi2H-ruHSmfpO/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbz8sC7GILCzsn1gs9h0FmmkzfgrcsB00Rqb9Cs4XVXAIR6IuoIYnmyndH_hl6XL8sUH/exec";
     
-    // KISITLAMASIZ GEMINI API KEY (https://aistudio.google.com/app/apikey)
+    // ÜCRETSİZ GEMINI API KEY ALMAK İÇİN: [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) 
     const GEMINI_API_KEY = "AQ.Ab8RN6Ls_R8XSZfZrYRx754XyaT3VxfXuDErLVzpiFWBJ8NT8Q";
 
     let aktifSekme = 'kiler', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null;
@@ -300,17 +300,18 @@
       }, 500);
     }
 
-    // YENİ: YAPAY ZEKA TARİF ÜRETİCİ
+    // YENİ: YAPAY ZEKA TARİF ÜRETİCİ (Sorunsuz string)
     async function aiTarifUret() {
       if(!GEMINI_API_KEY || GEMINI_API_KEY.includes("BURAYA")) return alert("Yapay zeka için Gemini API Key eklenmemiş.");
       const d = document.getElementById('aiModal'); const g = document.getElementById('aiGovde');
       g.innerHTML = `<div class="flex flex-col items-center justify-center py-6"><div class="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full mb-3"></div><p class="text-purple-400 font-bold">Dolap analiz ediliyor, tarifler yazılıyor...</p></div>`;
       d.classList.remove('hidden'); d.classList.add('flex');
       
-      const kilerUrunler = (appVerisi.kiler || []).filter(u => Number(u[2]) > 0).map(u => `${u[0]} (SKT:${u[5]||'Yok'})`).join(', ');
+      const kilerUrunler = (appVerisi.kiler || []).filter(u => Number(u[2]) > 0).map(u => `${u[0]} (SKT: ${u[5]||'Yok'})`).join(', ');
       if(!kilerUrunler) { g.innerHTML = "Dolabınızda malzeme yok, alışveriş zamanı! :)"; return; }
       
-      const prompt = `Benim dolabımda şu malzemeler var: ${kilerUrunler}. SKT'si yaklaşanları öncelikli kullanarak 2 pratik yemek tarifi ver. Sadece HTML olarak <b> ve <ul> etiketleriyle süsleyerek dön, markdown (```) kullanma.`;
+      const prompt = `Benim dolabımda şu malzemeler var: ${kilerUrunler}. SKT'si yaklaşanları öncelikli kullanarak 2 pratik yemek tarifi ver. Sadece HTML olarak <b> ve <ul> etiketleriyle süsleyerek dön, markdown kullanma.`;
+      
       try {
         const res = await fetch(`[https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$](https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$){GEMINI_API_KEY}`, { 
            method: 'POST', 
@@ -320,10 +321,10 @@
         const json = await res.json();
         
         if (json.error) {
-           g.innerHTML = `<span class="text-red-400">Google Hata: ${json.error.message} (Muhtemelen API Kısıtlaması)</span>`;
+           g.innerHTML = `<span class="text-red-400">Google Hata: ${json.error.message}</span>`;
            return;
         }
-        g.innerHTML = json.candidates[0].content.parts[0].text.replace(/```html/g, '').replace(/```/g, '');
+        g.innerHTML = json.candidates[0].content.parts[0].text;
       } catch(e) { g.innerHTML = `Sistemsel Hata: ${e.message}`; }
     }
 
@@ -336,7 +337,7 @@
       const reader = new FileReader();
       reader.onloadend = async function() {
         const base64data = reader.result.split(',')[1];
-        const prompt = `Bu resimdeki fiş veya faturanın toplam tutarını ve kategorisini (Market, Akaryakıt, Restoran, Aidat vb.) bul. Sadece JSON formatında dön. Başka hiçbir metin ekleme. Örnek: {"tutar": 150.50, "kategori": "Market"}`;
+        const prompt = `Bu resimdeki fiş veya faturanın toplam tutarını ve kategorisini (Market, Akaryakıt, Restoran, Aidat vb.) bul. Sadece JSON formatında dön. Başka metin ekleme. Örnek: {"tutar": 150.50, "kategori": "Market"}`;
         try {
           const res = await fetch(`[https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$](https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$){GEMINI_API_KEY}`, { 
              method: 'POST', 
@@ -350,7 +351,13 @@
              return;
           }
           
-          const yanitTxt = json.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
+          let yanitTxt = json.candidates[0].content.parts[0].text.trim();
+          if(yanitTxt.startsWith('```json')) {
+              yanitTxt = yanitTxt.replace('```json', '').replace('```', '').trim();
+          } else if (yanitTxt.startsWith('```')) {
+              yanitTxt = yanitTxt.replace(/```/g, '').trim();
+          }
+
           const sonuc = JSON.parse(yanitTxt);
           
           if(sonuc.tutar) document.getElementById('f_tutar').value = sonuc.tutar;
@@ -456,7 +463,6 @@
           iBox.innerHTML+=`<div class="bg-[#1c1c1e] p-4 rounded-[20px] flex justify-between items-center"><div class="flex gap-3.5 overflow-hidden"><div class="w-12 h-12 bg-[#2c2c2e] rounded-xl flex items-center justify-center text-gray-500 shrink-0"><i class="fa-solid fa-gift"></i></div><div class="overflow-hidden flex flex-col justify-center"><p class="font-semibold text-[14px] text-white truncate">${i[1]||''}</p><div class="flex items-center gap-2 mt-0.5"><span class="text-[11px] font-medium text-gray-500">${i[3]||''}</span>${i[0]?`<a href="${i[0]}" target="_blank" class="text-[11px] text-blue-400 font-semibold">Görüntüle</a>`:''}</div></div></div><div class="flex flex-col items-end gap-1.5 pl-2 shrink-0"><p class="font-bold text-[15px] text-white">₺${Number(i[2]||0).toLocaleString('tr-TR')}</p><button onclick="satirSil('istekler', ${idx}, 'istekSil')" class="text-[10px] text-red-400 uppercase font-bold tracking-wider">Sil</button></div></div>`;
         });
         
-        // RUTİNLER
         const rBox = document.getElementById('rutinListe'); rBox.innerHTML='';
         (appVerisi.rutinler || []).forEach((i, idx) => {
           const ad = i[0]||'', siklik = Number(i[1])||30, sonTarihStr = i[2];
