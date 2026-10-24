@@ -157,7 +157,7 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbzuc_R5WmiBY9K2QRLBjlAZiEd7PvwAEE19vDEbqBozitOGnHR9wq1NJ-WsC5PQPk8K/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzd13co3Og4rtZR945lu6P2g828JkpRnbmXdL1RwS6z_lITQq7Nnn2XGZOMOmheQIfE/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
@@ -224,18 +224,18 @@
       if (aktifSekme === 'kiler') {
         document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
         g.innerHTML = `
-          <!-- YAPAY ZEKA GÖRSEL MOTORU (GEMINI 3.8 FLASH) -->
+          <!-- YAPAY ZEKA GÖRSEL MOTORU (TURBO JET) -->
           <div class="bg-gradient-to-r from-blue-900/40 via-indigo-900/40 to-purple-900/40 p-4 rounded-2xl border border-blue-500/30 text-center space-y-2.5">
             <div class="flex justify-between items-center px-1">
               <span class="text-[12px] font-bold text-blue-300 flex items-center gap-1.5">
-                <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Hızlı Fotoğraf Tanıma
+                <i class="fa-solid fa-bolt text-amber-300"></i> Hızlı Fotoğraf Tanıma
               </span>
               <button type="button" onclick="geminiKeySifirla()" class="text-[10px] text-gray-400 underline hover:text-white">Şifre Değiştir</button>
             </div>
             <button type="button" onclick="document.getElementById('aiFotoInput').click()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-blue-600/30 transition-all text-sm">
               <i class="fa-solid fa-camera text-base"></i> Paketin Fotoğrafını Çek
             </button>
-            <p class="text-[10px] text-gray-400">Ambalajın ön yüzünü çekin; 1 saniyede otomatik tanımlansın.</p>
+            <p class="text-[10px] text-gray-400">Ambalajı çekin; 1 saniyede tanısın ve Google'dan resim seçenekleri getirsin.</p>
             <input type="file" id="aiFotoInput" accept="image/*" capture="environment" class="hidden" onchange="aiUrunAnalizEt(event)">
             <p id="aiDurumYazisi" class="text-[12px] hidden font-semibold pt-0.5"></p>
           </div>
@@ -248,15 +248,33 @@
           </div>
           <p id="barkodDurum" class="text-[12px] hidden font-medium"></p>
           
-          <div id="urunOnizlemeKutusu" class="hidden flex items-center gap-3 bg-[#2c2c2e] p-3 rounded-xl border border-white/5">
-            <img id="f_onizlemeResim" src="" class="w-14 h-14 rounded-lg object-cover bg-black/40 border border-white/5 shrink-0">
-            <div class="overflow-hidden">
-              <p id="f_onizlemeAd" class="text-[14px] font-bold text-white truncate"></p>
-              <span id="f_onizlemeKat" class="text-[11px] text-emerald-400 font-medium"></span>
+          <!-- SEÇİLEN RESİM VE BİLGİ KUTUSU -->
+          <div id="urunOnizlemeKutusu" class="hidden bg-[#2c2c2e] p-3.5 rounded-2xl border border-white/5 space-y-3">
+            <div class="flex items-center gap-3">
+              <img id="f_onizlemeResim" src="" class="w-16 h-16 rounded-xl object-cover bg-black/40 border border-white/10 shrink-0">
+              <div class="overflow-hidden">
+                <p id="f_onizlemeAd" class="text-[15px] font-bold text-white truncate"></p>
+                <span id="f_onizlemeKat" class="text-[11px] text-emerald-400 font-semibold block mt-0.5"></span>
+              </div>
+            </div>
+
+            <!-- 🖼️ GOOGLE RESİM SEÇENEKLERİ GALERİSİ -->
+            <div id="gorselSeceneklerAlani" class="hidden space-y-1.5 pt-2 border-t border-white/5">
+              <div class="flex justify-between items-center">
+                <span class="text-[11px] font-semibold text-gray-400">Ürün Görselini Seçin (Dokun ve Değiştir):</span>
+                <span id="gorselDurumText" class="text-[10px] text-blue-400 font-medium"></span>
+              </div>
+              <div id="gorselListesi" class="flex gap-2 overflow-x-auto no-scrollbar py-1"></div>
             </div>
           </div>
           
-          <input id="f_ad" type="text" placeholder="Ürün Adı" class="${inputClass}">
+          <div class="flex gap-2">
+            <input id="f_ad" type="text" placeholder="Ürün Adı" class="${inputClass} flex-1">
+            <button type="button" onclick="manuelResimAra()" class="bg-[#2c2c2e] px-4 rounded-xl text-emerald-400 font-bold active:scale-95 transition-transform shrink-0" title="Google'da Görsel Ara">
+              <i class="fa-solid fa-image text-lg"></i>
+            </button>
+          </div>
+          
           <select id="f_kategori" class="${inputClass}"><option value="Gıda & Mutfak">Kategori: Gıda & Mutfak</option><option value="Temizlik & Hijyen">Kategori: Temizlik & Hijyen</option><option value="Kişisel Bakım">Kategori: Kişisel Bakım</option><option value="Ev & Yaşam">Kategori: Ev & Yaşam</option></select>
           <input id="f_resim" type="hidden">
           <div class="grid grid-cols-2 gap-3"><input id="f_stok" type="number" placeholder="Stok" value="1" class="${inputClass}"><input id="f_birim" type="text" placeholder="Birim (Adet, Lt)" value="Adet" class="${inputClass}"></div>
@@ -284,7 +302,7 @@
       alert("Kayıtlı Gemini şifresi silindi. Bir sonraki fotoğrafta yeni şifreniz sorulacaktır.");
     }
 
-    // 🚀 ULTRA HIZLI VE KESİNTİSİZ SIKIŞTIRMA (iOS BELLEK KİLİTLENMESİNİ ENGELLER)
+    // 🚀 ULTRA HIZLI SIKIŞTIRMA (iOS BELLEĞİNİ KİLİTLEMEZ)
     function optimizeGorsel(file) {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -305,7 +323,88 @@
       });
     }
 
-    // ⚡ GEMINI 3.8 FLASH ÇAĞRISI (OFFICIAL REST)
+    // 🖼️ GOOGLE VE AĞDAN ÇOKLU GÖRSEL SEÇENEĞİ GETİRİP DİZEN MOTOR
+    async function resimSecenekleriGetir(urunAdi, kameraFotografi) {
+      const gAlan = document.getElementById('gorselSeceneklerAlani');
+      const gListe = document.getElementById('gorselListesi');
+      const gDurum = document.getElementById('gorselDurumText');
+      
+      gAlan.classList.remove('hidden');
+      gDurum.innerText = "Görseller taranıyor...";
+      gListe.innerHTML = "";
+
+      // 1. Seçenek: Çekilen Kamera Fotoğrafı
+      if (kameraFotografi) {
+        gListe.innerHTML += `
+          <div onclick="resimSec(this, '${kameraFotografi}')" class="gorsel-secim-kart ring-2 ring-blue-500 rounded-xl overflow-hidden shrink-0 cursor-pointer relative w-16 h-16 bg-black">
+            <img src="${kameraFotografi}" class="w-full h-full object-cover">
+            <span class="absolute bottom-0 inset-x-0 bg-blue-600/90 text-[8px] font-bold text-center text-white py-0.5">Çektiğin</span>
+          </div>`;
+      }
+
+      let bulunanlar = [];
+
+      // Google Görsellerden 4-5 seçenek çek
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
+        try {
+          const res = await fetch(`${API_URL}?islem=resimBul&ad=${encodeURIComponent(urunAdi)}`);
+          const data = await res.json();
+          if (data && data.resimler && data.resimler.length > 0) {
+            bulunanlar = data.resimler;
+          }
+        } catch (e) {}
+      }
+
+      // OpenFoodFacts Türkiye'den de alternatif çek
+      try {
+        const offRes = await fetch(`https://tr.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(urunAdi)}&search_simple=1&action=process&json=1&page_size=2`);
+        if (offRes.ok) {
+          const offData = await offRes.json();
+          if (offData.products) {
+            offData.products.forEach(p => {
+              const img = p.image_front_small_url || p.image_url;
+              if (img && !bulunanlar.includes(img)) bulunanlar.push(img);
+            });
+          }
+        }
+      } catch(e) {}
+
+      // Bulunan temiz katalog görsellerini yan yana diz
+      bulunanlar.forEach((url, i) => {
+        gListe.innerHTML += `
+          <div onclick="resimSec(this, '${url}')" class="gorsel-secim-kart ring-1 ring-white/10 rounded-xl overflow-hidden shrink-0 cursor-pointer relative w-16 h-16 bg-black hover:ring-2 hover:ring-blue-400 transition-all">
+            <img src="${url}" class="w-full h-full object-cover">
+            <span class="absolute bottom-0 inset-x-0 bg-black/70 text-[8px] font-bold text-center text-gray-300 py-0.5">Google ${i+1}</span>
+          </div>`;
+      });
+
+      // Eğer Google'dan temiz resim geldiyse, otomatik olarak ilk temiz resmi varsayılan seç!
+      if (bulunanlar.length > 0) {
+        const ilkKatalog = gListe.querySelectorAll('.gorsel-secim-kart')[1];
+        if (ilkKatalog) resimSec(ilkKatalog, bulunanlar[0]);
+        gDurum.innerText = `${bulunanlar.length} alternatif bulundu`;
+      } else {
+        gDurum.innerText = "Kendi fotoğrafınız seçildi";
+      }
+    }
+
+    function resimSec(element, url) {
+      document.querySelectorAll('.gorsel-secim-kart').forEach(k => {
+        k.className = "gorsel-secim-kart ring-1 ring-white/10 rounded-xl overflow-hidden shrink-0 cursor-pointer relative w-16 h-16 bg-black transition-all";
+      });
+      element.className = "gorsel-secim-kart ring-2 ring-blue-500 rounded-xl overflow-hidden shrink-0 cursor-pointer relative w-16 h-16 bg-black shadow-lg shadow-blue-500/20";
+      
+      document.getElementById('f_resim').value = url;
+      document.getElementById('f_onizlemeResim').src = url;
+    }
+
+    function manuelResimAra() {
+      const ad = document.getElementById('f_ad').value;
+      if (!ad || ad.trim().length < 2) return alert("Lütfen önce bir ürün adı yazın.");
+      resimSecenekleriGetir(ad, document.getElementById('f_resim').value);
+    }
+
+    // ⚡ 1 SANİYELİK TURBO JET YAPAY ZEKA ÇAĞRISI (THINKING KAPALI)
     async function aiUrunAnalizEt(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -326,7 +425,7 @@
       }
 
       durum.classList.remove('hidden');
-      durum.innerHTML = '<i class="fa-solid fa-bolt animate-pulse text-amber-300"></i> Gemini 3.8 Flash inceliyor...';
+      durum.innerHTML = '<i class="fa-solid fa-bolt animate-pulse text-amber-300"></i> 1 saniyede taranıyor...';
       durum.className = "text-[12px] text-amber-300 font-semibold block px-1";
 
       const baslangicZamani = Date.now();
@@ -342,10 +441,11 @@
 
         const pureBase64 = base64Url.split(',')[1];
         
+        // 🚀 DÜŞÜNME (THINKING) SÜRESİ TAMAMEN SIFIRLANMIŞ YENİ NESİL PAYLOAD
         const payload = {
           contents: [{
             parts: [
-              { text: "Fotoğraftaki Türk market ürününün marka ve tam adını tespit et (Örn: Dost Yarım Yağlı Süt, Birşah Yoğurt, Fairy Limon). Yanıt olarak SADECE geçerli bir JSON döndür: {\"ad\":\"Marka ve Ürün Adı\",\"kat\":\"Gıda & Mutfak\"}. Kategori sadece şunlardan biri olabilir: 'Gıda & Mutfak', 'Temizlik & Hijyen', 'Kişisel Bakım', 'Ev & Yaşam'." },
+              { text: "Fotoğraftaki Türk market ürününün marka ve tam adını tespit et (Örn: Dost Yarım Yağlı Süt 1L, Birşah Yoğurt 1.5kg, Fairy Limon). Yanıt olarak SADECE geçerli bir JSON döndür: {\"ad\":\"Marka ve Ürün Adı\",\"kat\":\"Gıda & Mutfak\"}. Kategori sadece: 'Gıda & Mutfak', 'Temizlik & Hijyen', 'Kişisel Bakım', 'Ev & Yaşam'." },
               {
                 inlineData: {
                   mimeType: "image/jpeg",
@@ -357,8 +457,10 @@
           generationConfig: {
             responseMimeType: "application/json",
             thinkingConfig: {
-              thinkingLevel: "low"
-            }
+              thinkingBudget: 0
+            },
+            temperature: 0.1,
+            maxOutputTokens: 60
           }
         };
 
@@ -373,20 +475,15 @@
         if (res.ok && data.candidates && data.candidates[0].content) {
           const parts = data.candidates[0].content.parts || [];
           let rawText = "";
-          for (const p of parts) {
-            if (p.text && !p.thought) {
-              rawText = p.text;
-            }
-          }
-          if (!rawText && parts.length > 0) {
-            rawText = parts[parts.length - 1].text || "";
-          }
+          for (const p of parts) { if (p.text && !p.thought) rawText = p.text; }
+          if (!rawText && parts.length > 0) rawText = parts[parts.length - 1].text || "";
 
           const match = rawText.match(/\{[\s\S]*?\}/);
           if (match) {
             const sonuc = JSON.parse(match[0]);
             const sure = ((Date.now() - baslangicZamani) / 1000).toFixed(1);
             
+            // Formu doldur
             document.getElementById('f_ad').value = sonuc.ad;
             if (sonuc.kat) document.getElementById('f_kategori').value = sonuc.kat;
             document.getElementById('f_onizlemeAd').innerText = sonuc.ad;
@@ -394,6 +491,9 @@
             
             durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>${sonuc.ad}</b> (${sure} sn)`;
             durum.className = "text-[12px] text-emerald-400 font-semibold block px-1";
+
+            // 🎯 GOOGLE GÖRSELLERİ BUL VE SEÇENEKLERİ DİZ
+            resimSecenekleriGetir(sonuc.ad, base64Url);
           } else {
             throw new Error("JSON yanıtı çözümlenemedi.");
           }
