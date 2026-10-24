@@ -160,7 +160,7 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbyw9E0rsfws1ziN4cm96Z_BHvhCwdEw1UBfprgNOx4dvxuDw6xvvQITkVV67eDT7I_D/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwPZuQl1THIPaLZtO4ijU_oNlP48you4Xp5qkx-rLpUZB4rqE1WsAfGhDoVXRADxpg2/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
@@ -257,7 +257,7 @@
             </div>
             <p id="barkodDurum" class="text-[12px] hidden font-semibold px-1"></p>
 
-            <!-- 📸 DOĞRUDAN PAKETİN RESMİNİ ÇEKME / YÜKLEME BUTONU -->
+            <!-- 📸 KENDİ FOTOĞRAFINI ÇEKME BUTONU -->
             <input type="file" id="fotoUploadInput" accept="image/*" capture="environment" class="hidden" onchange="kullaniciFotoSecildi(event)">
             <button type="button" onclick="document.getElementById('fotoUploadInput').click()" class="w-full bg-[#2c2c2e] hover:bg-[#333336] border border-dashed border-white/20 py-3 rounded-xl flex items-center justify-center gap-2 text-[13px] font-semibold text-gray-300 active:scale-[0.99] transition-all">
               <i class="fa-solid fa-camera text-blue-400 text-base"></i> Kendi Fotoğrafını Çek veya Galeriden Seç
@@ -275,7 +275,7 @@
 
               <div id="gorselSeceneklerAlani" class="space-y-1.5 pt-2 border-t border-white/5">
                 <div class="flex justify-between items-center">
-                  <span class="text-[11px] font-semibold text-gray-400">Görsel Seçenekleri (Dokun ve Değiştir):</span>
+                  <span class="text-[11px] font-semibold text-gray-400">Ürün Görseli Seçin (Dokun ve Değiştir):</span>
                   <span id="gorselDurumText" class="text-[10px] text-blue-400 font-medium"></span>
                 </div>
                 <div id="gorselListesi" class="flex gap-2 overflow-x-auto no-scrollbar py-1"></div>
@@ -334,34 +334,34 @@
       if (!val) return;
       val = val.trim();
       if (val.length >= 8) {
-        barkodTimer = setTimeout(() => barkodSunucudaAra(val), 250);
+        barkodTimer = setTimeout(() => barkodCozucuCalistir(val), 250);
       }
     }
 
-    // ⚡ PERAKENDE İNDEKSİ VE E-TABLO ENTEGRELİ ARAMA
-    async function barkodSunucudaAra(barkod) {
+    // ⚡ HİBRİT BARKOD MOTORU (E-TABLO + PERAKENDE İNDEKSİ)
+    async function barkodCozucuCalistir(barkod) {
       if (!barkod) return;
       barkod = String(barkod).trim();
       const d = document.getElementById('barkodDurum');
       d.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Perakende ağında taranıyor...';
       d.className = "text-[12px] text-blue-400 font-semibold block px-1";
 
-      // 1. Önce kilerde daha önce eklenmiş mi bak
+      // 1. Önce mevcut kilerde var mı kontrol et
       const kilerdeVar = (appVerisi.kiler || []).find(u => String(u[1]).trim() === barkod);
       if (kilerdeVar && kilerdeVar[0]) {
-        urunBilgileriniDoldur(kilerdeVar[0], kilerdeVar[7] || 'Gıda & Mutfak', kilerdeVar[3] || 'Adet', kilerdeVar[6] || '');
+        urunBilgileriniDoldur(kilerdeVar[0], kilerdeVar[7] || 'Gıda & Mutfak', kilerdeVar[3] || 'Adet', kilerdeVar[6] || '', []);
         d.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Kilerinizden Bulundu: <b>${kilerdeVar[0]}</b>`;
         d.className = "text-[12px] text-emerald-400 font-semibold block px-1";
         return;
       }
 
-      // 2. Apps Script (E-Tablo ve Arama Motoru İndeksi)
+      // 2. Apps Script Hibrit Motoruna Sor
       if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
         try {
-          const res = await fetch(`${API_URL}?islem=barkodAra&barkod=${encodeURIComponent(barkod)}`);
+          const res = await fetch(`${API_URL}?islem=barkodCoz&barkod=${encodeURIComponent(barkod)}`);
           const data = await res.json();
           if (data && data.bulundu && data.ad) {
-            urunBilgileriniDoldur(data.ad, data.kategori, data.birim, data.resim);
+            urunBilgileriniDoldur(data.ad, data.kategori, data.birim, data.resim, data.resimler || []);
             d.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Bulundu (${data.kaynak}): <b>${data.ad}</b>`;
             d.className = "text-[12px] text-emerald-400 font-semibold block px-1";
             return;
@@ -373,7 +373,7 @@
       d.className = "text-[12px] text-blue-400 font-medium block px-1";
     }
 
-    function urunBilgileriniDoldur(ad, kategori, birim, resim) {
+    function urunBilgileriniDoldur(ad, kategori, birim, resim, resimlerListesi) {
       document.getElementById('f_ad').value = ad;
       if (kategori && kategori !== "null") document.getElementById('f_kategori').value = kategori;
       if (birim && birim !== "null") document.getElementById('f_birim').value = birim;
@@ -387,10 +387,14 @@
         document.getElementById('f_onizlemeResim').src = resim;
       }
       
-      resimSecenekleriGetir(ad, resim);
+      if (resimlerListesi && resimlerListesi.length > 0) {
+        gorselListesiniDiz(resimlerListesi, resim);
+      } else {
+        resimSecenekleriGetir(ad, resim);
+      }
     }
 
-    // 📸 KULLANICININ KENDİ ÇEKTİĞİ FOTOĞRAFI İŞLEYİP KULLANMASI
+    // 📸 KENDİ ÇEKTİĞİ FOTOĞRAFI İŞLEYİP KULLANMA
     function kullaniciFotoSecildi(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -413,7 +417,6 @@
           document.getElementById('f_onizlemeResim').src = base64Url;
           document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
 
-          // Galerinin en başına "Çektiğin" kartını ekle
           const gListe = document.getElementById('gorselListesi');
           document.getElementById('gorselSeceneklerAlani').classList.remove('hidden');
           gListe.insertAdjacentHTML('afterbegin', `
@@ -428,47 +431,49 @@
       reader.readAsDataURL(file);
     }
 
-    // 🖼️ APPS SCRIPT ÜZERİNDEN BİNG GÖRSEL MOTORU ARAMASI
-    async function resimSecenekleriGetir(urunAdi, mevcutResim) {
+    // 🖼️ GÖRSELLERİ GALERİYE DİZEN FONKSİYON
+    function gorselListesiniDiz(bulunanlar, seciliUrl) {
       const gListe = document.getElementById('gorselListesi');
       const gDurum = document.getElementById('gorselDurumText');
       document.getElementById('gorselSeceneklerAlani').classList.remove('hidden');
-      gDurum.innerText = "Görseller aranıyor...";
       gListe.innerHTML = "";
 
-      if (mevcutResim) {
-        gListe.innerHTML += `
-          <div onclick="resimSec(this, '${mevcutResim}')" class="gorsel-secim-kart ring-2 ring-blue-500 rounded-xl overflow-hidden shrink-0 cursor-pointer relative w-16 h-16 bg-black">
-            <img src="${mevcutResim}" class="w-full h-full object-cover">
-            <span class="absolute bottom-0 inset-x-0 bg-blue-600/90 text-[8px] font-bold text-center text-white py-0.5">Mevcut</span>
-          </div>`;
-      }
-
-      let bulunanlar = [];
-
-      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
-        try {
-          const res = await fetch(`${API_URL}?islem=resimBul&ad=${encodeURIComponent(urunAdi)}`);
-          const data = await res.json();
-          if (data && data.resimler && data.resimler.length > 0) {
-            bulunanlar = data.resimler;
-          }
-        } catch (e) {}
-      }
-
       bulunanlar.forEach((url, i) => {
+        const isSelected = (url === seciliUrl || (i === 0 && !seciliUrl));
         gListe.innerHTML += `
-          <div onclick="resimSec(this, '${url}')" class="gorsel-secim-kart ring-1 ring-white/10 rounded-xl overflow-hidden shrink-0 cursor-pointer relative w-16 h-16 bg-black hover:ring-2 hover:ring-blue-400 transition-all">
+          <div onclick="resimSec(this, '${url}')" class="gorsel-secim-kart ${isSelected ? 'ring-2 ring-blue-500 shadow-lg shadow-blue-500/20' : 'ring-1 ring-white/10'} rounded-xl overflow-hidden shrink-0 cursor-pointer relative w-16 h-16 bg-black hover:ring-2 hover:ring-blue-400 transition-all">
             <img src="${url}" class="w-full h-full object-cover" onerror="this.parentElement.remove()">
             <span class="absolute bottom-0 inset-x-0 bg-black/70 text-[8px] font-bold text-center text-gray-300 py-0.5">Seçenek ${i+1}</span>
           </div>`;
       });
 
-      if (!mevcutResim && bulunanlar.length > 0) {
-        const ilk = gListe.querySelectorAll('.gorsel-secim-kart')[0];
-        if (ilk) resimSec(ilk, bulunanlar[0]);
+      if (bulunanlar.length > 0 && !seciliUrl) {
+        resimSec(gListe.querySelectorAll('.gorsel-secim-kart')[0], bulunanlar[0]);
       }
       gDurum.innerText = `${bulunanlar.length} görsel bulundu`;
+    }
+
+    async function resimSecenekleriGetir(urunAdi, mevcutResim) {
+      const gDurum = document.getElementById('gorselDurumText');
+      document.getElementById('gorselSeceneklerAlani').classList.remove('hidden');
+      gDurum.innerText = "Görseller taranıyor...";
+
+      let bulunanlar = [];
+      if (mevcutResim && mevcutResim.startsWith('http')) bulunanlar.push(mevcutResim);
+
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
+        try {
+          const res = await fetch(`${API_URL}?islem=resimBul&ad=${encodeURIComponent(urunAdi)}`);
+          const data = await res.json();
+          if (data && data.resimler) {
+            data.resimler.forEach(u => {
+              if (!bulunanlar.includes(u)) bulunanlar.push(u);
+            });
+          }
+        } catch (e) {}
+      }
+
+      gorselListesiniDiz(bulunanlar, mevcutResim);
     }
 
     function resimSec(element, url) {
@@ -500,7 +505,7 @@
         (txt) => { 
           document.getElementById('f_barkod').value = txt; 
           kameraKapat(); 
-          barkodSunucudaAra(txt); 
+          barkodCozucuCalistir(txt); 
         }, 
         () => {}
       ).catch(() => alert("Kamera izni gerekli.")); 
