@@ -157,7 +157,7 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxkV3jgHcPh620MjkLqXxjE53dwDerH_szNzmuFZLKLqrJgNVl9jTM9cntU-p8oLxRV/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzFYfvheaFitp599p1R6pMULhIuX5wcwk_iS_jbVYTK172hVgz_WVcUAEFjoLf3roaE/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
@@ -185,14 +185,14 @@
     function verileriYukle(gosterAnim) {
       if (!API_URL || API_URL.includes("BURAYA_EXEC")) return;
       if (gosterAnim) document.getElementById('yenileIcon').classList.add('animate-spin');
-      fetch(`${API_URL}?islem=verileriGetir`).then(res => res.json()).then(data => { if (data && data.kiler) { appVerisi = { ...defaultVeri, ...data }; yerelBellegeKaydet(); ekraniGuncelle(); }}).finally(() => { if(document.getElementById('yenileIcon')) document.getElementById('yenileIcon').classList.remove('animate-spin'); });
+      fetch(`${API_URL}?islem=verileriGetir`).then(res => res.json()).then(data => { if (data && data.kiler) { appVerisi = { ...defaultVeri, ...data }; yerelBellegeKaydet(); ekraniGuncelle(); }}).finally(() => { if (document.getElementById('yenileIcon')) document.getElementById('yenileIcon').classList.remove('animate-spin'); });
     }
 
     function arkaPlanSenkronize(paramsObj) {
       document.getElementById('senkRozeti').classList.remove('hidden');
       const query = new URLSearchParams(paramsObj).toString();
       const separator = API_URL.includes('?') ? '&' : '?';
-      fetch(API_URL + separator + query, { method: 'GET', redirect: 'follow' }).then(res => res.json()).then(data => { if(data && data.kiler) { appVerisi = { ...defaultVeri, ...data }; yerelBellegeKaydet(); ekraniGuncelle(); }}).finally(() => document.getElementById('senkRozeti').classList.add('hidden'));
+      fetch(API_URL + separator + query, { method: 'GET', redirect: 'follow' }).then(res => res.json()).then(data => { if (data && data.kiler) { appVerisi = { ...defaultVeri, ...data }; yerelBellegeKaydet(); ekraniGuncelle(); }}).finally(() => document.getElementById('senkRozeti').classList.add('hidden'));
     }
 
     function sekmeDegistir(sekme, baslik) {
@@ -200,7 +200,7 @@
       ['ozet', 'kiler', 'finans', 'alisveris', 'istekler'].forEach(s => document.getElementById('tab-' + s).classList.add('hidden'));
       document.getElementById('tab-' + sekme).classList.remove('hidden');
       document.querySelectorAll('.nav-btn').forEach(btn => {
-        if(btn.dataset.tab === sekme) { btn.classList.add('text-white'); btn.classList.remove('text-gray-500'); } 
+        if (btn.dataset.tab === sekme) { btn.classList.add('text-white'); btn.classList.remove('text-gray-500'); } 
         else { btn.classList.add('text-gray-500'); btn.classList.remove('text-white'); }
       });
     }
@@ -224,18 +224,18 @@
       if (aktifSekme === 'kiler') {
         document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
         g.innerHTML = `
-          <!-- YAPAY ZEKA GÖRSEL MOTORU (TURBO JET) -->
+          <!-- YAPAY ZEKA GÖRSEL MOTORU (RESILIENT PIPELINE) -->
           <div class="bg-gradient-to-r from-blue-900/40 via-indigo-900/40 to-purple-900/40 p-4 rounded-2xl border border-blue-500/30 text-center space-y-2.5">
             <div class="flex justify-between items-center px-1">
               <span class="text-[12px] font-bold text-blue-300 flex items-center gap-1.5">
-                <i class="fa-solid fa-bolt text-amber-300"></i> Hızlı Fotoğraf Tanıma
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Hızlı Fotoğraf Tanıma
               </span>
               <button type="button" onclick="geminiKeySifirla()" class="text-[10px] text-gray-400 underline hover:text-white">Şifre Değiştir</button>
             </div>
             <button type="button" onclick="document.getElementById('aiFotoInput').click()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-blue-600/30 transition-all text-sm">
               <i class="fa-solid fa-camera text-base"></i> Paketin Fotoğrafını Çek
             </button>
-            <p class="text-[10px] text-gray-400">Ambalajı çekin; 1 saniyede tanısın ve Google'dan resim seçenekleri getirsin.</p>
+            <p class="text-[10px] text-gray-400">Paketin önünü çekin; anında tanımlanıp görsel alternatifleri listelensin.</p>
             <input type="file" id="aiFotoInput" accept="image/*" capture="environment" class="hidden" onchange="aiUrunAnalizEt(event)">
             <p id="aiDurumYazisi" class="text-[12px] hidden font-semibold pt-0.5"></p>
           </div>
@@ -258,10 +258,9 @@
               </div>
             </div>
 
-            <!-- 🖼️ GOOGLE RESİM SEÇENEKLERİ GALERİSİ -->
             <div id="gorselSeceneklerAlani" class="hidden space-y-1.5 pt-2 border-t border-white/5">
               <div class="flex justify-between items-center">
-                <span class="text-[11px] font-semibold text-gray-400">Ürün Görselini Seçin (Dokun ve Değiştir):</span>
+                <span class="text-[11px] font-semibold text-gray-400">Görsel Seçin (Dokun ve Değiştir):</span>
                 <span id="gorselDurumText" class="text-[10px] text-blue-400 font-medium"></span>
               </div>
               <div id="gorselListesi" class="flex gap-2 overflow-x-auto no-scrollbar py-1"></div>
@@ -302,7 +301,6 @@
       alert("Kayıtlı Gemini şifresi silindi. Bir sonraki fotoğrafta yeni şifreniz sorulacaktır.");
     }
 
-    // 🚀 ULTRA HIZLI SIKIŞTIRMA (iOS BELLEĞİNİ KİLİTLEMEZ)
     function optimizeGorsel(file) {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -323,7 +321,6 @@
       });
     }
 
-    // 🖼️ GOOGLE VE AĞDAN ÇOKLU GÖRSEL SEÇENEĞİ GETİRİP DİZEN MOTOR
     async function resimSecenekleriGetir(urunAdi, kameraFotografi) {
       const gAlan = document.getElementById('gorselSeceneklerAlani');
       const gListe = document.getElementById('gorselListesi');
@@ -399,7 +396,7 @@
       resimSecenekleriGetir(ad, document.getElementById('f_resim').value);
     }
 
-    // ⚡ ZIRHLI VE ÇOK KATMANLI YAPAY ZEKA ÇAĞRISI (JSON HATASI VERMEZ)
+    // ⚡ ÇOK MODELLİ YEDEKLEMELİ ANALİZ (HIGH DEMAND VE DEPRECATION ENGELİNİ AŞAR)
     async function aiUrunAnalizEt(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -449,96 +446,113 @@
             ]
           }],
           generationConfig: {
-            maxOutputTokens: 500, // Kesilmeye karşı genişletildi
+            maxOutputTokens: 300,
             temperature: 0.1
           }
         };
 
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
+        // Otomatik sıralı fallback: biri yoğunsa veya kapalıysa hemen sonrakine geçer
+        const adayModeller = [
+          "gemini-3.8-flash",
+          "gemini-2.5-flash",
+          "gemini-2.0-flash",
+          "gemini-1.5-flash"
+        ];
 
-        const data = await res.json();
+        let basarili = false;
+        let sonHata = "";
 
-        if (res.ok && data.candidates && data.candidates[0].content) {
-          const parts = data.candidates[0].content.parts || [];
-          let rawText = "";
-          
-          // Düşünce tokenlarını filtrele ve metni topla
-          for (const p of parts) {
-            if (p.text && !p.thought) rawText += p.text + " ";
-          }
-          if (!rawText.trim() && parts.length > 0) {
-            rawText = parts.map(p => p.text || "").join(" ");
-          }
-
-          let temizMetin = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
-          let parsedAd = "";
-          let parsedKat = "Gıda & Mutfak";
-
-          // 1. Standart JSON denemesi
+        for (const model of adayModeller) {
           try {
-            const obj = JSON.parse(temizMetin);
-            if (obj.ad) parsedAd = obj.ad;
-            if (obj.kat || obj.kategori) parsedKat = obj.kat || obj.kategori;
-          } catch(e) {}
+            durum.innerHTML = `<i class="fa-solid fa-bolt animate-pulse text-amber-300"></i> ${model} sorgulanıyor...`;
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-          // 2. Regex ile { ... } ayıklama denemesi
-          if (!parsedAd) {
-            const m = temizMetin.match(/\{[\s\S]*?\}/);
-            if (m) {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+              signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            const data = await res.json();
+
+            if (res.ok && data.candidates && data.candidates[0].content) {
+              const parts = data.candidates[0].content.parts || [];
+              let rawText = "";
+              for (const p of parts) {
+                if (p.text && !p.thought) rawText += p.text + " ";
+              }
+              if (!rawText.trim() && parts.length > 0) {
+                rawText = parts.map(p => p.text || "").join(" ");
+              }
+
+              let temizMetin = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+              let parsedAd = "";
+              let parsedKat = "Gıda & Mutfak";
+
               try {
-                const obj = JSON.parse(m[0]);
+                const obj = JSON.parse(temizMetin);
                 if (obj.ad) parsedAd = obj.ad;
                 if (obj.kat || obj.kategori) parsedKat = obj.kat || obj.kategori;
               } catch(e) {}
+
+              if (!parsedAd) {
+                const m = temizMetin.match(/\{[\s\S]*?\}/);
+                if (m) {
+                  try {
+                    const obj = JSON.parse(m[0]);
+                    if (obj.ad) parsedAd = obj.ad;
+                    if (obj.kat || obj.kategori) parsedKat = obj.kat || obj.kategori;
+                  } catch(e) {}
+                }
+              }
+
+              if (!parsedAd) {
+                const adMatch = temizMetin.match(/"ad"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"?/i);
+                if (adMatch && adMatch[1]) parsedAd = adMatch[1].replace(/\\"/g, '"').trim();
+              }
+
+              if (!parsedAd) {
+                const lines = temizMetin.split('\n').map(l => l.replace(/[{}\[\]"]/g, '').trim()).filter(l => l.length > 2);
+                if (lines.length > 0) parsedAd = lines[0].substring(0, 50).trim();
+              }
+
+              if (parsedAd) {
+                const sure = ((Date.now() - baslangicZamani) / 1000).toFixed(1);
+                
+                document.getElementById('f_ad').value = parsedAd;
+                document.getElementById('f_kategori').value = parsedKat;
+                document.getElementById('f_onizlemeAd').innerText = parsedAd;
+                document.getElementById('f_onizlemeKat').innerText = parsedKat;
+                
+                durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>${parsedAd}</b> (${sure} sn)`;
+                durum.className = "text-[12px] text-emerald-400 font-semibold block px-1";
+
+                resimSecenekleriGetir(parsedAd, base64Url);
+                basarili = true;
+                break;
+              }
+            } else if (data.error) {
+              sonHata = data.error.message;
+              if (data.error.message.includes("API key not valid")) {
+                localStorage.removeItem('bizimEvGeminiKey');
+                durum.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-400"></i> API Şifresi Geçersiz. Lütfen tekrar girin.`;
+                durum.className = "text-[12px] text-red-400 font-semibold block px-1";
+                return;
+              }
             }
+          } catch (e) {
+            sonHata = e.message;
           }
+        }
 
-          // 3. Kesintiye uğramış JSON ayıklama denemesi
-          if (!parsedAd) {
-            const adMatch = temizMetin.match(/"ad"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"?/i);
-            if (adMatch && adMatch[1]) {
-              parsedAd = adMatch[1].replace(/\\"/g, '"').trim();
-            }
-          }
-
-          // 4. Düz metin kurtarma denemesi
-          if (!parsedAd) {
-            const lines = temizMetin.split('\n').map(l => l.replace(/[{}\[\]"]/g, '').trim()).filter(l => l.length > 2);
-            if (lines.length > 0) {
-              parsedAd = lines[0].substring(0, 50).trim();
-            }
-          }
-
-          if (parsedAd) {
-            const sure = ((Date.now() - baslangicZamani) / 1000).toFixed(1);
-            
-            // Alanları doldur
-            document.getElementById('f_ad').value = parsedAd;
-            document.getElementById('f_kategori').value = parsedKat;
-            document.getElementById('f_onizlemeAd').innerText = parsedAd;
-            document.getElementById('f_onizlemeKat').innerText = parsedKat;
-            
-            durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>${parsedAd}</b> (${sure} sn)`;
-            durum.className = "text-[12px] text-emerald-400 font-semibold block px-1";
-
-            // Google Görselleri getir
-            resimSecenekleriGetir(parsedAd, base64Url);
-          } else {
-            throw new Error("Metin ayıklanamadı.");
-          }
-        } else if (data.error) {
-          if (data.error.message.includes("API key not valid")) {
-            localStorage.removeItem('bizimEvGeminiKey');
-            durum.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-400"></i> API Şifresi Geçersiz. Lütfen butona tekrar basıp girin.`;
-            durum.className = "text-[12px] text-red-400 font-semibold block px-1";
-          } else {
-            durum.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-orange-400"></i> Google Hatası: ${data.error.message}`;
-            durum.className = "text-[12px] text-orange-400 font-semibold block px-1";
-          }
+        if (!basarili) {
+          document.getElementById('f_onizlemeAd').innerText = "Manuel Giriş";
+          durum.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-orange-400"></i> ${sonHata || "Ambalaj okunamadı, adı yazabilirsiniz."}`;
+          durum.className = "text-[12px] text-orange-400 font-semibold block px-1";
         }
       } catch (err) {
         document.getElementById('f_onizlemeAd').innerText = "Manuel Giriş";
@@ -561,13 +575,13 @@
       const yerel = (appVerisi.barkodHavuzu||[]).find(u => String(u[0]) === barkod);
       if (yerel && yerel[1]) {
         document.getElementById('f_ad').value = yerel[1];
-        if(yerel[2]) {
+        if (yerel[2]) {
           document.getElementById('f_resim').value = yerel[2];
           document.getElementById('f_onizlemeResim').src = yerel[2];
           document.getElementById('f_onizlemeAd').innerText = yerel[1];
           document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
         }
-        if(yerel[3]) document.getElementById('f_kategori').value = yerel[3];
+        if (yerel[3]) document.getElementById('f_kategori').value = yerel[3];
         d.innerHTML = `<i class="fa-solid fa-circle-check"></i> Havuzdan bulundu: <b>${yerel[1]}</b>`; d.className = "text-[12px] text-emerald-400 font-semibold block px-1"; return;
       }
       
@@ -621,7 +635,7 @@
     
     function marketModuAc() {
        akilliSiralamaAcik = !akilliSiralamaAcik; const btn = document.getElementById('marketModuBtn');
-       if(akilliSiralamaAcik) { btn.classList.add('bg-blue-600', 'border-blue-500'); btn.classList.remove('bg-[#2c2c2e]', 'border-white/10'); } else { btn.classList.remove('bg-blue-600', 'border-blue-500'); btn.classList.add('bg-[#2c2c2e]', 'border-white/10'); }
+       if (akilliSiralamaAcik) { btn.classList.add('bg-blue-600', 'border-blue-500'); btn.classList.remove('bg-[#2c2c2e]', 'border-white/10'); } else { btn.classList.remove('bg-blue-600', 'border-blue-500'); btn.classList.add('bg-[#2c2c2e]', 'border-white/10'); }
        ekraniGuncelle();
     }
 
@@ -629,15 +643,15 @@
       let payload = { islem: '' };
       if (aktifSekme === 'kiler') {
         payload = { islem: 'kilerEkle', ad: document.getElementById('f_ad').value, barkod: document.getElementById('f_barkod').value, stok: document.getElementById('f_stok').value, birim: document.getElementById('f_birim').value, skt: document.getElementById('f_skt').value, resim: document.getElementById('f_resim').value, kategori: document.getElementById('f_kategori').value, kritik: '1' };
-        let index = -1; if(payload.barkod) index = appVerisi.kiler.findIndex(u => u[1] === payload.barkod); if(index === -1 && payload.ad) index = appVerisi.kiler.findIndex(u => String(u[0]).toLowerCase() === payload.ad.toLowerCase());
-        if(index !== -1) { 
+        let index = -1; if (payload.barkod) index = appVerisi.kiler.findIndex(u => u[1] === payload.barkod); if (index === -1 && payload.ad) index = appVerisi.kiler.findIndex(u => String(u[0]).toLowerCase() === payload.ad.toLowerCase());
+        if (index !== -1) { 
           appVerisi.kiler[index][2] = String(Number(appVerisi.kiler[index][2]) + Number(payload.stok)); 
-          if(payload.skt) appVerisi.kiler[index][5] = payload.skt; 
-          if(payload.resim) appVerisi.kiler[index][6] = payload.resim;
+          if (payload.skt) appVerisi.kiler[index][5] = payload.skt; 
+          if (payload.resim) appVerisi.kiler[index][6] = payload.resim;
         } else { 
           appVerisi.kiler.push([payload.ad, payload.barkod, payload.stok, payload.birim, payload.kritik, payload.skt, payload.resim, payload.kategori]); 
         }
-        if(payload.barkod && payload.ad && !appVerisi.barkodHavuzu.find(u => u[0] == payload.barkod)) { appVerisi.barkodHavuzu.push([payload.barkod, payload.ad, payload.resim, payload.kategori]); }
+        if (payload.barkod && payload.ad && !appVerisi.barkodHavuzu.find(u => u[0] == payload.barkod)) { appVerisi.barkodHavuzu.push([payload.barkod, payload.ad, payload.resim, payload.kategori]); }
       } 
       else if (aktifSekme === 'finans') {
         payload = { islem: 'finansEkle', tip: document.getElementById('f_tip').value, tarih: document.getElementById('f_tarih').value, kategori: document.getElementById('f_kategori').value || 'Diğer', tutar: document.getElementById('f_tutar').value, taksit: document.getElementById('f_taksit').value, kisi: document.getElementById('f_kisi').value, not: document.getElementById('f_not').value };
@@ -655,12 +669,12 @@
     }
 
     function kilerUrunBitti(index, ad) { if (confirm(`Stoğu sıfırlanıp Alışveriş Listesine aktarılsın mı?`)) { appVerisi.kiler[index][2] = "0"; appVerisi.alisveris.push([ad, '1', 'Kiler', 'Bugün', 'Bekliyor']); yerelBellegeKaydet(); ekraniGuncelle(); if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'kilerBitti', index: index, ad: ad }); } }
-    function alisverisDurumDegistir(urunAd, mevcutDurum) { const idx = appVerisi.alisveris.findIndex(u => u[0] === urunAd); if(idx === -1) return; const yeniDurum = mevcutDurum === 'Alındı' ? 'Bekliyor' : 'Alındı'; appVerisi.alisveris[idx][4] = yeniDurum; yerelBellegeKaydet(); ekraniGuncelle(); if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'alisverisDurum', index: idx, durum: yeniDurum }); }
+    function alisverisDurumDegistir(urunAd, mevcutDurum) { const idx = appVerisi.alisveris.findIndex(u => u[0] === urunAd); if (idx === -1) return; const yeniDurum = mevcutDurum === 'Alındı' ? 'Bekliyor' : 'Alındı'; appVerisi.alisveris[idx][4] = yeniDurum; yerelBellegeKaydet(); ekraniGuncelle(); if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'alisverisDurum', index: idx, durum: yeniDurum }); }
     
     function satirSil(tablo, silAd, islemAdi) { 
-      if(confirm("Silmek istediğinize emin misiniz?")) { 
+      if (confirm("Silmek istediğinize emin misiniz?")) { 
         const idx = appVerisi[tablo].findIndex(u => (tablo==='alisveris' || tablo==='kiler' ? u[0]===silAd : u[1]===silAd)); 
-        if(idx !== -1) { 
+        if (idx !== -1) { 
           appVerisi[tablo].splice(idx, 1); 
           yerelBellegeKaydet(); 
           ekraniGuncelle(); 
@@ -680,7 +694,7 @@
           const ad = item[0]||'', stok = Number(item[2])||0, birim = item[3]||'Adet', skt = item[5], resim = item[6], kat = item[7]||'Gıda';
           let sktBadge = '';
           
-          if(skt && skt.includes('-')){ 
+          if (skt && skt.includes('-')){ 
             let p = skt.split('-'); let hedef = new Date(p[0], p[1]-1, p[2]); let fark = Math.ceil((hedef - bugun) / 86400000);
             if (fark < 0) { sktBadge = `<span class="bg-red-500/10 text-red-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-red-500/20"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Tarihi Geçti</span>`; kilerKritikHtml += `<div><span class="text-red-400 mr-1">•</span> ${ad} (Tarihi Geçti)</div>`; }
             else if (fark === 0) { sktBadge = `<span class="bg-orange-500/10 text-orange-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-orange-500/20"><i class="fa-solid fa-bell mr-1"></i>Bugün Bitiyor</span>`; kilerKritikHtml += `<div><span class="text-orange-400 mr-1">•</span> ${ad} (Bugün bitiyor)</div>`; }
@@ -727,7 +741,7 @@
         (appVerisi.finans || []).forEach(item => {
           const tStr = item[0]||''; if (!tStr.startsWith(donemFiltre)) return;
           const tip=item[1], kat=item[2]||'Diğer', t=Number(item[3])||0;
-          if(tip==='Maas_Ben') mBen+=t; else if(tip==='Maas_Esim') mEsim+=t; else if(tip==='Fatura'){ ftr+=t; kirilim[kat]=(kirilim[kat]||0)+t; } else { gdr+=t; kirilim[kat]=(kirilim[kat]||0)+t; }
+          if (tip==='Maas_Ben') mBen+=t; else if (tip==='Maas_Esim') mEsim+=t; else if (tip==='Fatura'){ ftr+=t; kirilim[kat]=(kirilim[kat]||0)+t; } else { gdr+=t; kirilim[kat]=(kirilim[kat]||0)+t; }
           let sign = tip.startsWith('Maas') ? '+' : '-'; let color = tip.startsWith('Maas') ? 'text-emerald-400' : (tip==='Fatura' ? 'text-orange-400' : 'text-white');
           fBox.insertAdjacentHTML('beforeend', `<div class="bg-[#1c1c1e] p-3.5 rounded-2xl flex justify-between items-center"><div><p class="font-semibold text-[14px] text-white">${kat}</p><p class="text-[11px] text-gray-500 font-medium">${tStr.split('-').reverse().join('.')} • ${item[5]||item[4]}</p></div><span class="font-bold text-[15px] ${color}">${sign}₺${t.toLocaleString('tr-TR')}</span></div>`);
         });
@@ -747,8 +761,8 @@
         }
         let sonKategori = "";
         aListesi.forEach((i) => {
-          const isAlindi = (i[4] === 'Alındı'); if(!isAlindi) bekleYenAlisveris++;
-          if(akilliSiralamaAcik) { const oKat = (appVerisi.barkodHavuzu.find(h => h[1].toLowerCase() === i[0].toLowerCase()) || [])[3] || 'Diğer'; if(oKat !== sonKategori) { aBox.insertAdjacentHTML('beforeend', `<div class="pt-2 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-widest pl-2 border-b border-white/5">${oKat} REYONU</div>`); sonKategori = oKat; } }
+          const isAlindi = (i[4] === 'Alındı'); if (!isAlindi) bekleYenAlisveris++;
+          if (akilliSiralamaAcik) { const oKat = (appVerisi.barkodHavuzu.find(h => h[1].toLowerCase() === i[0].toLowerCase()) || [])[3] || 'Diğer'; if (oKat !== sonKategori) { aBox.insertAdjacentHTML('beforeend', `<div class="pt-2 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-widest pl-2 border-b border-white/5">${oKat} REYONU</div>`); sonKategori = oKat; } }
           const safeUrunAd = (i[0]||'').replace(/"/g, '&quot;').replace(/'/g, "\\'"); 
           aBox.insertAdjacentHTML('beforeend', `<div class="bg-[#1c1c1e] p-4 rounded-[20px] flex items-center justify-between transition-all ${isAlindi ? 'opacity-50 grayscale' : ''}"><div class="flex items-center gap-3.5"><button onclick="alisverisDurumDegistir('${safeUrunAd}', '${i[4]}')" class="w-6 h-6 rounded-full border-[1.5px] ${isAlindi ? 'bg-emerald-500 border-emerald-500 text-black' : 'border-gray-500 text-transparent'} flex items-center justify-center"><i class="fa-solid fa-check text-[10px]"></i></button><div><p class="font-semibold text-[15px] ${isAlindi ? 'line-through text-gray-400' : 'text-white'}">${i[0]||''}</p><p class="text-[11px] font-medium text-gray-500">${i[1]||1} Adet • ${i[2]||''}</p></div></div><button onclick="satirSil('alisveris', '${safeUrunAd}', 'alisverisSil')" class="w-8 h-8 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center"><i class="fa-solid fa-trash-can text-[11px]"></i></button></div>`);
         });
@@ -769,7 +783,7 @@
       html5QrCode = new Html5Qrcode("reader"); 
       html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 280, height: 160 } }, (txt) => { document.getElementById('f_barkod').value = txt; kameraKapat(); barkodlaUrunAra(txt); }, ()=>{}).catch(()=>alert("Kamera izni gerekli.")); 
     }
-    function kameraKapat() { try { if(html5QrCode){html5QrCode.stop(); html5QrCode.clear();} } catch(e){} document.getElementById('kameraKutusu').classList.add('hidden'); }
+    function kameraKapat() { try { if (html5QrCode){html5QrCode.stop(); html5QrCode.clear();} } catch(e){} document.getElementById('kameraKutusu').classList.add('hidden'); }
   </script>
 </body>
 </html>
