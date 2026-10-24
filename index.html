@@ -157,7 +157,7 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbycFRhidr-VFrgAOqXlG3gm_tsPj8waeRo5i7JKxreGW9nNTbfq_jYA3ib6oO7QIBMo/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwSlT4nkRHkYoa2V3ugOqDydyTyJw3QDnlV3QDjEItJe4matp0LZ2XaEl6BdspE7Q8B/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
@@ -235,7 +235,7 @@
             <button type="button" onclick="document.getElementById('aiFotoInput').click()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-blue-600/30 transition-all text-sm">
               <i class="fa-solid fa-camera text-base"></i> Paketin Fotoğrafını Çek
             </button>
-            <p class="text-[10px] text-gray-400">BİM, A101, Şok, Migros... Paketin önünü çekin, adını ve reyonunu saniyesinde bulsun.</p>
+            <p class="text-[10px] text-gray-400">BİM, A101, Şok, Migros... Paketin önünü çekin, yapay zeka tanısın ve internetten kataloğunu bulsun.</p>
             <input type="file" id="aiFotoInput" accept="image/*" capture="environment" class="hidden" onchange="aiUrunAnalizEt(event)">
             <p id="aiDurumYazisi" class="text-[12px] hidden font-semibold pt-1"></p>
           </div>
@@ -250,7 +250,7 @@
           
           <div id="urunOnizlemeKutusu" class="hidden flex items-center gap-3 bg-[#2c2c2e] p-3 rounded-xl border border-white/5"><img id="f_onizlemeResim" src="" class="w-12 h-12 rounded-lg object-cover bg-black"><div><p id="f_onizlemeAd" class="text-[13px] font-bold text-white"></p><span id="f_onizlemeKat" class="text-[11px] text-emerald-400 font-medium"></span></div></div>
           
-          <input id="f_ad" type="text" placeholder="Ürün Adı" class="${inputClass}">
+          <input id="f_ad" type="text" placeholder="Ürün Adı" class="${inputClass}" onblur="if(!document.getElementById('f_resim').value) isimdenResimBul(this.value)">
           <select id="f_kategori" class="${inputClass}"><option value="Gıda & Mutfak">Kategori: Gıda</option><option value="Temizlik & Hijyen">Kategori: Temizlik</option><option value="Kişisel Bakım">Kategori: Kişisel Bakım</option><option value="Ev & Yaşam">Kategori: Ev & Yaşam</option></select>
           <input id="f_resim" type="hidden">
           <div class="grid grid-cols-2 gap-3"><input id="f_stok" type="number" placeholder="Stok" value="1" class="${inputClass}"><input id="f_birim" type="text" placeholder="Birim (Adet, Lt)" value="Adet" class="${inputClass}"></div>
@@ -301,6 +301,48 @@
       });
     }
 
+    // 🌐 İNTERNETTEN TEMİZ KATALOG RESMİ BULUCU
+    async function isimdenResimBul(isim) {
+      if(!isim || isim.length < 2) return;
+      
+      // 1. OpenFoodFacts'ten tertemiz ürün kataloğu resmi ara
+      try {
+        const offRes = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(isim)}&search_simple=1&action=process&json=1&page_size=3`);
+        if (offRes.ok) {
+          const offData = await offRes.json();
+          if (offData.products && offData.products.length > 0) {
+            for (let p of offData.products) {
+              const img = p.image_front_small_url || p.image_url || p.image_front_url;
+              if (img) {
+                setBulunanResim(img, isim);
+                return true;
+              }
+            }
+          }
+        }
+      } catch(e){}
+
+      // 2. Google Görseller üzerinden ara
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
+        try {
+          const res = await fetch(`${API_URL}?islem=resimBul&ad=${encodeURIComponent(isim)}`);
+          const data = await res.json();
+          if (data.resim) {
+            setBulunanResim(data.resim, isim);
+            return true;
+          }
+        } catch(e) {}
+      }
+      return false;
+    }
+
+    function setBulunanResim(url, isim) {
+      document.getElementById('f_resim').value = url;
+      document.getElementById('f_onizlemeResim').src = url;
+      if (isim) document.getElementById('f_onizlemeAd').innerText = isim;
+      document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
+    }
+
     // 🚀 DİNAMİK MODEL SEÇİCİ İLE ZIRHLI YAPAY ZEKA ÇAĞRISI
     async function aiUrunAnalizEt(e) {
       const file = e.target.files[0];
@@ -327,15 +369,13 @@
 
       try {
         const base64Url = await resmiKucultBase64(file, 600);
-        document.getElementById('f_resim').value = base64Url;
         document.getElementById('f_onizlemeResim').src = base64Url;
         document.getElementById('f_onizlemeAd').innerText = "Yapay zeka inceliyor...";
         document.getElementById('f_onizlemeKat').innerText = "Lütfen bekleyin";
         previewBox.classList.remove('hidden');
         
-        durum.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles animate-pulse text-amber-300"></i> Hesabınızdaki en güncel yapay zeka bağlanıyor...';
+        durum.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles animate-pulse text-amber-300"></i> Yapay zeka ambalajı okuyor...';
 
-        // 1. Hesabında aktif olan modelleri doğrudan Google'dan öğren
         let secilenModeller = [];
         try {
           const mRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
@@ -345,15 +385,12 @@
               const aktifler = mData.models
                 .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"))
                 .map(m => m.name.replace("models/", ""));
-              
-              // Flash modellerini en başa al (hızlı ve görme yetenekli)
               const flashlar = aktifler.filter(m => m.includes("flash"));
               secilenModeller = [...flashlar, ...aktifler];
             }
           }
         } catch(err) {}
 
-        // Eğer dinamik liste alınamazsa yedek güncel liste
         if (secilenModeller.length === 0) {
           secilenModeller = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-flash-latest"];
         }
@@ -373,7 +410,6 @@
         let basarili = false;
         let sonHataMetni = "";
 
-        // Hesaptaki modelleri tek tek dene, çalışan ilk model sonucu getirsin
         for (const model of secilenModeller) {
           try {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
@@ -394,7 +430,17 @@
                 if (sonuc.kategori) document.getElementById('f_kategori').value = sonuc.kategori;
                 document.getElementById('f_onizlemeAd').innerText = sonuc.ad;
                 document.getElementById('f_onizlemeKat').innerText = sonuc.kategori || "Gıda & Mutfak";
-                durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>Yapay Zeka (${model}) Tanıdı:</b> ${sonuc.ad}`;
+                
+                // 🌟 ÖZEL: İnternetten temiz katalog resmi ara ve fotoğrafı değiştir
+                durum.innerHTML = `<i class="fa-solid fa-spinner animate-spin text-purple-400"></i> <b>${sonuc.ad}</b> tanıdı, katalog resmi çekiliyor...`;
+                const resimBulundu = await isimdenResimBul(sonuc.ad);
+                
+                // İnternette yoksa çekilen fotoğrafı yedek olarak sakla
+                if (!resimBulundu) {
+                  document.getElementById('f_resim').value = base64Url;
+                }
+
+                durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>Yapay Zeka Tanıdı:</b> ${sonuc.ad}`;
                 durum.className = "text-[12px] text-emerald-400 font-semibold block px-1";
                 basarili = true;
                 break;
@@ -496,7 +542,13 @@
       if (aktifSekme === 'kiler') {
         payload = { islem: 'kilerEkle', ad: document.getElementById('f_ad').value, barkod: document.getElementById('f_barkod').value, stok: document.getElementById('f_stok').value, birim: document.getElementById('f_birim').value, skt: document.getElementById('f_skt').value, resim: document.getElementById('f_resim').value, kategori: document.getElementById('f_kategori').value, kritik: '1' };
         let index = -1; if(payload.barkod) index = appVerisi.kiler.findIndex(u => u[1] === payload.barkod); if(index === -1 && payload.ad) index = appVerisi.kiler.findIndex(u => String(u[0]).toLowerCase() === payload.ad.toLowerCase());
-        if(index !== -1) { appVerisi.kiler[index][2] = String(Number(appVerisi.kiler[index][2]) + Number(payload.stok)); if(payload.skt) appVerisi.kiler[index][5] = payload.skt; } else { appVerisi.kiler.push([payload.ad, payload.barkod, payload.stok, payload.birim, payload.kritik, payload.skt, payload.resim, payload.kategori]); }
+        if(index !== -1) { 
+          appVerisi.kiler[index][2] = String(Number(appVerisi.kiler[index][2]) + Number(payload.stok)); 
+          if(payload.skt) appVerisi.kiler[index][5] = payload.skt; 
+          if(payload.resim) appVerisi.kiler[index][6] = payload.resim;
+        } else { 
+          appVerisi.kiler.push([payload.ad, payload.barkod, payload.stok, payload.birim, payload.kritik, payload.skt, payload.resim, payload.kategori]); 
+        }
         if(payload.barkod && payload.ad && !appVerisi.barkodHavuzu.find(u => u[0] == payload.barkod)) { appVerisi.barkodHavuzu.push([payload.barkod, payload.ad, payload.resim, payload.kategori]); }
       } 
       else if (aktifSekme === 'finans') {
@@ -516,14 +568,26 @@
 
     function kilerUrunBitti(index, ad) { if (confirm(`Stoğu sıfırlanıp Alışveriş Listesine aktarılsın mı?`)) { appVerisi.kiler[index][2] = "0"; appVerisi.alisveris.push([ad, '1', 'Kiler', 'Bugün', 'Bekliyor']); yerelBellegeKaydet(); ekraniGuncelle(); if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'kilerBitti', index: index, ad: ad }); } }
     function alisverisDurumDegistir(urunAd, mevcutDurum) { const idx = appVerisi.alisveris.findIndex(u => u[0] === urunAd); if(idx === -1) return; const yeniDurum = mevcutDurum === 'Alındı' ? 'Bekliyor' : 'Alındı'; appVerisi.alisveris[idx][4] = yeniDurum; yerelBellegeKaydet(); ekraniGuncelle(); if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'alisverisDurum', index: idx, durum: yeniDurum }); }
-    function satirSil(tablo, silAd, islemAdi) { if(confirm("Silmek istediğinize emin misiniz?")) { const idx = appVerisi[tablo].findIndex(u => (tablo==='alisveris' ? u[0]===silAd : u[1]===silAd)); if(idx !== -1) { appVerisi[tablo].splice(idx, 1); yerelBellegeKaydet(); ekraniGuncelle(); if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: islemAdi, index: idx }); } } }
+    
+    // 🗑️ GÜNCELLENMİŞ SATIR SİLME (KİLER, ALIŞVERİŞ VE İSTEKLER UYUMLU)
+    function satirSil(tablo, silAd, islemAdi) { 
+      if(confirm("Silmek istediğinize emin misiniz?")) { 
+        const idx = appVerisi[tablo].findIndex(u => (tablo==='alisveris' || tablo==='kiler' ? u[0]===silAd : u[1]===silAd)); 
+        if(idx !== -1) { 
+          appVerisi[tablo].splice(idx, 1); 
+          yerelBellegeKaydet(); 
+          ekraniGuncelle(); 
+          if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: islemAdi, index: idx }); 
+        } 
+      } 
+    }
 
     function ekraniGuncelle() {
       try {
         const bugun = new Date(); bugun.setHours(0,0,0,0);
         let kilerKritikHtml = ""; let bekleYenAlisveris = 0; let istekSayisi = 0;
 
-        // KİLER
+        // KİLER LİSTESİ VE SİLME BUTONU
         const kBox = document.getElementById('kilerListe'); kBox.innerHTML = ''; 
         (appVerisi.kiler || []).forEach((item, index) => {
           const ad = item[0]||'', stok = Number(item[2])||0, birim = item[3]||'Adet', skt = item[5], resim = item[6], kat = item[7]||'Gıda';
@@ -539,9 +603,34 @@
           
           if (seciliKilerKategori !== 'Tümü' && kat !== seciliKilerKategori) return;
           const safeAd = ad.replace(/"/g, '&quot;').replace(/'/g, "\\'"); 
-          const imgHtml = resim ? `<img src="${resim}" class="w-14 h-14 rounded-xl object-cover">` : `<div class="w-14 h-14 rounded-xl bg-[#2c2c2e] flex items-center justify-center text-gray-400 shrink-0"><i class="fa-solid fa-box text-lg"></i></div>`;
+          const imgHtml = resim ? `<img src="${resim}" class="w-14 h-14 rounded-xl object-cover bg-black/40">` : `<div class="w-14 h-14 rounded-xl bg-[#2c2c2e] flex items-center justify-center text-gray-400 shrink-0"><i class="fa-solid fa-box text-lg"></i></div>`;
           
-          kBox.insertAdjacentHTML('beforeend', `<div class="bg-[#1c1c1e] p-4 rounded-[20px] shadow-sm"><div class="flex justify-between items-start"><div class="flex items-center gap-4">${imgHtml}<div class="flex flex-col justify-center h-full"><p class="font-semibold text-[15px] text-white tracking-tight mb-1.5">${ad}</p><div class="flex items-center gap-2">${sktBadge}</div></div></div><div class="flex flex-col items-end"><span class="text-2xl font-black ${stok===0?'text-red-400':'text-white'}">${stok} <span class="text-[11px] text-gray-500 font-medium">${birim}</span></span></div></div><div class="mt-3 pt-3 border-t border-white/5 flex justify-between items-center"><span class="text-[11px] font-medium text-gray-500">${kat}</span><button onclick="kilerUrunBitti(${index}, '${safeAd}')" class="text-[11px] font-bold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-1.5 rounded-full"><i class="fa-solid fa-plus mr-1"></i> Alışverişe Ekle</button></div></div>`);
+          kBox.insertAdjacentHTML('beforeend', `
+            <div class="bg-[#1c1c1e] p-4 rounded-[20px] shadow-sm">
+              <div class="flex justify-between items-start">
+                <div class="flex items-center gap-4">
+                  ${imgHtml}
+                  <div class="flex flex-col justify-center h-full">
+                    <p class="font-semibold text-[15px] text-white tracking-tight mb-1.5">${ad}</p>
+                    <div class="flex items-center gap-2">${sktBadge}</div>
+                  </div>
+                </div>
+                <div class="flex flex-col items-end">
+                  <span class="text-2xl font-black ${stok===0?'text-red-400':'text-white'}">${stok} <span class="text-[11px] text-gray-500 font-medium">${birim}</span></span>
+                </div>
+              </div>
+              <div class="mt-3 pt-3 border-t border-white/5 flex justify-between items-center">
+                <span class="text-[11px] font-medium text-gray-500">${kat}</span>
+                <div class="flex items-center gap-2">
+                  <button onclick="satirSil('kiler', '${safeAd}', 'kilerSil')" class="w-8 h-8 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500/20 active:scale-90 transition-transform" title="Ürünü Sil">
+                    <i class="fa-solid fa-trash-can text-[11px]"></i>
+                  </button>
+                  <button onclick="kilerUrunBitti(${index}, '${safeAd}')" class="text-[11px] font-bold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-3.5 py-1.5 rounded-full active:scale-95 transition-transform">
+                    <i class="fa-solid fa-plus mr-1"></i> Alışverişe Ekle
+                  </button>
+                </div>
+              </div>
+            </div>`);
         });
         document.getElementById('sktUyariAlani').innerHTML = kilerKritikHtml ? `<div class="bg-red-500/10 border border-red-500/20 p-3.5 rounded-2xl text-[12px] text-red-400 font-semibold mb-2 leading-relaxed"><i class="fa-solid fa-triangle-exclamation mr-1"></i> <b>SKT Uyarıları</b><br>${kilerKritikHtml}</div>` : '';
 
