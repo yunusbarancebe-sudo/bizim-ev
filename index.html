@@ -160,9 +160,9 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxEhTsn3XG571_dOEzqeQYjajl0GQId8ctOy9c2FH1eqFM7Qx1qV9RXL5l7dHdnjbUS/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzaYwWWn2E0Tt6Vj0uxN0ozmwfhTdAVn1QortssCkWMNg6ylSBiYJVzjc7oZ0reGmTx/exec";
 
-    let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null;
+    let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
     const defaultVeri = { kiler: [], finans: [], alisveris: [], istekler: [] };
     let appVerisi = defaultVeri;
@@ -247,7 +247,7 @@
       if (aktifSekme === 'kiler') {
         document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
         g.innerHTML = `
-          <!-- ⚡ BARKOD VE KATALOG MOTORU -->
+          <!-- ⚡ BARKOD VE AKILLI ÇÖZÜCÜ -->
           <div class="space-y-3">
             <div class="flex gap-2">
               <input id="f_barkod" type="text" placeholder="Barkodu Okutun veya Yazın" class="${inputClass} flex-1 font-mono tracking-wider" oninput="barkodHizliYazma(this.value)">
@@ -257,7 +257,7 @@
             </div>
             <p id="barkodDurum" class="text-[12px] hidden font-semibold px-1"></p>
 
-            <!-- ÖNİZLEME KART VE GÖRSEL GALERİSİ -->
+            <!-- ÖNİZLEME KART VE CANLI GÖRSEL GALERİSİ -->
             <div id="urunOnizlemeKutusu" class="hidden bg-[#252528] p-3.5 rounded-2xl border border-white/10 space-y-3">
               <div class="flex items-center gap-3">
                 <img id="f_onizlemeResim" src="" class="w-16 h-16 rounded-xl object-cover bg-black/50 border border-white/10 shrink-0">
@@ -269,7 +269,7 @@
 
               <div id="gorselSeceneklerAlani" class="space-y-1.5 pt-2 border-t border-white/5">
                 <div class="flex justify-between items-center">
-                  <span class="text-[11px] font-semibold text-gray-400">Ürün Görseli Seçin (Dokun ve Değiştir):</span>
+                  <span class="text-[11px] font-semibold text-gray-400">Görsel Seçenekleri (Dokun ve Değiştir):</span>
                   <span id="gorselDurumText" class="text-[10px] text-blue-400 font-medium"></span>
                 </div>
                 <div id="gorselListesi" class="flex gap-2 overflow-x-auto no-scrollbar py-1"></div>
@@ -323,25 +323,24 @@
       document.getElementById('formModal').classList.remove('flex'); 
     }
 
-    let barkodTimer = null;
     function barkodHizliYazma(val) {
       clearTimeout(barkodTimer);
       if (!val) return;
       val = val.trim();
       if (val.length >= 8) {
-        barkodTimer = setTimeout(() => barkodSunucudaAra(val), 300);
+        barkodTimer = setTimeout(() => barkodSunucudaAra(val), 250);
       }
     }
 
-    // ⚡ 0.04 SANİYE SUNUCU TARAFLI BARKOD ARAMA MOTORU
+    // ⚡ PERAKENDE İNDEKSİ VE E-TABLO ENTEGRELİ HIZLI ARAMA
     async function barkodSunucudaAra(barkod) {
       if (!barkod) return;
       barkod = String(barkod).trim();
       const d = document.getElementById('barkodDurum');
-      d.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Katalog taranıyor...';
+      d.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Perakende ağında taranıyor...';
       d.className = "text-[12px] text-blue-400 font-semibold block px-1";
 
-      // Önce mevcut kilerde var mı bak
+      // 1. Önce kilerde daha önce eklenmiş mi bak
       const kilerdeVar = (appVerisi.kiler || []).find(u => String(u[1]).trim() === barkod);
       if (kilerdeVar && kilerdeVar[0]) {
         urunBilgileriniDoldur(kilerdeVar[0], kilerdeVar[7] || 'Gıda & Mutfak', kilerdeVar[3] || 'Adet', kilerdeVar[6] || '');
@@ -350,7 +349,7 @@
         return;
       }
 
-      // E-Tablo ve Açık Ağda Sunucu Taraflı Hızlı Ara
+      // 2. Apps Script (E-Tablo ve Arama Motoru İndeksi)
       if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
         try {
           const res = await fetch(`${API_URL}?islem=barkodAra&barkod=${encodeURIComponent(barkod)}`);
@@ -364,7 +363,7 @@
         } catch(e) {}
       }
 
-      d.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400"></i> Yeni barkod. Ürün adını yazınca E-Tablonuza otomatik kaydedilecek.`;
+      d.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400"></i> Yeni barkod. Ürün adını yazınca E-Tablonuza kalıcı olarak eklenecek.`;
       d.className = "text-[12px] text-blue-400 font-medium block px-1";
     }
 
@@ -385,7 +384,7 @@
       resimSecenekleriGetir(ad, resim);
     }
 
-    // 🖼️ DOĞRUDAN TELEFONDAN ÇALIŞAN ENGELSİZ GÖRSEL MOTORU
+    // 🖼️ DOĞRUDAN TELEFONDAN ÇALIŞAN CANLI GÖRSEL MOTORU
     async function resimSecenekleriGetir(urunAdi, mevcutResim) {
       const gListe = document.getElementById('gorselListesi');
       const gDurum = document.getElementById('gorselDurumText');
@@ -402,7 +401,7 @@
 
       let bulunanlar = [];
 
-      // 1. OpenFoodFacts Canlı Ürün Ambalajı Arama
+      // 1. OpenFoodFacts Canlı Görsel Arama
       try {
         const offRes = await fetch(`https://tr.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(urunAdi)}&search_simple=1&action=process&json=1&page_size=6`);
         if (offRes.ok) {
