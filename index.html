@@ -20,15 +20,12 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .glass-nav { background: rgba(18, 18, 18, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.08); }
     .glass-header { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08); }
-    
-    /* Pro iOS UI Animations */
     .modal-enter { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   </style>
 </head>
 <body class="bg-black text-gray-100 antialiased min-h-screen">
 
-  <!-- PRO HEADER -->
   <header class="sticky top-0 z-40 glass-header safe-top">
     <div class="flex justify-between items-center px-6 py-4">
       <div>
@@ -46,13 +43,12 @@
     </div>
   </header>
 
-  <!-- SENKRONİZASYON BİLDİRİMİ -->
   <div id="senkRozeti" class="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-[#1c1c1e] border border-white/10 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 hidden transition-all">
     <div class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></div> Buluta Kaydediliyor...
   </div>
 
   <main class="p-4 space-y-5 max-w-lg mx-auto">
-    <!-- 1. KİLER -->
+    <!-- KİLER -->
     <section id="tab-kiler" class="space-y-4">
       <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
         <button onclick="kilerFiltrele('Tümü')" class="kiler-filtre-btn active px-4 py-1.5 rounded-full text-[13px] font-semibold bg-white text-black whitespace-nowrap transition-colors">Tümü</button>
@@ -65,7 +61,7 @@
       <div id="kilerListe" class="space-y-3"></div>
     </section>
 
-    <!-- 2. FİNANS -->
+    <!-- FİNANS -->
     <section id="tab-finans" class="space-y-5 hidden">
       <div class="flex items-center justify-between bg-[#1c1c1e] p-3 rounded-2xl">
         <span class="text-[13px] font-medium text-gray-400 pl-2">Hesap Dönemi</span>
@@ -103,14 +99,13 @@
       </div>
     </section>
 
-    <!-- 3. ALIŞVERİŞ -->
+    <!-- ALIŞVERİŞ -->
     <section id="tab-alisveris" class="space-y-3 hidden"><div id="alisverisListe" class="space-y-3"></div></section>
 
-    <!-- 4. İSTEKLER -->
+    <!-- İSTEKLER -->
     <section id="tab-istekler" class="space-y-3 hidden"><div id="istekListe" class="grid grid-cols-1 gap-3"></div></section>
   </main>
 
-  <!-- PRO BOTTOM NAV -->
   <nav class="fixed bottom-0 left-0 right-0 z-40 glass-nav safe-bottom">
     <div class="max-w-lg mx-auto px-6 pt-3 pb-1 flex justify-between">
       <button onclick="sekmeDegistir('kiler', 'Kiler & Stok')" class="nav-btn active flex flex-col items-center py-1 text-white w-16" data-tab="kiler">
@@ -128,22 +123,19 @@
     </div>
   </nav>
 
-  <!-- PRO FORM MODAL (iOS Sheet Design) -->
+  <!-- FORM MODAL -->
   <div id="formModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-md items-end justify-center p-0" onclick="modalDisTiklama(event)">
     <div class="bg-[#1c1c1e] w-full max-w-lg rounded-t-[32px] p-6 pb-[calc(24px+env(safe-area-inset-bottom))] max-h-[92vh] overflow-y-auto space-y-5 relative modal-enter" onclick="event.stopPropagation()">
       <div class="w-10 h-1.5 bg-gray-600 rounded-full mx-auto mb-2"></div>
-      
       <div class="flex justify-between items-center border-b border-white/10 pb-4">
         <h3 id="modalBaslik" class="font-bold text-lg text-white">Yeni Ekle</h3>
         <button type="button" onclick="modalKapat()" class="w-8 h-8 rounded-full bg-[#2c2c2e] text-gray-400 hover:text-white flex items-center justify-center font-bold text-lg active:scale-90 transition-transform">&times;</button>
       </div>
       <div id="modalGovde" class="space-y-4"></div>
-      
       <div id="kameraKutusu" class="hidden rounded-2xl overflow-hidden bg-black border border-white/10">
         <div id="reader" style="width: 100%;"></div>
         <button type="button" onclick="kameraKapat()" class="w-full bg-[#2c2c2e] py-3 text-[13px] font-bold text-white">Kamerayı Kapat</button>
       </div>
-      
       <button type="button" id="kaydetBtn" onclick="formKaydet()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-[15px] shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all">Kaydet</button>
     </div>
   </div>
@@ -152,12 +144,12 @@
     // ==========================================
     // ⚙️ APPS SCRIPT /EXEC BAĞLANTINIZI BURAYA GİRİN:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbwzXQN3-bZx8QEg6nfuoNNqadBbndXWiEw7PFxZFPA4edAn69gdJnyNPrznq14Q4VcZ/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwWnn8ro7BK7Iv-cGVgQB_bZ6lar4kJ0ieuiTqCi0f6bsXjCARAvxDi2dP4U0IcW00R/exec";
 
     let aktifSekme = 'kiler', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null;
     let appVerisi = { kiler: [], finans: [], alisveris: [], istekler: [], barkodHavuzu: [] };
     
-    // Güvenli Önbellek
+    // GÜVENLİ ÇEVRİMDIŞI ÖNBELLEK ÇEKİMİ
     try {
       const cached = localStorage.getItem('bizimEvVerisi');
       if (cached && cached !== "undefined") {
@@ -174,6 +166,10 @@
       if (API_URL && !API_URL.includes("BURAYA_EXEC")) verileriYukle(false);
     };
 
+    function yerelBellegeKaydet() {
+      localStorage.setItem('bizimEvVerisi', JSON.stringify(appVerisi));
+    }
+
     function verileriYukle(gosterAnim) {
       if (!API_URL || API_URL.includes("BURAYA_EXEC")) return;
       if (gosterAnim) document.getElementById('yenileIcon').classList.add('animate-spin');
@@ -181,29 +177,33 @@
       fetch(`${API_URL}?islem=verileriGetir`)
       .then(res => res.json())
       .then(data => {
-          appVerisi = data; 
-          localStorage.setItem('bizimEvVerisi', JSON.stringify(data)); 
-          ekraniGuncelle();
-      }).finally(() => {
+          if (data && data.kiler) {
+            appVerisi = data; 
+            yerelBellegeKaydet();
+            ekraniGuncelle();
+          }
+      }).catch(e => console.error("Veri çekilemedi:", e))
+      .finally(() => {
           if(document.getElementById('yenileIcon')) document.getElementById('yenileIcon').classList.remove('animate-spin');
       });
     }
 
-    // KRİTİK DÜZELTME: Veri kaybını önlemek için POST yerine GET kullanıyoruz. 
-    // Google sunucuları POST'u izinsiz siler ama GET'i her zaman alır.
+    // ARKA PLAN SENKRONİZASYONU (Sessiz ve Güvenli GET)
     function arkaPlanSenkronize(paramsObj) {
       document.getElementById('senkRozeti').classList.remove('hidden');
       
-      // Obje'yi URL parametrelerine çevir (GET metodu için)
       const query = new URLSearchParams(paramsObj).toString();
+      const separator = API_URL.includes('?') ? '&' : '?';
       
-      fetch(`${API_URL}?${query}`)
+      fetch(API_URL + separator + query, { method: 'GET', redirect: 'follow' })
       .then(res => res.json())
       .then(data => {
-        appVerisi = data; 
-        localStorage.setItem('bizimEvVerisi', JSON.stringify(data)); 
-        ekraniGuncelle();
-      }).catch(e => console.error("Kayıt Hatası:", e))
+        if(data && data.kiler) {
+          appVerisi = data; 
+          yerelBellegeKaydet(); 
+          ekraniGuncelle();
+        }
+      }).catch(e => console.error("Senkronizasyon başarısız:", e))
       .finally(() => document.getElementById('senkRozeti').classList.add('hidden'));
     }
 
@@ -239,7 +239,6 @@
       g.innerHTML = '';
       document.getElementById('kameraKutusu').classList.add('hidden');
       
-      // Pro Input Stili Sınıfı
       const inputClass = "w-full bg-[#2c2c2e] border border-white/5 p-4 rounded-xl text-[14px] font-medium text-white placeholder-gray-500 outline-none focus:border-blue-500 transition-colors";
       
       if (aktifSekme === 'kiler') {
@@ -355,7 +354,6 @@
       d.className = "text-[12px] text-orange-400 font-semibold block px-1";
     }
 
-    // HATASIZ VE KESİN ÇÖZÜMLÜ LİNK OKUYUCU
     function akilliLinkCozucu(url) {
       clearTimeout(linkDebounceTimer);
       if (!url || !url.startsWith("http")) return;
@@ -370,11 +368,9 @@
           const path = decodeURIComponent(u.pathname);
           let slug = "";
           
-          if (u.hostname.includes('trendyol.com')) {
-            slug = path.split('/').pop().split('-p-')[0];
-          } else if (u.hostname.includes('hepsiburada.com')) {
-            slug = path.split('/').pop().split('-pm-')[0];
-          } else if (u.hostname.includes('amazon.')) {
+          if (u.hostname.includes('trendyol.com')) { slug = path.split('/').pop().split('-p-')[0]; } 
+          else if (u.hostname.includes('hepsiburada.com')) { slug = path.split('/').pop().split('-pm-')[0]; } 
+          else if (u.hostname.includes('amazon.')) {
             const parts = path.split('/');
             if (parts.length > 1 && parts[1] !== 'dp') slug = parts[1];
             else if (parts.length > 2 && parts[2] !== 'dp') slug = parts[2];
@@ -387,23 +383,21 @@
             ad = slug.replace(/[-_]/g, ' ');
             ad = ad.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
           } else {
-            // Hiçbir şey bulamazsa Sitenin Adını yazar (Örn: Trendyol Ürünü), asla kilitlenmez.
             ad = u.hostname.replace('www.', '').split('.')[0];
             ad = ad.charAt(0).toUpperCase() + ad.slice(1) + " Ürünü";
           }
           
           document.getElementById('f_ad').value = ad;
-          d.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> İsim ayrıştırıldı: <b>${ad}</b>`;
+          d.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> İsim çekildi: <b>${ad}</b>`;
           d.className = "text-[12px] text-emerald-400 font-medium block px-1";
-
         } catch(e) {
-             // En kötü ihtimalle bile çalışır
              document.getElementById('f_ad').value = "Yeni Ürün";
              d.innerHTML = `<i class="fa-solid fa-info-circle text-gray-400"></i> Lütfen ürün adını giriniz.`;
         }
       }, 300);
     }
 
+    // HER İŞLEMDE %100 YEREL KAYIT ZIRHI
     function formKaydet() {
       let payload = { islem: '' };
       if (aktifSekme === 'kiler') {
@@ -434,6 +428,7 @@
         appVerisi.istekler.push([payload.link, payload.ad, payload.fiyat, payload.ekleyen, payload.resim]);
       }
       
+      yerelBellegeKaydet(); // ANAHTAR ÇÖZÜM: İnternet kopsa bile telefonda kalır
       ekraniGuncelle(); 
       modalKapat();
       if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize(payload);
@@ -443,7 +438,7 @@
       if (confirm(`Stoğu sıfırlanıp Alışveriş Listesine aktarılsın mı?`)) {
         appVerisi.kiler[index][2] = "0";
         appVerisi.alisveris.push([ad, '1', 'Kiler', 'Bugün', 'Bekliyor']);
-        ekraniGuncelle();
+        yerelBellegeKaydet(); ekraniGuncelle();
         if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'kilerBitti', index: index, ad: ad });
       }
     }
@@ -451,27 +446,26 @@
     function alisverisDurumDegistir(index, mevcutDurum) {
       const yeniDurum = mevcutDurum === 'Alındı' ? 'Bekliyor' : 'Alındı';
       appVerisi.alisveris[index][4] = yeniDurum;
-      ekraniGuncelle();
+      yerelBellegeKaydet(); ekraniGuncelle();
       if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'alisverisDurum', index: index, durum: yeniDurum });
     }
 
     function alisverisSil(index) {
       if(confirm("Listeden silinsin mi?")) {
-        appVerisi.alisveris.splice(index, 1); ekraniGuncelle();
+        appVerisi.alisveris.splice(index, 1); yerelBellegeKaydet(); ekraniGuncelle();
         if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'alisverisSil', index: index });
       }
     }
 
     function istekSil(index) {
       if(confirm("İstek listesinden kaldırılsın mı?")) {
-        appVerisi.istekler.splice(index, 1); ekraniGuncelle();
+        appVerisi.istekler.splice(index, 1); yerelBellegeKaydet(); ekraniGuncelle();
         if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'istekSil', index: index });
       }
     }
 
     function ekraniGuncelle() {
       try {
-        // PRO KİLER
         const kBox = document.getElementById('kilerListe'); const sktBox = document.getElementById('sktUyariAlani');
         kBox.innerHTML = ''; sktBox.innerHTML = ''; let sktKritik = [];
         const bugun = new Date(); bugun.setHours(0,0,0,0);
@@ -512,7 +506,6 @@
         });
         if(sktKritik.length>0) sktBox.innerHTML = `<div class="bg-red-500/10 border border-red-500/20 p-3.5 rounded-2xl text-[12px] text-red-400 font-semibold mb-2 flex items-center gap-2"><i class="fa-solid fa-circle-exclamation"></i> SKT Uyarısı: ${sktKritik.join(', ')}</div>`;
 
-        // PRO FİNANS
         const donemFiltre = `${document.getElementById('finansYilSec').value}-${document.getElementById('finansAySec').value}`;
         let mBen=0, mEsim=0, ftr=0, gdr=0, kirilim={};
         const fBox = document.getElementById('finansListe'); fBox.innerHTML = '';
@@ -544,7 +537,6 @@
           krBox.innerHTML += `<div class="space-y-1.5"><div class="flex justify-between text-gray-300 font-medium"><span>${k}</span><span>₺${kirilim[k].toLocaleString('tr-TR')}</span></div><div class="w-full bg-[#2c2c2e] h-1.5 rounded-full overflow-hidden"><div class="bg-blue-500 h-full rounded-full" style="width:${yuzde}%"></div></div></div>`;
         });
 
-        // PRO ALIŞVERİŞ 
         const aBox = document.getElementById('alisverisListe'); aBox.innerHTML='';
         (appVerisi.alisveris || []).forEach((i, idx) => {
           const isAlindi = (i[4] === 'Alındı');
@@ -561,7 +553,6 @@
           </div>`;
         });
         
-        // PRO İSTEKLER 
         const iBox = document.getElementById('istekListe'); iBox.innerHTML='';
         (appVerisi.istekler || []).forEach((i, idx) => {
           iBox.innerHTML+=`
