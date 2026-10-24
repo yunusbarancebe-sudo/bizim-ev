@@ -12,8 +12,6 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
-  <!-- Barkod ve Metin Okuma (OCR) Motorları -->
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
@@ -160,12 +158,25 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxEFfbAQBXC-ilQIrcz7vrg9ydIt1dTLdHTiVB4PGkEgLVEw3spaGXTnvtmPo5qmE6d/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyFpwd8NVQncaq3x6WXLeloaKe0D7QcCuXFTgEL2EqyFqKbZsM9PRFA4mMHUvX3D8Wh/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
     const defaultVeri = { kiler: [], finans: [], alisveris: [], istekler: [], barkodHavuzu: [] };
     let appVerisi = defaultVeri;
+
+    // TÜRKİYE MARKETLERİ HIZLI TAMAMLAMA VERİTABANI
+    const marketOnbellek = [
+      "Dost Süt (BİM)", "Birşah Süt (A101)", "Mis Süt (Şok)", "Pınar Süt", "Sütaş Süt", "Sek Süt", "İçim Süt",
+      "Kızılay Maden Suyu", "Beypazarı Maden Suyu", "Çaykur Rize Turist Çay", "Doğuş Karadeniz Çay", "Lipton Yellow Label",
+      "Solo Tuvalet Kağıdı", "Familia Tuvalet Kağıdı", "Selpak Tuvalet Kağıdı", "Papia Tuvalet Kağıdı",
+      "Fairy Bulaşık Deterjanı", "Pril Bulaşık Deterjanı", "Finish Bulaşık Tableti", "Domestos Çamaşır Suyu",
+      "Yudum Ayçiçek Yağı", "Komili Zeytinyağı", "Orkide Ayçiçek Yağı", "Sole Ayçiçek Yağı (BİM)", "Vera Ayçiçek Yağı (A101)",
+      "Filiz Makarna", "Barilla Makarna", "Nuh'un Ankara Makarnası", "Reis Kırmızı Mercimek", "Duru Osmancık Pirinç",
+      "Sütaş Kaşar Peyniri", "İçim Kaşar Peyniri", "Torku Kaşar Peyniri", "Kaanlar Zeytin", "Marmarabirlik Zeytin",
+      "Nutella", "Torku Banada", "Çokokrem", "Eti Browni Intense", "Ülker Çikolatalı Gofret", "Tadım Kavrulmuş Fındık",
+      "Head & Shoulders Şampuan", "Clear Şampuan", "Elidor Şampuan", "Duru Sıvı Sabun", "Colgate Diş Macunu"
+    ];
 
     try {
       const cached = localStorage.getItem('bizimEvVerisi');
@@ -227,29 +238,30 @@
       if (aktifSekme === 'kiler') {
         document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
         g.innerHTML = `
-          <div class="flex gap-2 mb-2">
+          <div class="flex gap-2">
             <input id="f_barkod" type="text" placeholder="Barkod Tara veya Yaz" class="${inputClass} flex-1" oninput="barkodHizliYazma(this.value)">
             <button type="button" onclick="kameraAc()" class="bg-[#2c2c2e] px-4 rounded-xl text-blue-400 font-bold active:scale-95 transition-transform"><i class="fa-solid fa-barcode text-lg"></i></button>
           </div>
-          <p id="barkodDurum" class="text-[12px] hidden font-medium mb-3"></p>
+          <p id="barkodDurum" class="text-[12px] hidden font-medium"></p>
           
-          <div id="urunOnizlemeKutusu" class="hidden flex items-center gap-3 bg-[#2c2c2e] p-3 rounded-xl border border-white/5 mb-3"><img id="f_onizlemeResim" src="" class="w-12 h-12 rounded-lg object-cover bg-black"><div><p id="f_onizlemeAd" class="text-[13px] font-bold text-white"></p><span id="f_onizlemeKat" class="text-[11px] text-emerald-400 font-medium"></span></div></div>
+          <div id="urunOnizlemeKutusu" class="hidden flex items-center gap-3 bg-[#2c2c2e] p-3 rounded-xl border border-white/5"><img id="f_onizlemeResim" src="" class="w-12 h-12 rounded-lg object-cover bg-black"><div><p id="f_onizlemeAd" class="text-[13px] font-bold text-white"></p><span id="f_onizlemeKat" class="text-[11px] text-emerald-400 font-medium"></span></div></div>
           
-          <!-- YENİ: FOTOĞRAF VE SES DESTEKLİ İSİM GİRİŞİ -->
-          <div class="flex gap-2">
-            <input id="f_ad" type="text" placeholder="Ürün Adı (Söyle / Foto Çek)" class="${inputClass} flex-1" onblur="isimdenResimBul(this.value)">
-            <!-- Kamera İle Yazı Okuma Butonu -->
-            <button type="button" onclick="document.getElementById('ocrInput').click()" class="bg-[#2c2c2e] px-4 rounded-xl text-purple-400 font-bold active:scale-95 transition-transform"><i class="fa-solid fa-camera"></i></button>
-            <input type="file" id="ocrInput" accept="image/*" capture="environment" class="hidden" onchange="fotodanYaziOku(event)">
-            <!-- Mikrofon Butonu -->
-            <button type="button" onclick="sesleYaz()" class="bg-[#2c2c2e] px-4 rounded-xl text-red-400 font-bold active:scale-95 transition-transform"><i class="fa-solid fa-microphone"></i></button>
+          <div class="relative">
+            <div class="flex gap-2">
+              <input id="f_ad" type="text" placeholder="Ürün Adı" class="${inputClass} flex-1" oninput="canliOneriGetir(this.value)" onblur="setTimeout(()=>isimdenResimBul(document.getElementById('f_ad').value), 300)">
+              <button type="button" onclick="document.getElementById('ocrInput').click()" class="bg-[#2c2c2e] px-4 rounded-xl text-purple-400 font-bold active:scale-95 transition-transform" title="Fotoğraftan Oku"><i class="fa-solid fa-camera"></i></button>
+              <input type="file" id="ocrInput" accept="image/*" capture="environment" class="hidden" onchange="optimizeVeOku(event)">
+              <button type="button" onclick="sesleYaz()" class="bg-[#2c2c2e] px-4 rounded-xl text-red-400 font-bold active:scale-95 transition-transform" title="Sesle Söyle"><i class="fa-solid fa-microphone"></i></button>
+            </div>
+            <!-- CANLI ARAMA DROPDOWN -->
+            <div id="oneriKutusu" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-[#252528] border border-white/10 rounded-2xl max-h-48 overflow-y-auto z-30 shadow-2xl divide-y divide-white/5"></div>
           </div>
-          <p class="text-[10px] text-gray-500 mb-3 px-1 mt-1"><i class="fa-solid fa-info-circle"></i> Barkod yoksa ürün adının fotoğrafını çekin veya mikrofona söyleyin.</p>
+          <p id="ocrDurum" class="text-[11px] text-gray-400 hidden px-1"></p>
 
           <select id="f_kategori" class="${inputClass}"><option value="Gıda & Mutfak">Kategori: Gıda</option><option value="Temizlik & Hijyen">Kategori: Temizlik</option><option value="Kişisel Bakım">Kategori: Kişisel Bakım</option><option value="Ev & Yaşam">Kategori: Ev & Yaşam</option></select>
           <input id="f_resim" type="hidden">
-          <div class="grid grid-cols-2 gap-3 mt-3"><input id="f_stok" type="number" placeholder="Stok" value="1" class="${inputClass}"><input id="f_birim" type="text" placeholder="Birim (Adet, Lt)" value="Adet" class="${inputClass}"></div>
-          <div class="mt-3"><label class="block text-[12px] text-gray-400 mb-1.5 px-1">SKT (Son Kullanma Tarihi)</label><input id="f_skt" type="date" class="${inputClass}"></div>`;
+          <div class="grid grid-cols-2 gap-3"><input id="f_stok" type="number" placeholder="Stok" value="1" class="${inputClass}"><input id="f_birim" type="text" placeholder="Birim (Adet, Lt)" value="Adet" class="${inputClass}"></div>
+          <div><label class="block text-[12px] text-gray-400 mb-1.5 px-1">SKT (Son Kullanma Tarihi)</label><input id="f_skt" type="date" class="${inputClass}"></div>`;
       } 
       else if (aktifSekme === 'finans') {
         document.getElementById('modalBaslik').innerText = 'Harcama / Gelir Ekle';
@@ -268,58 +280,109 @@
 
     function modalKapat() { try { kameraKapat(); } catch (e) {} document.getElementById('formModal').classList.add('hidden'); document.getElementById('formModal').classList.remove('flex'); }
 
-    // 📸 FOTOĞRAFTAN METİN OKUMA (TESSERACT OCR)
-    async function fotodanYaziOku(e) {
+    // CANLI OTOMATİK TAMAMLAMA (2 HARFTE ÜRÜN BULMA)
+    function canliOneriGetir(val) {
+      const k = document.getElementById('oneriKutusu');
+      if (!val || val.length < 2) { k.classList.add('hidden'); return; }
+      const q = val.toLowerCase();
+      const bulunanlar = marketOnbellek.filter(m => m.toLowerCase().includes(q)).slice(0, 5);
+      if (bulunanlar.length === 0) { k.classList.add('hidden'); return; }
+      k.innerHTML = '';
+      bulunanlar.forEach(item => {
+        k.innerHTML += `<div onclick="oneriSec('${item.replace(/'/g, "\\'")}')" class="p-3 text-sm text-gray-200 hover:bg-white/10 cursor-pointer flex items-center gap-2"><i class="fa-solid fa-basket-shopping text-blue-400 text-xs"></i> <span>${item}</span></div>`;
+      });
+      k.classList.remove('hidden');
+    }
+
+    function oneriSec(ad) {
+      document.getElementById('f_ad').value = ad;
+      document.getElementById('oneriKutusu').classList.add('hidden');
+      isimdenResimBul(ad);
+    }
+
+    // 🚀 CANVAS İLE SIKIŞTIRMA VE ZIRHLI OCR MOTORU
+    function resmiKucult(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width, h = img.height;
+            const maxBoyut = 900;
+            if (w > h && w > maxBoyut) { h = Math.round((h * maxBoyut) / w); w = maxBoyut; }
+            else if (h > maxBoyut) { w = Math.round((w * maxBoyut) / h); h = maxBoyut; }
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            
+            // Kontrast artırma ve gri tonlama
+            const idata = ctx.getImageData(0, 0, w, h);
+            const d = idata.data;
+            for (let i = 0; i < d.length; i += 4) {
+              const gri = (d[i]*0.299 + d[i+1]*0.587 + d[i+2]*0.114);
+              d[i] = gri; d[i+1] = gri; d[i+2] = gri;
+            }
+            ctx.putImageData(idata, 0, 0);
+            canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.85);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function optimizeVeOku(e) {
       const file = e.target.files[0];
       if (!file) return;
       const fAd = document.getElementById('f_ad');
-      fAd.value = "Yazı okunuyor (Lütfen bekleyin)...";
-      
+      const d = document.getElementById('ocrDurum');
+      d.classList.remove('hidden');
+      d.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-purple-400"></i> Fotoğraf optimize ediliyor ve okunuyor...';
+
       try {
+        const kucukResimBlob = await resmiKucult(file);
         const worker = await Tesseract.createWorker('tur');
-        const ret = await worker.recognize(file);
+        const ret = await worker.recognize(kucukResimBlob);
         await worker.terminate();
 
         const metin = ret.data.text;
-        // Metni temizle ve en belirgin ilk 1-2 kelimeyi al
-        const satirlar = metin.split('\n').map(s => s.trim()).filter(s => s.length > 2 && s.length < 25);
-        let urunAdi = satirlar.length > 0 ? satirlar[0] : metin.substring(0, 20);
-        urunAdi = urunAdi.replace(/[^a-zA-ZçğıöşüÇĞİÖŞÜ0-9 ]/g, '').trim();
+        // Ambalaj gürültülerini filtreleme sözlüğü
+        const copKelimeler = ["icindekiler", "içindekiler", "enerji", "protein", "tett", "parti", "net", "gram", "saklama", "besin", "öğeleri", "kg", "ml", "tl", "fiyat", "barkod", "türk", "malı"];
+        
+        const temizSatirlar = metin.split('\n')
+          .map(s => s.replace(/[^a-zA-ZçğıöşüÇĞİÖŞÜ0-9 ]/g, '').trim())
+          .filter(s => s.length >= 3 && !copKelimeler.some(c => s.toLowerCase().includes(c)));
 
-        if (urunAdi && urunAdi.length > 2) {
-           fAd.value = urunAdi;
-           isimdenResimBul(urunAdi);
+        let bulunanUrun = temizSatirlar.length > 0 ? temizSatirlar[0] : "";
+
+        if (bulunanUrun && bulunanUrun.length > 2) {
+          fAd.value = bulunanUrun;
+          d.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Okundu: <b>${bulunanUrun}</b>`;
+          isimdenResimBul(bulunanUrun);
         } else {
-           fAd.value = "Okunamadı, tekrar deneyin";
+          d.innerHTML = `<i class="fa-solid fa-xmark text-orange-400"></i> Ambalaj metni anlaşılamadı. Lütfen adını elle girin.`;
         }
       } catch (err) {
-        fAd.value = "";
-        alert("Fotoğraf okuma başarısız oldu.");
+        d.innerHTML = `<i class="fa-solid fa-xmark text-red-400"></i> Okuma hatası oluştu.`;
       }
     }
 
-    // 🎤 SESLE ÜRÜN İSMİ YAZDIRMA
     function sesleYaz() {
       const fAd = document.getElementById('f_ad');
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        alert("Cihazınız sesli yazdırmayı desteklemiyor. Klavyenizdeki mikrofon ikonunu kullanabilirsiniz.");
-        return;
-      }
+      if (!SpeechRecognition) return alert("Cihazınızda sesli yazdırma desteklenmiyor.");
       const recognition = new SpeechRecognition();
       recognition.lang = 'tr-TR';
       recognition.start();
-      fAd.value = "Dinleniyor, konuşun...";
-      
-      recognition.onresult = function(event) {
-        const transcript = event.results[0][0].transcript;
-        fAd.value = transcript;
-        isimdenResimBul(transcript);
+      fAd.placeholder = "Dinleniyor, konuşun...";
+      recognition.onresult = function(e) {
+        const t = e.results[0][0].transcript;
+        fAd.value = t;
+        isimdenResimBul(t);
       };
-      recognition.onerror = function() {
-        fAd.value = "";
-        alert("Ses anlaşılamadı, lütfen tekrar deneyin.");
-      }
     }
 
     function barkodHizliYazma(val) {
@@ -328,11 +391,13 @@
       else if (val.length > 5) { barkodTimer = setTimeout(() => barkodlaUrunAra(val), 600); }
     }
 
+    // 🚀 ÇİFT HATLI BARKOD MOTORU (OFF + TÜRK BARKOD AĞI)
     async function barkodlaUrunAra(barkod) {
       if (!barkod) return; barkod = String(barkod).trim();
       const d = document.getElementById('barkodDurum');
-      d.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Havuz taranıyor...'; d.className = "text-[12px] text-blue-400 font-semibold block px-1";
+      d.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Barkod sorgulanıyor...'; d.className = "text-[12px] text-blue-400 font-semibold block px-1";
 
+      // 1. Kendi yerel havuzumuz
       const yerel = (appVerisi.barkodHavuzu||[]).find(u => String(u[0]) === barkod);
       if (yerel && yerel[1]) {
         document.getElementById('f_ad').value = yerel[1];
@@ -341,24 +406,43 @@
         d.innerHTML = `<i class="fa-solid fa-circle-check"></i> Havuzunuzdan bulundu: <b>${yerel[1]}</b>`; d.className = "text-[12px] text-emerald-400 font-semibold block px-1"; return;
       }
       
+      // 2. OpenFoodFacts
       try {
         const resOFF = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barkod}.json`);
         if (resOFF.ok) {
           const dataOFF = await resOFF.json();
           if (dataOFF.status === 1 && dataOFF.product) {
-            const prod = dataOFF.product; const marka = prod.brands ? prod.brands.split(',')[0].trim() : ''; let ad = prod.product_name_tr || prod.product_name || prod.generic_name_tr || prod.generic_name || '';
-            if (marka && ad && !ad.toLowerCase().includes(marka.toLowerCase())) ad = marka + ' ' + ad; else if (!ad && marka) ad = marka + ' Ürünü';
+            const prod = dataOFF.product; const marka = prod.brands ? prod.brands.split(',')[0].trim() : ''; let ad = prod.product_name_tr || prod.product_name || prod.generic_name_tr || '';
+            if (marka && ad && !ad.toLowerCase().includes(marka.toLowerCase())) ad = marka + ' ' + ad; else if (!ad && marka) ad = marka;
             if (ad) {
               document.getElementById('f_ad').value = ad; document.getElementById('f_kategori').value = "Gıda & Mutfak";
               const resim = prod.image_front_small_url || prod.image_url || '';
               if (resim) { document.getElementById('f_resim').value = resim; document.getElementById('f_onizlemeResim').src = resim; document.getElementById('f_onizlemeAd').innerText = ad; document.getElementById('f_onizlemeKat').innerText = "Gıda & Mutfak"; document.getElementById('urunOnizlemeKutusu').classList.remove('hidden'); }
-              d.innerHTML = `<i class="fa-solid fa-circle-check"></i> İnternetten Bulundu: <b>${ad}</b>`; d.className = "text-[12px] text-emerald-400 font-semibold block px-1"; return;
+              d.innerHTML = `<i class="fa-solid fa-circle-check"></i> Bulundu: <b>${ad}</b>`; d.className = "text-[12px] text-emerald-400 font-semibold block px-1"; return;
             }
           }
         }
       } catch (err) {}
 
-      d.innerHTML = `<i class="fa-solid fa-circle-plus"></i> Barkod bulunamadı. Lütfen Kamera veya Mikrofon ikonunu kullanın.`; d.className = "text-[12px] text-orange-400 font-semibold block px-1";
+      // 3. Türk Barkod Veritabanı (CORS Proxy üzerinden)
+      try {
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.barkodoku.com/' + barkod)}`;
+        const resTR = await fetch(proxyUrl);
+        if (resTR.ok) {
+          const html = await resTR.text();
+          const match = html.match(/<title>(.*?) - Barkod Okuyucu/i);
+          if (match && match[1] && !match[1].includes('Bulunamadı')) {
+            const adTR = match[1].trim();
+            document.getElementById('f_ad').value = adTR;
+            d.innerHTML = `<i class="fa-solid fa-circle-check"></i> Türk Kataloğundan Bulundu: <b>${adTR}</b>`;
+            d.className = "text-[12px] text-emerald-400 font-semibold block px-1";
+            isimdenResimBul(adTR);
+            return;
+          }
+        }
+      } catch (e) {}
+
+      d.innerHTML = `<i class="fa-solid fa-circle-plus"></i> Barkod kayıtlı değil. Lütfen Kamera veya Mikrofonu kullanın.`; d.className = "text-[12px] text-orange-400 font-semibold block px-1";
     }
 
     async function isimdenResimBul(isim) {
