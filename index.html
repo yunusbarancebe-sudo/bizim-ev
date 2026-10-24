@@ -107,7 +107,7 @@
     <!-- İSTEKLER -->
     <section id="tab-istekler" class="space-y-3 hidden"><div id="istekListe" class="grid grid-cols-1 gap-3"></div></section>
 
-    <!-- YENİ: RUTİNLER (Bakım Takvimi) -->
+    <!-- RUTİNLER -->
     <section id="tab-rutinler" class="space-y-3 hidden"><div id="rutinListe" class="space-y-3"></div></section>
   </main>
 
@@ -151,10 +151,10 @@
     // ==========================================
     // ⚙️ GEREKLİ ANAHTARLARI BURAYA YAPIŞTIRIN:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbwlszIxHJBMAAMTr-0oR1QsauDOuUJldpao6KJzzVt1vjSfamc-g-1cPZIhQphSUuMg/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzwRvAkXxlTATW7r0rFCk2nPIwMfYbjZwLtT5F1Aslqfm3PJdQf-9aCi2H-ruHSmfpO/exec";
     
-    // ÜCRETSİZ GEMINI API KEY ALMAK İÇİN: https://aistudio.google.com/app/apikey adresine gidin
-    const GEMINI_API_KEY = "AQ.Ab8RN6KTDxW1gWnsev27mraBJ4E9aVHDNFMLT20mdL7mka_beQ";
+    // KISITLAMASIZ GEMINI API KEY (https://aistudio.google.com/app/apikey)
+    const GEMINI_API_KEY = "AQ.Ab8RN6Ls_R8XSZfZrYRx754XyaT3VxfXuDErLVzpiFWBJ8NT8Q";
 
     let aktifSekme = 'kiler', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null;
     let appVerisi = { kiler: [], finans: [], alisveris: [], istekler: [], barkodHavuzu: [], rutinler: [] };
@@ -238,7 +238,6 @@
       } else if (aktifSekme === 'finans') {
         document.getElementById('modalBaslik').innerText = 'Harcama / Gelir Ekle';
         g.innerHTML = `
-          <!-- YAPAY ZEKA FATURA OKUYUCU BUTONU -->
           <div class="pb-3 border-b border-white/5 mb-3">
              <input type="file" id="faturaDosya" accept="image/*" capture="environment" class="hidden" onchange="aiFaturaTara(event)">
              <button type="button" onclick="document.getElementById('faturaDosya').click()" class="w-full bg-[#2c2c2e] text-blue-400 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform"><i class="fa-solid fa-camera"></i> AI ile Fiş / Fatura Oku</button>
@@ -265,7 +264,6 @@
 
     function modalKapat() { try { kameraKapat(); } catch (e) {} document.getElementById('formModal').classList.add('hidden'); document.getElementById('formModal').classList.remove('flex'); }
 
-    // BARKOD & LİNK & KAYIT İŞLEMLERİ (Eskisiyle aynı sağlam yapı)
     async function barkodlaUrunAra(barkod) {
       if (!barkod) return;
       const d = document.getElementById('barkodDurum'); d.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Taranıyor...'; d.className = "text-[12px] text-blue-400 font-semibold block px-1";
@@ -302,37 +300,56 @@
       }, 500);
     }
 
-    // YAPAY ZEKA - TARİF ÜRETİCİ
+    // YENİ: YAPAY ZEKA TARİF ÜRETİCİ
     async function aiTarifUret() {
-      if(!GEMINI_API_KEY || GEMINI_API_KEY.includes("BURAYA")) return alert("Yapay zeka için Gemini API Key girilmemiş!");
+      if(!GEMINI_API_KEY || GEMINI_API_KEY.includes("BURAYA")) return alert("Yapay zeka için Gemini API Key eklenmemiş.");
       const d = document.getElementById('aiModal'); const g = document.getElementById('aiGovde');
       g.innerHTML = `<div class="flex flex-col items-center justify-center py-6"><div class="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full mb-3"></div><p class="text-purple-400 font-bold">Dolap analiz ediliyor, tarifler yazılıyor...</p></div>`;
       d.classList.remove('hidden'); d.classList.add('flex');
       
-      const kilerUrunler = (appVerisi.kiler || []).filter(u => Number(u[2]) > 0).map(u => `${u[0]} (SKT: ${u[5]||'Yok'})`).join(', ');
+      const kilerUrunler = (appVerisi.kiler || []).filter(u => Number(u[2]) > 0).map(u => `${u[0]} (SKT:${u[5]||'Yok'})`).join(', ');
       if(!kilerUrunler) { g.innerHTML = "Dolabınızda malzeme yok, alışveriş zamanı! :)"; return; }
       
-      const prompt = `Benim dolabımda şu malzemeler var: ${kilerUrunler}. Lütfen SKT'si yaklaşanları öncelikli kullanarak yapabileceğim çok pratik 2 yemek tarifi ver. Sadece HTML olarak <b> ve <ul> etiketleriyle süsleyerek dön, markdown kullanma.`;
+      const prompt = `Benim dolabımda şu malzemeler var: ${kilerUrunler}. SKT'si yaklaşanları öncelikli kullanarak 2 pratik yemek tarifi ver. Sadece HTML olarak <b> ve <ul> etiketleriyle süsleyerek dön, markdown (```) kullanma.`;
       try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, { method: 'POST', headers:{'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{parts:[{text: prompt}]}] }) });
+        const res = await fetch(`[https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$](https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$){GEMINI_API_KEY}`, { 
+           method: 'POST', 
+           headers:{'Content-Type': 'application/json'}, 
+           body: JSON.stringify({ contents: [{parts:[{text: prompt}]}] }) 
+        });
         const json = await res.json();
+        
+        if (json.error) {
+           g.innerHTML = `<span class="text-red-400">Google Hata: ${json.error.message} (Muhtemelen API Kısıtlaması)</span>`;
+           return;
+        }
         g.innerHTML = json.candidates[0].content.parts[0].text.replace(/```html/g, '').replace(/```/g, '');
-      } catch(e) { g.innerHTML = "Yapay zekaya ulaşılamadı. İnternet bağlantınızı kontrol edin."; }
+      } catch(e) { g.innerHTML = `Sistemsel Hata: ${e.message}`; }
     }
 
-    // YAPAY ZEKA - FATURA OKUYUCU
+    // YENİ: YAPAY ZEKA FATURA OKUYUCU
     function aiFaturaTara(event) {
-      if(!GEMINI_API_KEY || GEMINI_API_KEY.includes("BURAYA")) return alert("Yapay zeka için Gemini API Key girilmemiş!");
+      if(!GEMINI_API_KEY || GEMINI_API_KEY.includes("BURAYA")) return alert("Yapay zeka için Gemini API Key eklenmemiş.");
       const file = event.target.files[0]; if(!file) return;
-      const d = document.getElementById('aiFaturaDurum'); d.classList.remove('hidden'); d.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Fiş okunuyor, lütfen bekleyin...';
+      const d = document.getElementById('aiFaturaDurum'); d.classList.remove('hidden'); d.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Fiş okunuyor, bekleyin...';
       
       const reader = new FileReader();
       reader.onloadend = async function() {
         const base64data = reader.result.split(',')[1];
         const prompt = `Bu resimdeki fiş veya faturanın toplam tutarını ve kategorisini (Market, Akaryakıt, Restoran, Aidat vb.) bul. Sadece JSON formatında dön. Başka hiçbir metin ekleme. Örnek: {"tutar": 150.50, "kategori": "Market"}`;
         try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, { method: 'POST', headers:{'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{parts:[{text: prompt}, {inline_data: {mime_type: "image/jpeg", data: base64data}}]}] }) });
+          const res = await fetch(`[https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$](https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$){GEMINI_API_KEY}`, { 
+             method: 'POST', 
+             headers:{'Content-Type': 'application/json'}, 
+             body: JSON.stringify({ contents: [{parts:[{text: prompt}, {inlineData: {mimeType: "image/jpeg", data: base64data}}]}] }) 
+          });
           const json = await res.json();
+          
+          if (json.error) {
+             d.innerHTML = `<span class="text-red-400">Hata: ${json.error.message}</span>`;
+             return;
+          }
+          
           const yanitTxt = json.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
           const sonuc = JSON.parse(yanitTxt);
           
