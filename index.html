@@ -3,14 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  
-  <!-- YENİ: TAM EKRAN (PWA) UYGULAMA AYARLARI -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-title" content="Bizim Ev">
   <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=Ev&background=2563eb&color=fff&size=256">
-  
   <title>Bizim Ev PRO</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
@@ -24,8 +21,8 @@
     .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 24px); }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .glass-nav { background: rgba(18, 18, 18, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.08); }
-    .glass-header { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .glass-nav { background: rgba(18, 18, 18, 0.85); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.08); }
+    .glass-header { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08); }
     .modal-enter { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   </style>
@@ -91,7 +88,7 @@
       <div id="kilerListe" class="space-y-3"></div>
     </section>
 
-    <!-- FİNANS (TAKSİT DESTEKLİ) -->
+    <!-- FİNANS -->
     <section id="tab-finans" class="space-y-5 hidden">
       <div class="flex items-center justify-between bg-[#1c1c1e] p-3 rounded-2xl">
         <span class="text-[13px] font-medium text-gray-400 pl-2">Dönem</span>
@@ -116,7 +113,7 @@
       <div class="space-y-3 pt-2"><h3 class="text-[11px] font-semibold uppercase tracking-widest text-gray-500 px-2">İşlem Geçmişi</h3><div id="finansListe" class="space-y-2.5"></div></div>
     </section>
 
-    <!-- ALIŞVERİŞ (MARKET MODU & WHATSAPP) -->
+    <!-- ALIŞVERİŞ -->
     <section id="tab-alisveris" class="space-y-3 hidden">
       <div class="flex gap-2">
         <button onclick="whatsappPaylas()" class="flex-1 bg-[#128C7E] text-white p-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform"><i class="fa-brands fa-whatsapp text-lg"></i> Paylaş</button>
@@ -139,7 +136,7 @@
     </div>
   </nav>
 
-  <!-- FORM MODAL (Taksit Seçeneği Eklendi) -->
+  <!-- FORM MODAL -->
   <div id="formModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-md items-end justify-center p-0" onclick="modalDisTiklama(event)">
     <div class="bg-[#1c1c1e] w-full max-w-lg rounded-t-[32px] p-6 pb-[calc(24px+env(safe-area-inset-bottom))] max-h-[92vh] overflow-y-auto space-y-5 relative modal-enter" onclick="event.stopPropagation()">
       <div class="w-10 h-1.5 bg-gray-600 rounded-full mx-auto mb-2"></div>
@@ -160,12 +157,10 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxI12k0bEwiGxHo5qlg7RD8X2OCesgRHaUh3-1F9vRJGmYoPfWUpnQMa6jH4pKtIaYq/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbw5XmBrMCTdBI5xtx7SX-teThFXYdnbM6sHmnhA2K0OouhB_GonI7xDMiBzbLbDWOme/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null;
     let akilliSiralamaAcik = false;
-    
-    // Rutinler silindiği için boş veri şablonunu kısalttık
     const defaultVeri = { kiler: [], finans: [], alisveris: [], istekler: [], barkodHavuzu: [] };
     let appVerisi = defaultVeri;
     
@@ -190,20 +185,14 @@
     function verileriYukle(gosterAnim) {
       if (!API_URL || API_URL.includes("BURAYA_EXEC")) return;
       if (gosterAnim) document.getElementById('yenileIcon').classList.add('animate-spin');
-      fetch(`${API_URL}?islem=verileriGetir`)
-        .then(res => res.json())
-        .then(data => { if (data && data.kiler) { appVerisi = { ...defaultVeri, ...data }; yerelBellegeKaydet(); ekraniGuncelle(); }})
-        .finally(() => { if(document.getElementById('yenileIcon')) document.getElementById('yenileIcon').classList.remove('animate-spin'); });
+      fetch(`${API_URL}?islem=verileriGetir`).then(res => res.json()).then(data => { if (data && data.kiler) { appVerisi = { ...defaultVeri, ...data }; yerelBellegeKaydet(); ekraniGuncelle(); }}).finally(() => { if(document.getElementById('yenileIcon')) document.getElementById('yenileIcon').classList.remove('animate-spin'); });
     }
 
     function arkaPlanSenkronize(paramsObj) {
       document.getElementById('senkRozeti').classList.remove('hidden');
       const query = new URLSearchParams(paramsObj).toString();
       const separator = API_URL.includes('?') ? '&' : '?';
-      fetch(API_URL + separator + query, { method: 'GET', redirect: 'follow' })
-        .then(res => res.json())
-        .then(data => { if(data && data.kiler) { appVerisi = { ...defaultVeri, ...data }; yerelBellegeKaydet(); ekraniGuncelle(); }})
-        .finally(() => document.getElementById('senkRozeti').classList.add('hidden'));
+      fetch(API_URL + separator + query, { method: 'GET', redirect: 'follow' }).then(res => res.json()).then(data => { if(data && data.kiler) { appVerisi = { ...defaultVeri, ...data }; yerelBellegeKaydet(); ekraniGuncelle(); }}).finally(() => document.getElementById('senkRozeti').classList.add('hidden'));
     }
 
     function sekmeDegistir(sekme, baslik) {
@@ -227,7 +216,6 @@
 
     function modalAc() {
       if (aktifSekme === 'ozet') sekmeDegistir('kiler', 'Kiler & Stok');
-      
       const modal = document.getElementById('formModal');
       const g = document.getElementById('modalGovde'); g.innerHTML = '';
       document.getElementById('kameraKutusu').classList.add('hidden');
@@ -236,21 +224,11 @@
       if (aktifSekme === 'kiler') {
         document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
         g.innerHTML = `
-          <div class="flex gap-2">
-            <input id="f_barkod" type="text" placeholder="Barkod Tara veya Yaz" class="${inputClass} flex-1">
-            <button type="button" onclick="kameraAc()" class="bg-[#2c2c2e] px-4 rounded-xl text-blue-400 font-bold"><i class="fa-solid fa-barcode text-lg"></i></button>
-          </div>
+          <div class="flex gap-2"><input id="f_barkod" type="text" placeholder="Barkod Tara veya Yaz" class="${inputClass} flex-1"><button type="button" onclick="kameraAc()" class="bg-[#2c2c2e] px-4 rounded-xl text-blue-400 font-bold"><i class="fa-solid fa-barcode text-lg"></i></button></div>
           <p id="barkodDurum" class="text-[12px] hidden font-medium"></p>
-          
-          <div id="urunOnizlemeKutusu" class="hidden flex items-center gap-3 bg-[#2c2c2e] p-3 rounded-xl border border-white/5">
-            <img id="f_onizlemeResim" src="" class="w-12 h-12 rounded-lg object-cover bg-black">
-            <div><p id="f_onizlemeAd" class="text-[13px] font-bold text-white"></p><span id="f_onizlemeKat" class="text-[11px] text-emerald-400 font-medium"></span></div>
-          </div>
-          
+          <div id="urunOnizlemeKutusu" class="hidden flex items-center gap-3 bg-[#2c2c2e] p-3 rounded-xl border border-white/5"><img id="f_onizlemeResim" src="" class="w-12 h-12 rounded-lg object-cover bg-black"><div><p id="f_onizlemeAd" class="text-[13px] font-bold text-white"></p><span id="f_onizlemeKat" class="text-[11px] text-emerald-400 font-medium"></span></div></div>
           <input id="f_ad" type="text" placeholder="Ürün Adı (Yazınca Resmi Bulur)" class="${inputClass}" onblur="isimdenResimBul(this.value)">
-          <select id="f_kategori" class="${inputClass}">
-            <option value="Gıda & Mutfak">Kategori: Gıda</option><option value="Temizlik & Hijyen">Kategori: Temizlik</option><option value="Kişisel Bakım">Kategori: Kişisel Bakım</option><option value="Ev & Yaşam">Kategori: Ev & Yaşam</option>
-          </select>
+          <select id="f_kategori" class="${inputClass}"><option value="Gıda & Mutfak">Kategori: Gıda</option><option value="Temizlik & Hijyen">Kategori: Temizlik</option><option value="Kişisel Bakım">Kategori: Kişisel Bakım</option><option value="Ev & Yaşam">Kategori: Ev & Yaşam</option></select>
           <input id="f_resim" type="hidden">
           <div class="grid grid-cols-2 gap-3"><input id="f_stok" type="number" placeholder="Stok" value="1" class="${inputClass}"><input id="f_birim" type="text" placeholder="Birim (Adet, Lt)" value="Adet" class="${inputClass}"></div>
           <div><label class="block text-[12px] text-gray-400 mb-1.5 px-1">SKT (Son Kullanma Tarihi)</label><input id="f_skt" type="date" class="${inputClass}"></div>`;
@@ -258,21 +236,7 @@
       } 
       else if (aktifSekme === 'finans') {
         document.getElementById('modalBaslik').innerText = 'Harcama / Gelir Ekle';
-        g.innerHTML = `
-          <select id="f_tip" class="${inputClass}"><option value="Gider">Gider (Harcama)</option><option value="Fatura">Fatura / Aidat</option><option value="Maas_Ben">Maaş (Ben)</option><option value="Maas_Esim">Maaş (Eşim)</option></select>
-          <input id="f_tarih" type="date" value="${new Date().toISOString().split('T')[0]}" class="${inputClass}">
-          <input id="f_kategori" type="text" placeholder="Kategori (Market, Benzin vb.)" class="${inputClass}">
-          
-          <!-- YENİ: TAKSİT BÖLÜMÜ -->
-          <div class="grid grid-cols-2 gap-3">
-             <input id="f_tutar" type="number" placeholder="Tutar (₺)" class="${inputClass}">
-             <select id="f_taksit" class="${inputClass}">
-                <option value="1">Tek Çekim</option><option value="2">2 Taksit</option><option value="3">3 Taksit</option><option value="4">4 Taksit</option><option value="5">5 Taksit</option><option value="6">6 Taksit</option><option value="9">9 Taksit</option><option value="12">12 Taksit</option>
-             </select>
-          </div>
-          
-          <select id="f_kisi" class="${inputClass}"><option value="Ben">Ben</option><option value="Eşim">Eşim</option><option value="Ortak">Ortak Hane</option></select>
-          <input id="f_not" type="text" placeholder="Açıklama (İsteğe Bağlı)" class="${inputClass}">`;
+        g.innerHTML = `<select id="f_tip" class="${inputClass}"><option value="Gider">Gider (Harcama)</option><option value="Fatura">Fatura / Aidat</option><option value="Maas_Ben">Maaş (Ben)</option><option value="Maas_Esim">Maaş (Eşim)</option></select><input id="f_tarih" type="date" value="${new Date().toISOString().split('T')[0]}" class="${inputClass}"><input id="f_kategori" type="text" placeholder="Kategori (Market, Benzin vb.)" class="${inputClass}"><div class="grid grid-cols-2 gap-3"><input id="f_tutar" type="number" placeholder="Tutar (₺)" class="${inputClass}"><select id="f_taksit" class="${inputClass}"><option value="1">Tek Çekim</option><option value="2">2 Taksit</option><option value="3">3 Taksit</option><option value="4">4 Taksit</option><option value="5">5 Taksit</option><option value="6">6 Taksit</option><option value="9">9 Taksit</option><option value="12">12 Taksit</option></select></div><select id="f_kisi" class="${inputClass}"><option value="Ben">Ben</option><option value="Eşim">Eşim</option><option value="Ortak">Ortak Hane</option></select><input id="f_not" type="text" placeholder="Açıklama (İsteğe Bağlı)" class="${inputClass}">`;
       } 
       else if (aktifSekme === 'alisveris') {
         document.getElementById('modalBaslik').innerText = 'Alışveriş Listesi';
@@ -287,39 +251,26 @@
 
     function modalKapat() { try { kameraKapat(); } catch (e) {} document.getElementById('formModal').classList.add('hidden'); document.getElementById('formModal').classList.remove('flex'); }
 
-    // 📸 İSİMDEN RESİM BULUCU (Yeni)
     async function isimdenResimBul(isim) {
-      if(!isim || isim.length < 3 || document.getElementById('f_resim').value) return; // Zaten resim varsa arama
+      if(!isim || isim.length < 3 || document.getElementById('f_resim').value) return;
       if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
         try {
           const res = await fetch(`${API_URL}?islem=resimBul&ad=${encodeURIComponent(isim)}`);
           const data = await res.json();
-          if (data.resim) {
-             document.getElementById('f_resim').value = data.resim;
-             document.getElementById('f_onizlemeResim').src = data.resim;
-             document.getElementById('f_onizlemeAd').innerText = isim;
-             document.getElementById('f_onizlemeKat').innerText = "Otomatik resim eklendi";
-             document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
-          }
+          if (data.resim) { document.getElementById('f_resim').value = data.resim; document.getElementById('f_onizlemeResim').src = data.resim; document.getElementById('f_onizlemeAd').innerText = isim; document.getElementById('f_onizlemeKat').innerText = "Otomatik resim eklendi"; document.getElementById('urunOnizlemeKutusu').classList.remove('hidden'); }
         } catch(e) {}
       }
     }
 
-    // 🚀 LİNK ÇÖZÜCÜ
     function akilliLinkCozucu(url) {
       clearTimeout(linkDebounceTimer); if (!url || !url.startsWith("http")) return;
       linkDebounceTimer = setTimeout(async () => {
-        const d = document.getElementById('linkDurum'); d.classList.remove('hidden'); d.innerHTML = '<i class="fa-solid fa-bolt text-blue-400"></i> Link analiz ediliyor (Bot koruması aşılıyor)...';
+        const d = document.getElementById('linkDurum'); d.classList.remove('hidden'); d.innerHTML = '<i class="fa-solid fa-bolt text-blue-400"></i> Link analiz ediliyor...';
         try {
           if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
             const res = await fetch(`${API_URL}?islem=linkCoz&url=${encodeURIComponent(url)}`);
             const data = await res.json();
-            if (data.baslik && data.baslik.length > 3) {
-                document.getElementById('f_ad').value = data.baslik;
-                d.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Ürün: <b>${data.baslik}</b>`;
-                d.className = "text-[12px] text-emerald-400 font-medium block px-1";
-                return;
-            }
+            if (data.baslik && data.baslik.length > 3) { document.getElementById('f_ad').value = data.baslik; d.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Ürün: <b>${data.baslik}</b>`; d.className = "text-[12px] text-emerald-400 font-medium block px-1"; return; }
           }
           const u = new URL(url); let ad = u.hostname.replace('www.','').split('.')[0]; ad = ad.charAt(0).toUpperCase() + ad.slice(1) + " Ürünü"; document.getElementById('f_ad').value = ad;
           d.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Ürün adını kendiniz girebilirsiniz.`; d.className = "text-[12px] text-emerald-400 font-medium block px-1";
@@ -331,17 +282,7 @@
       if (!barkod) return;
       const d = document.getElementById('barkodDurum'); d.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Taranıyor...'; d.className = "text-[12px] text-blue-400 font-semibold block px-1";
       const yerel = (appVerisi.barkodHavuzu||[]).find(u => String(u[0]) === String(barkod));
-      if (yerel) { 
-        document.getElementById('f_ad').value = yerel[1] || ''; 
-        if(yerel[2]) {
-           document.getElementById('f_resim').value = yerel[2];
-           document.getElementById('f_onizlemeResim').src = yerel[2];
-           document.getElementById('f_onizlemeAd').innerText = yerel[1];
-           document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
-        }
-        if(yerel[3]) document.getElementById('f_kategori').value = yerel[3]; 
-        d.innerHTML = `<i class="fa-solid fa-circle-check"></i> Havuzunuzdan bulundu.`; d.className = "text-[12px] text-emerald-400 font-semibold block px-1"; return; 
-      }
+      if (yerel) { document.getElementById('f_ad').value = yerel[1] || ''; if(yerel[2]) { document.getElementById('f_resim').value = yerel[2]; document.getElementById('f_onizlemeResim').src = yerel[2]; document.getElementById('f_onizlemeAd').innerText = yerel[1]; document.getElementById('urunOnizlemeKutusu').classList.remove('hidden'); } if(yerel[3]) document.getElementById('f_kategori').value = yerel[3]; d.innerHTML = `<i class="fa-solid fa-circle-check"></i> Havuzunuzdan bulundu.`; d.className = "text-[12px] text-emerald-400 font-semibold block px-1"; return; }
       if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
         try {
           const data = await fetch(`${API_URL}?islem=barkodAra&barkod=${barkod}`).then(r=>r.json());
@@ -351,24 +292,16 @@
       d.innerHTML = `<i class="fa-solid fa-circle-plus"></i> Yeni Ürün. Adını yazın, sisteme kaydedilsin.`; d.className = "text-[12px] text-orange-400 font-semibold block px-1";
     }
 
-    // 💬 WHATSAPP PAYLAŞ
     function whatsappPaylas() {
       const alinacaklar = (appVerisi.alisveris || []).filter(i => i[4] !== 'Alındı');
       if (alinacaklar.length === 0) return alert("Alışveriş listeniz şu an boş!");
-      let mesaj = "🛒 *Ev Alışveriş Listesi*\n\n";
-      alinacaklar.forEach(i => { mesaj += `▫️ ${i[0]} (${i[1]} Adet)\n`; });
+      let mesaj = "🛒 *Ev Alışveriş Listesi*\n\n"; alinacaklar.forEach(i => { mesaj += `▫️ ${i[0]} (${i[1]} Adet)\n`; });
       window.open(`https://wa.me/?text=${encodeURIComponent(mesaj)}`, '_blank');
     }
     
-    // 🛒 MARKET MODU (Kategoriye Göre Gruplama)
     function marketModuAc() {
-       akilliSiralamaAcik = !akilliSiralamaAcik;
-       const btn = document.getElementById('marketModuBtn');
-       if(akilliSiralamaAcik) {
-          btn.classList.add('bg-blue-600', 'border-blue-500'); btn.classList.remove('bg-[#2c2c2e]', 'border-white/10');
-       } else {
-          btn.classList.remove('bg-blue-600', 'border-blue-500'); btn.classList.add('bg-[#2c2c2e]', 'border-white/10');
-       }
+       akilliSiralamaAcik = !akilliSiralamaAcik; const btn = document.getElementById('marketModuBtn');
+       if(akilliSiralamaAcik) { btn.classList.add('bg-blue-600', 'border-blue-500'); btn.classList.remove('bg-[#2c2c2e]', 'border-white/10'); } else { btn.classList.remove('bg-blue-600', 'border-blue-500'); btn.classList.add('bg-[#2c2c2e]', 'border-white/10'); }
        ekraniGuncelle();
     }
 
@@ -376,84 +309,89 @@
       let payload = { islem: '' };
       if (aktifSekme === 'kiler') {
         payload = { islem: 'kilerEkle', ad: document.getElementById('f_ad').value, barkod: document.getElementById('f_barkod').value, stok: document.getElementById('f_stok').value, birim: document.getElementById('f_birim').value, skt: document.getElementById('f_skt').value, resim: document.getElementById('f_resim').value, kategori: document.getElementById('f_kategori').value, kritik: '1' };
-        let index = -1;
-        if(payload.barkod) index = appVerisi.kiler.findIndex(u => u[1] === payload.barkod);
-        if(index === -1 && payload.ad) index = appVerisi.kiler.findIndex(u => String(u[0]).toLowerCase() === payload.ad.toLowerCase());
-        if(index !== -1) { appVerisi.kiler[index][2] = String(Number(appVerisi.kiler[index][2]) + Number(payload.stok)); if(payload.skt) appVerisi.kiler[index][5] = payload.skt; } 
-        else { appVerisi.kiler.push([payload.ad, payload.barkod, payload.stok, payload.birim, payload.kritik, payload.skt, payload.resim, payload.kategori]); }
+        let index = -1; if(payload.barkod) index = appVerisi.kiler.findIndex(u => u[1] === payload.barkod); if(index === -1 && payload.ad) index = appVerisi.kiler.findIndex(u => String(u[0]).toLowerCase() === payload.ad.toLowerCase());
+        if(index !== -1) { appVerisi.kiler[index][2] = String(Number(appVerisi.kiler[index][2]) + Number(payload.stok)); if(payload.skt) appVerisi.kiler[index][5] = payload.skt; } else { appVerisi.kiler.push([payload.ad, payload.barkod, payload.stok, payload.birim, payload.kritik, payload.skt, payload.resim, payload.kategori]); }
         if(payload.barkod && payload.ad && !appVerisi.barkodHavuzu.find(u => u[0] == payload.barkod)) { appVerisi.barkodHavuzu.push([payload.barkod, payload.ad, payload.resim, payload.kategori]); }
       } 
       else if (aktifSekme === 'finans') {
         payload = { islem: 'finansEkle', tip: document.getElementById('f_tip').value, tarih: document.getElementById('f_tarih').value, kategori: document.getElementById('f_kategori').value || 'Diğer', tutar: document.getElementById('f_tutar').value, taksit: document.getElementById('f_taksit').value, kisi: document.getElementById('f_kisi').value, not: document.getElementById('f_not').value };
-        
-        // Cihazdaki Finans tablosunu Taksit mantığıyla yerel güncelle (Kapanıp açılıncaya kadar anlık görünsün)
-        const tkst = Number(payload.taksit) || 1;
-        const basTarih = payload.tarih ? new Date(payload.tarih) : new Date();
-        const aTutar = (Number(payload.tutar) || 0) / tkst;
-        for (let m=0; m<tkst; m++) {
-           let iTarih = new Date(basTarih); iTarih.setMonth(iTarih.getMonth() + m);
-           let tStr = iTarih.toISOString().split('T')[0];
-           let nNot = tkst > 1 ? (payload.not ? payload.not+" " : "")+`(${m+1}/${tkst} Taksit)` : payload.not;
-           appVerisi.finans.unshift([tStr, payload.tip, payload.kategori, aTutar, payload.kisi, nNot]);
-        }
+        const tkst = Number(payload.taksit) || 1; const basTarih = payload.tarih ? new Date(payload.tarih) : new Date(); const aTutar = (Number(payload.tutar) || 0) / tkst;
+        for (let m=0; m<tkst; m++) { let iTarih = new Date(basTarih); iTarih.setMonth(iTarih.getMonth() + m); let tStr = iTarih.toISOString().split('T')[0]; let nNot = tkst > 1 ? (payload.not ? payload.not+" " : "")+`(${m+1}/${tkst} Taksit)` : payload.not; appVerisi.finans.unshift([tStr, payload.tip, payload.kategori, aTutar, payload.kisi, nNot]); }
       } 
       else if (aktifSekme === 'alisveris') {
-        payload = { islem: 'alisverisEkle', urun: document.getElementById('f_urun').value, adet: document.getElementById('f_adet').value, ekleyen: document.getElementById('f_ekleyen').value };
-        appVerisi.alisveris.push([payload.urun, payload.adet, payload.ekleyen, 'Bugün', 'Bekliyor']);
+        payload = { islem: 'alisverisEkle', urun: document.getElementById('f_urun').value, adet: document.getElementById('f_adet').value, ekleyen: document.getElementById('f_ekleyen').value }; appVerisi.alisveris.push([payload.urun, payload.adet, payload.ekleyen, 'Bugün', 'Bekliyor']);
       } 
       else if (aktifSekme === 'istekler') {
-        payload = { islem: 'istekEkle', link: document.getElementById('f_link').value, ad: document.getElementById('f_ad').value, fiyat: document.getElementById('f_fiyat').value, ekleyen: document.getElementById('f_ekleyen').value, resim: document.getElementById('f_resim').value };
-        appVerisi.istekler.push([payload.link, payload.ad, payload.fiyat, payload.ekleyen, payload.resim]);
+        payload = { islem: 'istekEkle', link: document.getElementById('f_link').value, ad: document.getElementById('f_ad').value, fiyat: document.getElementById('f_fiyat').value, ekleyen: document.getElementById('f_ekleyen').value, resim: document.getElementById('f_resim').value }; appVerisi.istekler.push([payload.link, payload.ad, payload.fiyat, payload.ekleyen, payload.resim]);
       }
       yerelBellegeKaydet(); ekraniGuncelle(); modalKapat();
       if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize(payload);
     }
 
-    function kilerUrunBitti(index, ad) {
-      if (confirm(`Stoğu sıfırlanıp Alışveriş Listesine aktarılsın mı?`)) {
-        appVerisi.kiler[index][2] = "0"; appVerisi.alisveris.push([ad, '1', 'Kiler', 'Bugün', 'Bekliyor']); yerelBellegeKaydet(); ekraniGuncelle();
-        if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'kilerBitti', index: index, ad: ad });
-      }
-    }
-
-    function alisverisDurumDegistir(urunAd, mevcutDurum) {
-      const idx = appVerisi.alisveris.findIndex(u => u[0] === urunAd);
-      if(idx === -1) return;
-      const yeniDurum = mevcutDurum === 'Alındı' ? 'Bekliyor' : 'Alındı'; 
-      appVerisi.alisveris[idx][4] = yeniDurum; yerelBellegeKaydet(); ekraniGuncelle();
-      if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'alisverisDurum', index: idx, durum: yeniDurum });
-    }
-
-    function satirSil(tablo, silAd, islemAdi) {
-      if(confirm("Silmek istediğinize emin misiniz?")) { 
-        const idx = appVerisi[tablo].findIndex(u => (tablo==='alisveris' ? u[0]===silAd : u[1]===silAd));
-        if(idx !== -1) { appVerisi[tablo].splice(idx, 1); yerelBellegeKaydet(); ekraniGuncelle(); if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: islemAdi, index: idx }); }
-      }
-    }
+    function kilerUrunBitti(index, ad) { if (confirm(`Stoğu sıfırlanıp Alışveriş Listesine aktarılsın mı?`)) { appVerisi.kiler[index][2] = "0"; appVerisi.alisveris.push([ad, '1', 'Kiler', 'Bugün', 'Bekliyor']); yerelBellegeKaydet(); ekraniGuncelle(); if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'kilerBitti', index: index, ad: ad }); } }
+    function alisverisDurumDegistir(urunAd, mevcutDurum) { const idx = appVerisi.alisveris.findIndex(u => u[0] === urunAd); if(idx === -1) return; const yeniDurum = mevcutDurum === 'Alındı' ? 'Bekliyor' : 'Alındı'; appVerisi.alisveris[idx][4] = yeniDurum; yerelBellegeKaydet(); ekraniGuncelle(); if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'alisverisDurum', index: idx, durum: yeniDurum }); }
+    function satirSil(tablo, silAd, islemAdi) { if(confirm("Silmek istediğinize emin misiniz?")) { const idx = appVerisi[tablo].findIndex(u => (tablo==='alisveris' ? u[0]===silAd : u[1]===silAd)); if(idx !== -1) { appVerisi[tablo].splice(idx, 1); yerelBellegeKaydet(); ekraniGuncelle(); if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: islemAdi, index: idx }); } } }
 
     function ekraniGuncelle() {
       try {
         const bugun = new Date(); bugun.setHours(0,0,0,0);
         let kilerKritikHtml = ""; let bekleYenAlisveris = 0; let istekSayisi = 0;
 
-        // KİLER
+        // ================= YENİ: KİLER SKT KUTUCUĞU =================
         const kBox = document.getElementById('kilerListe'); kBox.innerHTML = ''; 
         (appVerisi.kiler || []).forEach((item, index) => {
           const ad = item[0]||'', stok = Number(item[2])||0, birim = item[3]||'Adet', skt = item[5], resim = item[6], kat = item[7]||'Gıda';
-          let fark = null, sktBadge = '';
-          if(skt && skt.includes('-')){ fark = Math.ceil((new Date(skt.split('-')[0], skt.split('-')[1]-1, skt.split('-')[2]) - bugun)/86400000); }
-          if (fark !== null) {
-            if (fark < 0) { sktBadge = `<span class="bg-red-500/10 text-red-400 px-2 py-0.5 rounded text-[10px] font-bold">Tarihi Geçti</span>`; kilerKritikHtml += `<div><span class="text-red-400 mr-1">•</span> ${ad} (Tarihi Geçti)</div>`; }
-            else if (fark <= 3) { sktBadge = `<span class="bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded text-[10px] font-bold">Son ${fark} Gün</span>`; kilerKritikHtml += `<div><span class="text-orange-400 mr-1">•</span> ${ad} (Son ${fark} gün)</div>`; }
+          let sktBadge = '';
+          
+          if(skt && skt.includes('-')){ 
+            let p = skt.split('-');
+            let hedef = new Date(p[0], p[1]-1, p[2]);
+            let fark = Math.ceil((hedef - bugun) / 86400000);
+            
+            if (fark < 0) { 
+              sktBadge = `<span class="bg-red-500/10 text-red-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-red-500/20"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Tarihi Geçti</span>`; 
+              kilerKritikHtml += `<div><span class="text-red-400 mr-1">•</span> ${ad} (Tarihi Geçti)</div>`; 
+            }
+            else if (fark === 0) {
+              sktBadge = `<span class="bg-orange-500/10 text-orange-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-orange-500/20"><i class="fa-solid fa-bell mr-1"></i>Bugün Bitiyor</span>`; 
+              kilerKritikHtml += `<div><span class="text-orange-400 mr-1">•</span> ${ad} (Bugün bitiyor)</div>`;
+            }
+            else if (fark <= 7) { 
+              sktBadge = `<span class="bg-orange-500/10 text-orange-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-orange-500/20"><i class="fa-solid fa-clock mr-1"></i>${fark} Gün Kaldı</span>`; 
+              if (fark <= 3) kilerKritikHtml += `<div><span class="text-orange-400 mr-1">•</span> ${ad} (Son ${fark} gün)</div>`; 
+            } 
+            else {
+              sktBadge = `<span class="bg-blue-500/10 text-blue-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-blue-500/20"><i class="fa-regular fa-calendar mr-1"></i>${fark} Gün Kaldı</span>`;
+            }
           }
+          
           if (seciliKilerKategori !== 'Tümü' && kat !== seciliKilerKategori) return;
           const safeAd = ad.replace(/"/g, '&quot;').replace(/'/g, "\\'"); 
-          const imgHtml = resim ? `<img src="${resim}" class="w-12 h-12 rounded-xl object-cover">` : `<div class="w-12 h-12 rounded-xl bg-[#2c2c2e] flex items-center justify-center text-gray-400 shrink-0"><i class="fa-solid fa-box text-sm"></i></div>`;
-          kBox.insertAdjacentHTML('beforeend', `<div class="bg-[#1c1c1e] p-4 rounded-[20px] shadow-sm"><div class="flex justify-between items-center"><div class="flex items-center gap-3.5">${imgHtml}<div><p class="font-semibold text-[15px] text-white tracking-tight">${ad}</p><div class="flex items-center gap-2 mt-1">${sktBadge}<span class="text-[11px] font-medium text-gray-500">${kat}</span></div></div></div><div class="flex flex-col items-end"><span class="text-xl font-bold ${stok===0?'text-red-400':'text-white'}">${stok} <span class="text-[11px] text-gray-500 font-medium">${birim}</span></span></div></div><div class="mt-3 pt-3 border-t border-white/5 flex justify-end"><button onclick="kilerUrunBitti(${index}, '${safeAd}')" class="text-[11px] font-bold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-1.5 rounded-full"><i class="fa-solid fa-plus mr-1"></i> Alışverişe Ekle</button></div></div>`);
+          const imgHtml = resim ? `<img src="${resim}" class="w-14 h-14 rounded-xl object-cover">` : `<div class="w-14 h-14 rounded-xl bg-[#2c2c2e] flex items-center justify-center text-gray-400 shrink-0"><i class="fa-solid fa-box text-lg"></i></div>`;
+          
+          kBox.insertAdjacentHTML('beforeend', `
+            <div class="bg-[#1c1c1e] p-4 rounded-[20px] shadow-sm">
+              <div class="flex justify-between items-start">
+                <div class="flex items-center gap-4">
+                  ${imgHtml}
+                  <div class="flex flex-col justify-center h-full">
+                    <p class="font-semibold text-[15px] text-white tracking-tight mb-1.5">${ad}</p>
+                    <div class="flex items-center gap-2">${sktBadge}</div>
+                  </div>
+                </div>
+                <div class="flex flex-col items-end">
+                  <span class="text-2xl font-black ${stok===0?'text-red-400':'text-white'}">${stok} <span class="text-[11px] text-gray-500 font-medium">${birim}</span></span>
+                </div>
+              </div>
+              <div class="mt-3 pt-3 border-t border-white/5 flex justify-between items-center">
+                <span class="text-[11px] font-medium text-gray-500">${kat}</span>
+                <button onclick="kilerUrunBitti(${index}, '${safeAd}')" class="text-[11px] font-bold text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 px-4 py-1.5 rounded-full"><i class="fa-solid fa-plus mr-1"></i> Alışverişe Ekle</button>
+              </div>
+            </div>`);
         });
-        document.getElementById('sktUyariAlani').innerHTML = kilerKritikHtml ? `<div class="bg-red-500/10 border border-red-500/20 p-3.5 rounded-2xl text-[12px] text-red-400 font-semibold mb-2"><i class="fa-solid fa-circle-exclamation mr-1"></i> SKT Uyarıları var!</div>` : '';
+        document.getElementById('sktUyariAlani').innerHTML = kilerKritikHtml ? `<div class="bg-red-500/10 border border-red-500/20 p-3.5 rounded-2xl text-[12px] text-red-400 font-semibold mb-2 leading-relaxed"><i class="fa-solid fa-triangle-exclamation mr-1"></i> <b>SKT Uyarıları</b><br>${kilerKritikHtml}</div>` : '';
 
-        // FİNANS (Taksit Gösterimi)
+        // FİNANS
         const donemFiltre = `${document.getElementById('finansYilSec').value}-${document.getElementById('finansAySec').value}`;
         let mBen=0, mEsim=0, ftr=0, gdr=0, kirilim={}; const fBox = document.getElementById('finansListe'); fBox.innerHTML = '';
         (appVerisi.finans || []).forEach(item => {
@@ -471,30 +409,23 @@
         const krBox = document.getElementById('kategoriKirilimListe'); krBox.innerHTML='';
         Object.keys(kirilim).sort((a,b)=>kirilim[b]-kirilim[a]).forEach(k => { let yuzde = (ftr+gdr)>0 ? Math.round((kirilim[k]/(ftr+gdr))*100) : 0; krBox.insertAdjacentHTML('beforeend', `<div class="space-y-1.5"><div class="flex justify-between text-gray-300 font-medium"><span>${k}</span><span>₺${kirilim[k].toLocaleString('tr-TR')}</span></div><div class="w-full bg-[#2c2c2e] h-1.5 rounded-full overflow-hidden"><div class="bg-blue-500 h-full rounded-full" style="width:${yuzde}%"></div></div></div>`); });
 
-        // ALIŞVERİŞ (MARKET MODU SIRALAMASI)
+        // ALIŞVERİŞ
         const aBox = document.getElementById('alisverisListe'); aBox.innerHTML='';
         let aListesi = [...(appVerisi.alisveris || [])];
-        
         if (akilliSiralamaAcik) {
-          // Havuzdan kategori bulup ona göre sırala
           aListesi.sort((a, b) => {
              const katA = (appVerisi.barkodHavuzu.find(h => h[1].toLowerCase() === a[0].toLowerCase()) || [])[3] || 'Z-Diğer';
              const katB = (appVerisi.barkodHavuzu.find(h => h[1].toLowerCase() === b[0].toLowerCase()) || [])[3] || 'Z-Diğer';
              return katA.localeCompare(katB);
           });
         }
-        
         let sonKategori = "";
         aListesi.forEach((i) => {
           const isAlindi = (i[4] === 'Alındı');
           if(!isAlindi) bekleYenAlisveris++;
-          
           if(akilliSiralamaAcik) {
              const oKat = (appVerisi.barkodHavuzu.find(h => h[1].toLowerCase() === i[0].toLowerCase()) || [])[3] || 'Diğer';
-             if(oKat !== sonKategori) {
-                 aBox.insertAdjacentHTML('beforeend', `<div class="pt-2 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-widest pl-2 border-b border-white/5">${oKat} REYONU</div>`);
-                 sonKategori = oKat;
-             }
+             if(oKat !== sonKategori) { aBox.insertAdjacentHTML('beforeend', `<div class="pt-2 pb-1 text-[11px] font-bold text-gray-500 uppercase tracking-widest pl-2 border-b border-white/5">${oKat} REYONU</div>`); sonKategori = oKat; }
           }
           const safeUrunAd = (i[0]||'').replace(/"/g, '&quot;').replace(/'/g, "\\'"); 
           aBox.insertAdjacentHTML('beforeend', `<div class="bg-[#1c1c1e] p-4 rounded-[20px] flex items-center justify-between transition-all ${isAlindi ? 'opacity-50 grayscale' : ''}"><div class="flex items-center gap-3.5"><button onclick="alisverisDurumDegistir('${safeUrunAd}', '${i[4]}')" class="w-6 h-6 rounded-full border-[1.5px] ${isAlindi ? 'bg-emerald-500 border-emerald-500 text-black' : 'border-gray-500 text-transparent'} flex items-center justify-center"><i class="fa-solid fa-check text-[10px]"></i></button><div><p class="font-semibold text-[15px] ${isAlindi ? 'line-through text-gray-400' : 'text-white'}">${i[0]||''}</p><p class="text-[11px] font-medium text-gray-500">${i[1]||1} Adet • ${i[2]||''}</p></div></div><button onclick="satirSil('alisveris', '${safeUrunAd}', 'alisverisSil')" class="w-8 h-8 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center"><i class="fa-solid fa-trash-can text-[11px]"></i></button></div>`);
