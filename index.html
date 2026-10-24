@@ -47,7 +47,7 @@
   </div>
 
   <main class="p-4 space-y-4 max-w-lg mx-auto">
-    <!-- 1. KİLER -->
+    <!-- KİLER -->
     <section id="tab-kiler" class="space-y-3">
       <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
         <button onclick="kilerFiltrele('Tümü')" class="kiler-filtre-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white whitespace-nowrap">Tümü</button>
@@ -60,7 +60,7 @@
       <div id="kilerListe" class="space-y-2.5"></div>
     </section>
 
-    <!-- 2. FİNANS -->
+    <!-- FİNANS -->
     <section id="tab-finans" class="space-y-4 hidden">
       <div class="flex items-center justify-between bg-zinc-900 border border-zinc-800 p-2.5 rounded-2xl">
         <span class="text-xs font-bold text-zinc-400 pl-2"><i class="fa-regular fa-calendar-days text-indigo-400 mr-1.5"></i> Dönem</span>
@@ -104,10 +104,10 @@
       </div>
     </section>
 
-    <!-- 3. ALIŞVERİŞ -->
+    <!-- ALIŞVERİŞ -->
     <section id="tab-alisveris" class="space-y-3 hidden"><div id="alisverisListe" class="space-y-2"></div></section>
 
-    <!-- 4. İSTEKLER -->
+    <!-- İSTEKLER -->
     <section id="tab-istekler" class="space-y-3 hidden"><div id="istekListe" class="grid grid-cols-1 gap-2.5"></div></section>
   </main>
 
@@ -128,21 +128,18 @@
     </div>
   </nav>
 
-  <!-- GÜVENLİ FORM MODAL -->
+  <!-- FORM MODAL -->
   <div id="formModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm items-end sm:items-center justify-center p-0 sm:p-4" onclick="modalDisTiklama(event)">
     <div class="bg-zinc-900 border border-zinc-800 rounded-t-[32px] sm:rounded-3xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto space-y-4 safe-bottom shadow-2xl relative" onclick="event.stopPropagation()">
       <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
         <h3 id="modalBaslik" class="font-bold text-base text-zinc-100">Yeni Ekle</h3>
         <button type="button" onclick="modalKapat()" class="w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center font-bold text-lg active:scale-90">&times;</button>
       </div>
-
       <div id="modalGovde" class="space-y-3"></div>
-
       <div id="kameraKutusu" class="hidden rounded-2xl overflow-hidden border border-zinc-800 bg-black">
         <div id="reader" style="width: 100%;"></div>
         <button type="button" onclick="kameraKapat()" class="w-full bg-zinc-800 py-2.5 text-xs font-semibold text-zinc-300">Kamerayı Kapat</button>
       </div>
-
       <div class="flex gap-2 pt-2">
         <button type="button" onclick="modalKapat()" class="w-1/3 bg-zinc-800 text-zinc-300 py-3.5 rounded-2xl font-bold active:scale-95">Vazgeç</button>
         <button type="button" id="kaydetBtn" onclick="formKaydet()" class="flex-1 bg-indigo-600 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-indigo-600/30 active:scale-95">Kaydet</button>
@@ -154,19 +151,18 @@
     // ==========================================
     // ⚙️ APPS SCRIPT /EXEC BAĞLANTINIZI BURAYA GİRİN:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbzD76V5G0yZkVK5C-vAQYCFMJXq9TVcdRlVP4cBsGexiaQCce0N2kE5qa7UpzFt_ejS/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzTvIvzMTTNex1LmIWNcA_Ejx6xICYEHknAtV9csc4HsIQC-zhjNXUgllPhFqxVyD0F/exec";
 
     let aktifSekme = 'kiler', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null;
-    
-    // GÜVENLİ ÖN BELLEK YÜKLEMESİ
     let appVerisi = { kiler: [], finans: [], alisveris: [], istekler: [] };
+    
     try {
       const cached = localStorage.getItem('bizimEvVerisi');
       if (cached && cached !== "undefined") {
         const parsed = JSON.parse(cached);
         if (parsed && typeof parsed === 'object') appVerisi = parsed;
       }
-    } catch (e) { console.warn("Önbellek temizlendi."); }
+    } catch (e) {}
 
     window.onload = function() {
       const simdi = new Date();
@@ -227,10 +223,10 @@
             <input id="f_barkod" type="text" placeholder="Barkod Tara / Yaz" class="flex-1 bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
             <button type="button" onclick="kameraAc()" class="bg-indigo-600 px-4 rounded-xl text-white active:scale-95"><i class="fa-solid fa-barcode"></i> Tara</button>
           </div>
-          <p id="barkodDurum" class="text-[11px] text-zinc-400 hidden"></p>
+          <p id="barkodDurum" class="text-[11px] text-emerald-400 hidden"></p>
           <div id="urunOnizlemeKutusu" class="hidden flex items-center gap-3 bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
             <img id="f_onizlemeResim" src="" class="w-12 h-12 rounded-lg object-cover">
-            <div><p id="f_onizlemeAd" class="text-xs font-bold text-zinc-200"></p><span id="f_onizlemeKat" class="text-[10px] text-emerald-400"></span></div>
+            <div><p id="f_onizlemeAd" class="text-xs font-bold text-zinc-200"></p><span id="f_onizlemeKat" class="text-[10px] text-zinc-500">İnternetten bulundu</span></div>
           </div>
           <input id="f_ad" type="text" placeholder="Ürün Adı" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
           <select id="f_kategori" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
@@ -273,17 +269,10 @@
         document.getElementById('modalBaslik').innerText = 'İstek / Wishlist Ekle';
         g.innerHTML = `
           <div class="space-y-1">
-            <input id="f_link" type="text" oninput="linkGirildi(this.value)" placeholder="Link Yapıştır (Trendyol, Amazon vb.)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-            <p id="linkDurum" class="text-[11px] text-indigo-400 hidden"></p>
+            <input id="f_link" type="text" oninput="akilliLinkCozucu(this.value)" placeholder="Link Yapıştır (Trendyol, Amazon, vb.)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+            <p id="linkDurum" class="text-[11px] text-emerald-400 hidden"></p>
           </div>
-          <div id="linkOnizlemeKutusu" class="hidden flex items-center gap-3 bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
-            <img id="f_linkResimOnizle" src="" class="w-14 h-14 rounded-lg object-cover">
-            <div class="overflow-hidden">
-              <p id="f_linkBaslikOnizle" class="text-xs font-bold text-zinc-200 truncate"></p>
-              <p id="f_linkFiyatOnizle" class="text-xs font-extrabold text-emerald-400"></p>
-            </div>
-          </div>
-          <input id="f_ad" type="text" placeholder="Ürün Adı" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+          <input id="f_ad" type="text" placeholder="Ürün Adı (Otomatik Dolar)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
           <input id="f_fiyat" type="number" placeholder="Fiyatı (₺)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
           <input id="f_resim" type="hidden">
           <select id="f_ekleyen" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
@@ -301,78 +290,103 @@
       modal.classList.remove('flex');
     }
 
+    // YENİ GÜÇLÜ BARKOD MOTORU (Yerel Hafıza + İnternet)
     async function barkodlaUrunAra(barkod) {
       if (!barkod) return;
       const d = document.getElementById('barkodDurum');
-      d.innerText = "Veritabanlarında aranıyor..."; d.classList.remove('hidden');
-      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
-        try {
-          const res = await fetch(`${API_URL}?islem=barkodAra&barkod=${barkod}`);
-          const data = await res.json();
-          if (data.ad) {
-            document.getElementById('f_ad').value = data.ad;
-            if (data.kategori) document.getElementById('f_kategori').value = data.kategori;
-            if (data.resim) {
-              document.getElementById('f_resim').value = data.resim;
-              document.getElementById('f_onizlemeResim').src = data.resim;
-              document.getElementById('f_onizlemeAd').innerText = data.ad;
-              document.getElementById('f_onizlemeKat').innerText = data.kategori;
-              document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
-            }
-            d.innerText = "Ürün bulundu: " + data.ad; return;
-          }
-        } catch (e) {}
+      d.innerText = "Ürün aranıyor..."; d.classList.remove('hidden'); d.className = "text-[11px] text-indigo-400";
+
+      // 1. Önce senin kiler geçmişine baksın (Daha önce girdiysen anında bulur)
+      const yerelUrun = (appVerisi.kiler || []).find(u => String(u[1]) === String(barkod));
+      if (yerelUrun) {
+        document.getElementById('f_ad').value = yerelUrun[0];
+        document.getElementById('f_kategori').value = yerelUrun[7] || "Gıda & Mutfak";
+        d.innerHTML = `<i class="fa-solid fa-circle-check"></i> Ürün Kiler geçmişinden bulundu!`;
+        d.className = "text-[11px] text-emerald-400";
+        return;
       }
-      d.innerText = "Bulunamadı, lütfen adını kendiniz yazın.";
+
+      // 2. İnternetten (Barkodoku + OpenFoodFacts) arayalım
+      let urunAdi = "", urunResim = "";
+      try {
+        const offRes = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barkod}.json`);
+        const offData = await offRes.json();
+        if (offData.status === 1) {
+          urunAdi = offData.product.product_name_tr || offData.product.product_name || "";
+          urunResim = offData.product.image_front_small_url || "";
+        }
+      } catch(e) {}
+
+      if (!urunAdi) {
+        try {
+          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://www.barkodoku.com/' + barkod)}`;
+          const boRes = await fetch(proxyUrl);
+          const boData = await boRes.json();
+          const doc = new DOMParser().parseFromString(boData.contents, "text/html");
+          const title = doc.querySelector('title')?.innerText || '';
+          if (title && !title.includes('Bulunamadı')) {
+            urunAdi = title.replace(' - Barkod Okuyucu', '').trim();
+            const img = doc.querySelector('#imgProduct');
+            if (img) urunResim = img.getAttribute('src');
+          }
+        } catch(e) {}
+      }
+
+      if (urunAdi) {
+        document.getElementById('f_ad').value = urunAdi;
+        if (urunResim) {
+          if (!urunResim.startsWith('http')) urunResim = 'https://www.barkodoku.com' + urunResim;
+          document.getElementById('f_resim').value = urunResim;
+          document.getElementById('f_onizlemeResim').src = urunResim;
+          document.getElementById('f_onizlemeAd').innerText = urunAdi;
+          document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
+        }
+        d.innerHTML = `<i class="fa-solid fa-circle-check"></i> İnternetten bulundu: ${urunAdi}`;
+        d.className = "text-[11px] text-emerald-400";
+      } else {
+        d.innerText = "Bulunamadı. Adını kendiniz yazarsanız sisteme sonsuza dek kaydedilir.";
+        d.className = "text-[11px] text-zinc-400";
+      }
     }
 
-    // Microlink API ile Bot Korumasını (Cloudflare) Aşan Link Çözücü
-    function linkGirildi(url) {
+    // YENİ AKILLI URL PARÇALAYICI (Bot Korumasına Takılmaz!)
+    function akilliLinkCozucu(url) {
       clearTimeout(linkDebounceTimer);
       if (!url || !url.startsWith("http")) return;
 
-      linkDebounceTimer = setTimeout(async () => {
+      linkDebounceTimer = setTimeout(() => {
         const d = document.getElementById('linkDurum');
-        d.classList.remove('hidden');
-        d.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Güvenlik duvarı aşılıyor, ürün taranıyor...';
-
         try {
-          // Microlink: Arka planda gerçek bir Chrome tarayıcı açıp sayfayı okur (Trendyol/Amazon engellemez)
-          const apiEndpoint = `https://api.microlink.io?url=${encodeURIComponent(url)}&palette=true`;
-          const res = await fetch(apiEndpoint);
-          const json = await res.json();
+          const urlObj = new URL(url);
+          const path = urlObj.pathname;
+          const host = urlObj.hostname;
+          let slug = "";
 
-          if (json.status === 'success' && json.data) {
-            let baslik = json.data.title || "";
-            let resim = json.data.image?.url || json.data.logo?.url || "";
-
-            // Başlıktaki mağaza isimlerini temizle
-            if (baslik) {
-              baslik = baslik.replace(/Trendyol|Hepsiburada|Amazon.com.tr|Çiçeksepeti|Boyner/gi, '')
-                             .replace(/[-|].*$/, '')
-                             .trim();
-              document.getElementById('f_ad').value = baslik;
-              document.getElementById('f_linkBaslikOnizle').innerText = baslik;
-            }
-
-            if (resim) {
-              document.getElementById('f_resim').value = resim;
-              document.getElementById('f_linkResimOnizle').src = resim;
-              document.getElementById('urunOnizlemeKutusu')?.classList.remove('hidden');
-              document.getElementById('linkOnizlemeKutusu').classList.remove('hidden');
-            }
-            
-            // Trendyol vb. fiyatları genellikle meta etiketlere koymaz, 
-            // bu yüzden kullanıcıyı yanlış yönlendirmemek için fiyatı boş bırakıp manuel girmesini istiyoruz.
-            d.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> Ürün bulundu! <span class="text-zinc-500">(Fiyatı manuel giriniz)</span>';
-          } else {
-            throw new Error("Veri çekilemedi");
+          // Trendyol & Hepsiburada URL'sinden ismini sök
+          if (host.includes('trendyol.com') || host.includes('hepsiburada.com')) {
+            const parts = path.split('/');
+            slug = parts[parts.length - 1].split('-p-')[0];
+          } 
+          // Amazon URL'sinden ismini sök
+          else if (host.includes('amazon.com.tr')) {
+            slug = path.split('/')[1];
           }
-        } catch (e) {
-          d.innerText = "Site gizlilik nedeniyle bilgi vermedi, lütfen kendiniz yazın.";
-        }
-      }, 700);
+          // Diğer Siteler
+          else {
+            const parts = path.split('/').filter(p => p.length > 0);
+            slug = parts[parts.length - 1].split('-p-')[0];
+          }
+
+          if (slug && slug.length > 3) {
+            slug = decodeURIComponent(slug).replace(/-/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+            document.getElementById('f_ad').value = slug;
+            d.innerHTML = `<i class="fa-solid fa-bolt text-amber-400"></i> Ürün adı URL'den hızlıca çekildi.`;
+            d.classList.remove('hidden');
+          }
+        } catch (e) {}
+      }, 300);
     }
+
     function formKaydet() {
       let payload = { islem: '' };
       if (aktifSekme === 'kiler') {
@@ -407,7 +421,6 @@
     }
 
     function ekraniGuncelle() {
-      // TÜM EKRAN HATA KORUMASI
       try {
         const kBox = document.getElementById('kilerListe'); const sktBox = document.getElementById('sktUyariAlani');
         kBox.innerHTML = ''; sktBox.innerHTML = ''; let sktKritik = [];
@@ -426,7 +439,7 @@
             else if (fark <= 3) { sktBadge = `<span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold">Son ${fark} Gün</span>`; sktKritik.push(`${ad} (Son ${fark} gün)`); }
           }
           
-          const safeAd = ad.replace(/'/g, "\\'"); // Ürün ismindeki tırnakları butonu bozmaması için koruyoruz
+          const safeAd = ad.replace(/'/g, "\\'"); 
           
           kBox.innerHTML += `
             <div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl space-y-2.5">
@@ -475,10 +488,8 @@
         (appVerisi.alisveris || []).forEach((i, idx) => aBox.innerHTML+=`<div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl flex gap-3"><button onclick="alisverisTamamla(${idx})" class="w-6 h-6 rounded-full border border-zinc-700 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-check text-xs"></i></button><div><p class="font-bold text-sm">${i[0]||''}</p><p class="text-[11px] text-zinc-500">${i[1]||1} Adet • ${i[2]||''}</p></div></div>`);
         
         const iBox = document.getElementById('istekListe'); iBox.innerHTML='';
-        (appVerisi.istekler || []).forEach(i => iBox.innerHTML+=`<div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl flex justify-between items-center"><div class="flex gap-3 overflow-hidden">${i[4]?`<img src="${i[4]}" class="w-14 h-14 rounded-xl object-cover">`:`<div class="w-14 h-14 bg-zinc-800 rounded-xl"></div>`}<div class="overflow-hidden"><p class="font-bold text-sm truncate">${i[1]||''}</p><p class="text-[11px] text-zinc-500">${i[3]||''} istedi</p></div></div><p class="font-black text-sm pl-2">₺${Number(i[2]||0).toLocaleString('tr-TR')}</p></div>`);
-      } catch (e) {
-        console.error("Arayüz güncellenirken bir hata oluştu:", e);
-      }
+        (appVerisi.istekler || []).forEach(i => iBox.innerHTML+=`<div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl flex justify-between items-center"><div class="flex gap-3 overflow-hidden">${i[4]?`<img src="${i[4]}" class="w-14 h-14 rounded-xl object-cover">`:`<div class="w-14 h-14 bg-zinc-800 rounded-xl flex items-center justify-center text-zinc-500"><i class="fa-solid fa-gift"></i></div>`}<div class="overflow-hidden"><p class="font-bold text-sm truncate">${i[1]||''}</p><p class="text-[11px] text-zinc-500">${i[3]||''} istedi</p></div></div><div class="text-right"><p class="font-black text-sm pl-2">₺${Number(i[2]||0).toLocaleString('tr-TR')}</p>${i[0]?`<a href="${i[0]}" target="_blank" class="text-[10px] text-indigo-400 font-bold underline">Ürüne Git</a>`:''}</div></div>`);
+      } catch (e) {}
     }
 
     function kameraAc() {
