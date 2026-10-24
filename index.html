@@ -326,6 +326,7 @@
       d.innerText = "Bulunamadı, lütfen adını kendiniz yazın.";
     }
 
+    // Microlink API ile Bot Korumasını (Cloudflare) Aşan Link Çözücü
     function linkGirildi(url) {
       clearTimeout(linkDebounceTimer);
       if (!url || !url.startsWith("http")) return;
@@ -333,48 +334,45 @@
       linkDebounceTimer = setTimeout(async () => {
         const d = document.getElementById('linkDurum');
         d.classList.remove('hidden');
-        d.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Güvenlik duvarı aşılıyor, bilgiler çekiliyor...';
+        d.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Güvenlik duvarı aşılıyor, ürün taranıyor...';
 
         try {
-          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-          const res = await fetch(proxyUrl);
+          // Microlink: Arka planda gerçek bir Chrome tarayıcı açıp sayfayı okur (Trendyol/Amazon engellemez)
+          const apiEndpoint = `https://api.microlink.io?url=${encodeURIComponent(url)}&palette=true`;
+          const res = await fetch(apiEndpoint);
           const json = await res.json();
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(json.contents, "text/html");
 
-          let baslik = "";
-          const ogTitle = doc.querySelector('meta[property="og:title"], meta[name="twitter:title"]');
-          if (ogTitle) baslik = ogTitle.getAttribute("content");
-          else baslik = doc.title;
-          if (baslik) baslik = baslik.replace(/\s*-\s*Trendyol|\s*-\s*Hepsiburada|\s*\|\s*Amazon.com.tr/gi, '').trim();
+          if (json.status === 'success' && json.data) {
+            let baslik = json.data.title || "";
+            let resim = json.data.image?.url || json.data.logo?.url || "";
 
-          let resim = "";
-          const ogImage = doc.querySelector('meta[property="og:image"], meta[name="twitter:image"]');
-          if (ogImage) resim = ogImage.getAttribute("content");
+            // Başlıktaki mağaza isimlerini temizle
+            if (baslik) {
+              baslik = baslik.replace(/Trendyol|Hepsiburada|Amazon.com.tr|Çiçeksepeti|Boyner/gi, '')
+                             .replace(/[-|].*$/, '')
+                             .trim();
+              document.getElementById('f_ad').value = baslik;
+              document.getElementById('f_linkBaslikOnizle').innerText = baslik;
+            }
 
-          let fiyat = "";
-          const ogPrice = doc.querySelector('meta[property="product:price:amount"]');
-          if (ogPrice) {
-            fiyat = ogPrice.getAttribute("content");
+            if (resim) {
+              document.getElementById('f_resim').value = resim;
+              document.getElementById('f_linkResimOnizle').src = resim;
+              document.getElementById('urunOnizlemeKutusu')?.classList.remove('hidden');
+              document.getElementById('linkOnizlemeKutusu').classList.remove('hidden');
+            }
+            
+            // Trendyol vb. fiyatları genellikle meta etiketlere koymaz, 
+            // bu yüzden kullanıcıyı yanlış yönlendirmemek için fiyatı boş bırakıp manuel girmesini istiyoruz.
+            d.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> Ürün bulundu! <span class="text-zinc-500">(Fiyatı manuel giriniz)</span>';
           } else {
-            const priceEl = doc.querySelector('.prc-dsc, .a-price-whole');
-            if (priceEl) fiyat = priceEl.innerText.replace(/[^0-9,.]/g, '').split(',')[0];
+            throw new Error("Veri çekilemedi");
           }
-
-          if (baslik) { document.getElementById('f_ad').value = baslik; document.getElementById('f_linkBaslikOnizle').innerText = baslik; }
-          if (fiyat) { document.getElementById('f_fiyat').value = fiyat; document.getElementById('f_linkFiyatOnizle').innerText = '₺' + fiyat; }
-          if (resim) {
-            document.getElementById('f_resim').value = resim; document.getElementById('f_linkResimOnizle').src = resim;
-            document.getElementById('urunOnizlemeKutusu')?.classList.remove('hidden');
-            document.getElementById('linkOnizlemeKutusu').classList.remove('hidden');
-          }
-          d.innerText = "Ürün bilgileri başarıyla çekildi!";
         } catch (e) {
-          d.innerText = "Site engelledi, lütfen bilgileri kendiniz doldurun.";
+          d.innerText = "Site gizlilik nedeniyle bilgi vermedi, lütfen kendiniz yazın.";
         }
-      }, 600);
+      }, 700);
     }
-
     function formKaydet() {
       let payload = { islem: '' };
       if (aktifSekme === 'kiler') {
