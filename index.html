@@ -158,9 +158,9 @@
 
   <script>
     // ==========================================
-    // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA:
+    // ⚙️ APPS SCRIPT BAĞLANTISI:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxg8QrJCwMkOWsdeDitRZCLchj2jvjmOrK29CZozGjNk6LkpfiNqe6_9uEEW8UNTcjT/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwAqF4fDdpOVc9WFMfn7pxfFg7_a-rAaUfLzefShViGLXJboeCt6eIivt4Tw3eS3KHh/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null;
     let akilliSiralamaAcik = false;
@@ -247,7 +247,7 @@
       if (aktifSekme === 'kiler') {
         document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
         g.innerHTML = `
-          <!-- ⚡ BARKOD VE AKILLI KATALOG MOTORU -->
+          <!-- ⚡ BARKOD VE KATALOG MOTORU -->
           <div class="space-y-3">
             <div class="flex gap-2">
               <input id="f_barkod" type="text" placeholder="Barkodu Okutun veya Yazın" class="${inputClass} flex-1 font-mono tracking-wider" oninput="barkodKatalogdaAra(this.value)">
@@ -257,7 +257,7 @@
             </div>
             <p id="barkodDurum" class="text-[12px] hidden font-semibold px-1"></p>
 
-            <!-- ÖNİZLEME KART VE RESİM GALERİSİ -->
+            <!-- ÖNİZLEME KART VE GÖRSEL GALERİSİ -->
             <div id="urunOnizlemeKutusu" class="hidden bg-[#252528] p-3.5 rounded-2xl border border-white/10 space-y-3">
               <div class="flex items-center gap-3">
                 <img id="f_onizlemeResim" src="" class="w-16 h-16 rounded-xl object-cover bg-black/50 border border-white/10 shrink-0">
@@ -269,19 +269,19 @@
 
               <div id="gorselSeceneklerAlani" class="space-y-1.5 pt-2 border-t border-white/5">
                 <div class="flex justify-between items-center">
-                  <span class="text-[11px] font-semibold text-gray-400">Görsel Seçenekleri (Dokun ve Değiştir):</span>
+                  <span class="text-[11px] font-semibold text-gray-400">Ürün Görseli Seçin (Dokun ve Değiştir):</span>
                   <span id="gorselDurumText" class="text-[10px] text-blue-400 font-medium"></span>
                 </div>
                 <div id="gorselListesi" class="flex gap-2 overflow-x-auto no-scrollbar py-1"></div>
               </div>
             </div>
 
-            <!-- ÜRÜN ADI VE CANLI ARAMA DROPDOWN -->
+            <!-- ÜRÜN ADI VE CANLI TAMAMLAMA -->
             <div class="relative">
               <div class="flex gap-2">
                 <input id="f_ad" type="text" placeholder="Ürün Adı (Yazarak da arayabilirsiniz)" class="${inputClass} flex-1" oninput="canliKatalogArama(this.value)">
-                <button type="button" onclick="manuelResimAra()" class="bg-[#2c2c2e] px-4 rounded-xl text-emerald-400 font-bold active:scale-95 transition-transform shrink-0" title="Google'da Görsel Ara">
-                  <i class="fa-solid fa-image text-lg"></i>
+                <button type="button" onclick="manuelResimAra()" class="bg-[#2c2c2e] px-4 rounded-xl text-emerald-400 font-bold active:scale-95 transition-transform shrink-0" title="Görsel Ara">
+                  <i class="fa-solid fa-magnifying-glass text-lg"></i>
                 </button>
               </div>
               <div id="canliOneriDropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-[#252528] border border-white/10 rounded-2xl max-h-48 overflow-y-auto z-30 shadow-2xl divide-y divide-white/5"></div>
@@ -352,10 +352,28 @@
         return;
       }
 
-      // 3. Bulunamadıysa kullanıcıya bilgi ver
+      // 3. Açık İnternet Ağı (OpenFoodFacts)
       if (barkod.length >= 8) {
-        d.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400"></i> Yeni barkod. Ürün adını yazdığınızda bu barkod kalıcı olarak E-Tablonuza kaydedilecek.`;
+        d.innerHTML = `<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Ağda aranıyor...`;
         d.className = "text-[12px] text-blue-400 font-medium block px-1";
+        
+        fetch(`https://world.openfoodfacts.org/api/v0/product/${barkod}.json`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.status === 1 && data.product) {
+              const p = data.product;
+              let ad = p.product_name_tr || p.product_name || "";
+              if (ad) {
+                urunBilgileriniDoldur(ad, "Gıda & Mutfak", "Adet", p.image_front_small_url || p.image_url || "");
+                d.innerHTML = `<i class="fa-solid fa-globe text-emerald-400"></i> Bulundu: <b>${ad}</b>`;
+                d.className = "text-[12px] text-emerald-400 font-semibold block px-1";
+              }
+            } else {
+              d.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400"></i> Yeni barkod. Ürün adını yazınca kalıcı kaydedilecek.`;
+            }
+          }).catch(e => {
+            d.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400"></i> Yeni barkod. Ürün adını yazınca kalıcı kaydedilecek.`;
+          });
       }
     }
 
@@ -391,7 +409,7 @@
     }
 
     function katalogdanSec(barkod, ad, kategori, birim, resim) {
-      document.getElementById('f_barkod').value = barkod;
+      if (barkod && barkod !== "null" && barkod !== "undefined") document.getElementById('f_barkod').value = barkod;
       document.getElementById('canliOneriDropdown').classList.add('hidden');
       urunBilgileriniDoldur(ad, kategori, birim, resim);
       
@@ -402,67 +420,76 @@
 
     function urunBilgileriniDoldur(ad, kategori, birim, resim) {
       document.getElementById('f_ad').value = ad;
-      if (kategori) document.getElementById('f_kategori').value = kategori;
-      if (birim) document.getElementById('f_birim').value = birim;
+      if (kategori && kategori !== "null") document.getElementById('f_kategori').value = kategori;
+      if (birim && birim !== "null") document.getElementById('f_birim').value = birim;
       
       document.getElementById('f_onizlemeAd').innerText = ad;
-      document.getElementById('f_onizlemeKat').innerText = kategori;
+      document.getElementById('f_onizlemeKat').innerText = kategori || "Gıda & Mutfak";
       document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
 
-      if (resim) {
+      if (resim && resim.startsWith('http')) {
         document.getElementById('f_resim').value = resim;
         document.getElementById('f_onizlemeResim').src = resim;
       }
       
-      // Resim seçeneklerini Google'dan çek
       resimSecenekleriGetir(ad, resim);
     }
 
-    // 🖼️ GOOGLE VE OPENFOODFACTS RESİM ARAMA
+    // 🖼️ ENGELSİZ CANLI GÖRSEL ARAMA MOTORU (OPENFOODFACTS + WIKIMEDIA)
     async function resimSecenekleriGetir(urunAdi, mevcutResim) {
       const gListe = document.getElementById('gorselListesi');
       const gDurum = document.getElementById('gorselDurumText');
       gDurum.innerText = "Görseller aranıyor...";
       gListe.innerHTML = "";
 
-      if (mevcutResim) {
+      if (mevcutResim && mevcutResim.startsWith('http')) {
         gListe.innerHTML += `
           <div onclick="resimSec(this, '${mevcutResim}')" class="gorsel-secim-kart ring-2 ring-blue-500 rounded-xl overflow-hidden shrink-0 cursor-pointer relative w-16 h-16 bg-black">
             <img src="${mevcutResim}" class="w-full h-full object-cover">
-            <span class="absolute bottom-0 inset-x-0 bg-blue-600/90 text-[8px] font-bold text-center text-white py-0.5">Katalog</span>
+            <span class="absolute bottom-0 inset-x-0 bg-blue-600/90 text-[8px] font-bold text-center text-white py-0.5">Seçili</span>
           </div>`;
       }
 
       let bulunanlar = [];
 
-      // Google Görsellerden Çek
-      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
-        try {
-          const res = await fetch(`${API_URL}?islem=resimBul&ad=${encodeURIComponent(urunAdi)}`);
-          const data = await res.json();
-          if (data && data.resimler) bulunanlar = data.resimler;
-        } catch (e) {}
-      }
-
-      // OpenFoodFacts Türkiye'den Çek
+      // 1. OpenFoodFacts Canlı Packshot Arama (Doğrudan Market Ürünleri Görselleri)
       try {
-        const offRes = await fetch(`https://tr.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(urunAdi)}&search_simple=1&action=process&json=1&page_size=2`);
+        const offRes = await fetch(`https://tr.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(urunAdi)}&search_simple=1&action=process&json=1&page_size=4`);
         if (offRes.ok) {
           const offData = await offRes.json();
           if (offData.products) {
             offData.products.forEach(p => {
               const img = p.image_front_small_url || p.image_url;
-              if (img && !bulunanlar.includes(img)) bulunanlar.push(img);
+              if (img && !bulunanlar.includes(img) && img !== mevcutResim) {
+                bulunanlar.push(img);
+              }
             });
           }
         }
       } catch(e) {}
 
+      // 2. Wikimedia Commons API Arama (CORS Serbest, Asla Bloklanmaz)
+      try {
+        const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(urunAdi)}&gsrlimit=4&prop=pageimages&pithumbsize=250&format=json&origin=*`;
+        const wRes = await fetch(wikiUrl);
+        if (wRes.ok) {
+          const wData = await wRes.json();
+          if (wData.query && wData.query.pages) {
+            Object.values(wData.query.pages).forEach(page => {
+              if (page.thumbnail && page.thumbnail.source && !bulunanlar.includes(page.thumbnail.source)) {
+                bulunanlar.push(page.thumbnail.source);
+              }
+            });
+          }
+        }
+      } catch(e) {}
+
+      // Kartları Listele
       bulunanlar.forEach((url, i) => {
         gListe.innerHTML += `
           <div onclick="resimSec(this, '${url}')" class="gorsel-secim-kart ring-1 ring-white/10 rounded-xl overflow-hidden shrink-0 cursor-pointer relative w-16 h-16 bg-black hover:ring-2 hover:ring-blue-400 transition-all">
-            <img src="${url}" class="w-full h-full object-cover">
-            <span class="absolute bottom-0 inset-x-0 bg-black/70 text-[8px] font-bold text-center text-gray-300 py-0.5">Google ${i+1}</span>
+            <img src="${url}" class="w-full h-full object-cover" onerror="this.parentElement.remove()">
+            <span class="absolute bottom-0 inset-x-0 bg-black/70 text-[8px] font-bold text-center text-gray-300 py-0.5">Seçenek ${i+1}</span>
           </div>`;
       });
 
@@ -470,7 +497,7 @@
         const ilk = gListe.querySelectorAll('.gorsel-secim-kart')[0];
         if (ilk) resimSec(ilk, bulunanlar[0]);
       }
-      gDurum.innerText = `${bulunanlar.length} görsel alternatifi`;
+      gDurum.innerText = `${bulunanlar.length} görsel bulundu`;
     }
 
     function resimSec(element, url) {
@@ -583,7 +610,7 @@
         if (!payload.ad) return alert("Lütfen ürün adını giriniz.");
 
         let index = -1; 
-        if (payload.barkod) index = appVerisi.kiler.findIndex(u => u[1] === payload.barkod); 
+        if (payload.barkod) index = appVerisi.kiler.findIndex(u => String(u[1]).trim() === String(payload.barkod).trim()); 
         if (index === -1 && payload.ad) index = appVerisi.kiler.findIndex(u => String(u[0]).toLowerCase() === payload.ad.toLowerCase());
         
         if (index !== -1) { 
@@ -594,7 +621,7 @@
           appVerisi.kiler.push([payload.ad, payload.barkod, payload.stok, payload.birim, payload.kritik, payload.skt, payload.resim, payload.kategori]); 
         }
 
-        // Yerel kataloğa da hemen kaydet (anında hatırlaması için)
+        // Yerel kataloğa anında ekle
         if (payload.barkod && !appVerisi.barkodKatalog.find(u => String(u[0]) === String(payload.barkod))) {
           appVerisi.barkodKatalog.push([payload.barkod, payload.ad, payload.kategori, payload.birim, payload.resim]);
         }
