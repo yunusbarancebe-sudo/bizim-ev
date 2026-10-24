@@ -157,7 +157,7 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbzZAX7Mi2740v2bghZaQIcFKLrxAWLCPVC5LXea9gfB3vj6DYfyewuQlESeAFqAxC1o/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycby4RQOcSX_e-3t1qXf653-wnYJYoZjbqr-pv0D_StpQlMEeWJJroz5aVwp4-VCxdlU/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
@@ -309,35 +309,30 @@
       });
     }
 
-    // 🌐 HIZLI VE KESİN GÖRSEL BULUCU (WIKIMEDIA + OPEN FOOD FACTS API)
-    async function hizliGorselBul(aramaKelimesi) {
-      if (!aramaKelimesi || aramaKelimesi.trim().length < 2) return null;
-      const temizAd = aramaKelimesi.trim();
+    // 🌐 TEMİZ ÜRÜN RESMİ BULUCU (GOOGLE GÖRSELLER + OPENFOODFACTS)
+    async function hizliGorselBul(ad) {
+      if (!ad || ad.trim().length < 2) return null;
+      const temizAd = ad.trim();
 
-      // 1. Wikimedia API (CORS engeli yok, 150ms'de temiz katalog fotoğrafı döner)
-      try {
-        const wikiUrl = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(temizAd + " product")}&gsrlimit=1&prop=pageimages&pithumbsize=240&format=json&origin=*`;
-        const res = await fetch(wikiUrl);
-        if (res.ok) {
+      // 1. Google Görseller üzerinden Apps Script ile temiz resim
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
+        try {
+          const res = await fetch(`${API_URL}?islem=resimBul&ad=${encodeURIComponent(temizAd)}`);
           const data = await res.json();
-          if (data.query && data.query.pages) {
-            const page = Object.values(data.query.pages)[0];
-            if (page && page.thumbnail && page.thumbnail.source) {
-              setGorsel(page.thumbnail.source, temizAd);
-              return page.thumbnail.source;
-            }
+          if (data && data.resim) {
+            setGorsel(data.resim, temizAd);
+            return data.resim;
           }
-        }
-      } catch (e) {}
+        } catch (e) {}
+      }
 
-      // 2. OpenFoodFacts v2 Arama (Doğrudan JSON)
+      // 2. OpenFoodFacts Türkiye Arama
       try {
-        const offUrl = `https://world.openfoodfacts.org/api/v2/search?search_terms=${encodeURIComponent(temizAd)}&fields=image_front_small_url,image_url&page_size=1`;
-        const resOFF = await fetch(offUrl);
-        if (resOFF.ok) {
-          const dataOFF = await resOFF.json();
-          if (dataOFF.products && dataOFF.products.length > 0) {
-            const img = dataOFF.products[0].image_front_small_url || dataOFF.products[0].image_url;
+        const offRes = await fetch(`https://tr.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(temizAd)}&search_simple=1&action=process&json=1&page_size=1`);
+        if (offRes.ok) {
+          const offData = await offRes.json();
+          if (offData.products && offData.products.length > 0) {
+            const img = offData.products[0].image_front_small_url || offData.products[0].image_url;
             if (img) {
               setGorsel(img, temizAd);
               return img;
@@ -356,7 +351,7 @@
       document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
     }
 
-    // ⚡ TURBO YAPAY ZEKA ÇAĞRISI (1-2 SANİYEDE SONUÇ)
+    // ⚡ TURBO YAPAY ZEKA ÇAĞRISI (GEMINI VISION)
     async function aiUrunAnalizEt(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -383,18 +378,24 @@
       try {
         const base64Url = await optimizeGorsel(file);
         
-        // Çekilen fotoğrafı anında önizlemeye koy (boş beklemesin)
+        // Çekilen fotoğrafı önizlemeye koy
         setGorsel(base64Url, "Analiz ediliyor...");
         previewBox.classList.remove('hidden');
 
         const pureBase64 = base64Url.split(',')[1];
-        const promptText = "Fotoğraftaki Türk market ürününü tanı (BİM, A101, Şok, Migros vb.). Marka ve net ürün adını tespit et. SADECE geçerli bir JSON döndür: {\"ad\": \"Marka Ürün Adı\", \"kat\": \"Kategori\", \"arama\": \"İngilizce_ürün_kelimesi\"}. Kategori seçenekleri: 'Gıda & Mutfak', 'Temizlik & Hijyen', 'Kişisel Bakım', 'Ev & Yaşam'. Başka hiçbir şey yazma.";
+        const promptText = "Bu fotoğraftaki Türk market ürününü tespit et (Örn: Dost Süt, Birşah Yoğurt, Fairy Limon vb.). Marka ve net ürün adını tespit et. SADECE geçerli bir JSON döndür: {\"ad\": \"Marka Ürün Adı\", \"kat\": \"Kategori\"}. Kategori seçenekleri sadece: 'Gıda & Mutfak', 'Temizlik & Hijyen', 'Kişisel Bakım', 'Ev & Yaşam'. Başka hiçbir açıklama yazma.";
 
+        // Doğru Google Protobuf REST formatı (inlineData ve mimeType)
         const payload = {
           contents: [{
             parts: [
               { text: promptText },
-              { inline_data: { mime_type: "image/jpeg", data: pureBase64 } }
+              {
+                inlineData: {
+                  mimeType: "image/jpeg",
+                  data: pureBase64
+                }
+              }
             ]
           }],
           generationConfig: {
@@ -403,12 +404,12 @@
           }
         };
 
-        // Doğrudan hızlı modellere istek (gereksiz liste taraması yok!)
-        const hedefler = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-2.5-flash"];
+        // En stabil ve hızlı modeller
+        const modeller = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest"];
         let basarili = false;
         let hataMetni = "";
 
-        for (const model of hedefler) {
+        for (const model of modeller) {
           try {
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
               method: "POST",
@@ -424,7 +425,7 @@
               if (match) {
                 const sonuc = JSON.parse(match[0]);
                 
-                // Form alanlarını 1 saniyede doldur
+                // Form alanlarını doldur
                 document.getElementById('f_ad').value = sonuc.ad;
                 if (sonuc.kat) document.getElementById('f_kategori').value = sonuc.kat;
                 document.getElementById('f_onizlemeAd').innerText = sonuc.ad;
@@ -433,12 +434,9 @@
                 durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>Tanındı:</b> ${sonuc.ad}`;
                 durum.className = "text-[12px] text-emerald-400 font-semibold block px-1";
 
-                // Arka planda temiz katalog görselini paralel ara
-                const aramaTerimi = sonuc.arama || sonuc.ad;
-                hizliGorselBul(aramaTerimi).then(bulunanUrl => {
-                  if (bulunanUrl) {
-                    setGorsel(bulunanUrl, sonuc.ad);
-                  }
+                // Arka planda Google'dan temiz katalog görselini ara
+                hizliGorselBul(sonuc.ad).then(bulunanUrl => {
+                  if (bulunanUrl) setGorsel(bulunanUrl, sonuc.ad);
                 });
 
                 basarili = true;
