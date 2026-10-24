@@ -26,7 +26,6 @@
 </head>
 <body class="bg-[#09090b] text-zinc-100 antialiased min-h-screen">
 
-  <!-- Üst Navigasyon -->
   <header class="sticky top-0 z-40 bg-[#09090b]/80 backdrop-blur-xl border-b border-zinc-800 safe-top">
     <div class="flex justify-between items-center px-5 py-3">
       <div>
@@ -44,17 +43,13 @@
     </div>
   </header>
 
-  <!-- Arka Plan Senkronizasyon Rozeti -->
   <div id="senkRozeti" class="fixed top-16 right-5 z-50 bg-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 hidden">
-    <div class="w-2 h-2 rounded-full bg-white animate-ping"></div>
-    İşleniyor...
+    <div class="w-2 h-2 rounded-full bg-white animate-ping"></div> İşleniyor...
   </div>
 
   <main class="p-4 space-y-4 max-w-lg mx-auto">
-
-    <!-- 1. KİLER & STOK BÖLÜMÜ -->
+    <!-- KİLER -->
     <section id="tab-kiler" class="space-y-3">
-      <!-- Kategori Filtre Butonları -->
       <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
         <button onclick="kilerFiltrele('Tümü')" class="kiler-filtre-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white whitespace-nowrap">Tümü</button>
         <button onclick="kilerFiltrele('Gıda & Mutfak')" class="kiler-filtre-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-zinc-900 border border-zinc-800 text-zinc-400 whitespace-nowrap">Gıda & Mutfak</button>
@@ -62,44 +57,30 @@
         <button onclick="kilerFiltrele('Kişisel Bakım')" class="kiler-filtre-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-zinc-900 border border-zinc-800 text-zinc-400 whitespace-nowrap">Kişisel Bakım</button>
         <button onclick="kilerFiltrele('Ev & Yaşam')" class="kiler-filtre-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-zinc-900 border border-zinc-800 text-zinc-400 whitespace-nowrap">Ev & Yaşam</button>
       </div>
-
       <div id="sktUyariAlani"></div>
       <div id="kilerListe" class="space-y-2.5"></div>
     </section>
 
-    <!-- 2. BÜTÇE & FATURALAR (FİNANS) BÖLÜMÜ -->
+    <!-- FİNANS -->
     <section id="tab-finans" class="space-y-4 hidden">
-      <!-- Ay / Yıl Seçim Çubuğu -->
       <div class="flex items-center justify-between bg-zinc-900 border border-zinc-800 p-2.5 rounded-2xl">
-        <span class="text-xs font-bold text-zinc-400 pl-2"><i class="fa-regular fa-calendar-days text-indigo-400 mr-1.5"></i> Hesap Dönemi</span>
+        <span class="text-xs font-bold text-zinc-400 pl-2"><i class="fa-regular fa-calendar-days text-indigo-400 mr-1.5"></i> Dönem</span>
         <div class="flex gap-2">
           <select id="finansAySec" onchange="ekraniGuncelle()" class="bg-zinc-800 border border-zinc-700 text-xs font-bold text-zinc-200 px-3 py-1.5 rounded-xl outline-none">
-            <option value="01">Ocak</option>
-            <option value="02">Şubat</option>
-            <option value="03">Mart</option>
-            <option value="04">Nisan</option>
-            <option value="05">Mayıs</option>
-            <option value="06">Haziran</option>
-            <option value="07">Temmuz</option>
-            <option value="08">Ağustos</option>
-            <option value="09">Eylül</option>
-            <option value="10">Ekim</option>
-            <option value="11">Kasım</option>
-            <option value="12">Aralık</option>
+            <option value="01">Ocak</option><option value="02">Şubat</option><option value="03">Mart</option>
+            <option value="04">Nisan</option><option value="05">Mayıs</option><option value="06">Haziran</option>
+            <option value="07">Temmuz</option><option value="08">Ağustos</option><option value="09">Eylül</option>
+            <option value="10">Ekim</option><option value="11">Kasım</option><option value="12">Aralık</option>
           </select>
           <select id="finansYilSec" onchange="ekraniGuncelle()" class="bg-zinc-800 border border-zinc-700 text-xs font-bold text-zinc-200 px-3 py-1.5 rounded-xl outline-none">
-            <option value="2025">2025</option>
-            <option value="2026">2026</option>
-            <option value="2027">2027</option>
+            <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option>
           </select>
         </div>
       </div>
-
-      <!-- Dönem Özeti Kartı -->
-      <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-3xl space-y-3 shadow-sm">
+      <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-3xl space-y-3">
         <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
           <div>
-            <span class="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Net Kalan Bütçe</span>
+            <span class="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Net Kalan</span>
             <p id="netKalan" class="text-2xl font-black text-white mt-0.5">₺0</p>
           </div>
           <div class="text-right">
@@ -107,70 +88,43 @@
             <p id="toplamGelir" class="text-sm font-extrabold text-emerald-400 mt-0.5">₺0</p>
           </div>
         </div>
-
         <div class="grid grid-cols-2 gap-2 text-xs">
-          <div class="bg-zinc-950 p-2.5 rounded-2xl border border-zinc-800">
-            <span class="text-zinc-500 block text-[10px]">Maaş (Ben)</span>
-            <span id="maasBenTutar" class="font-bold text-zinc-200">₺0</span>
-          </div>
-          <div class="bg-zinc-950 p-2.5 rounded-2xl border border-zinc-800">
-            <span class="text-zinc-500 block text-[10px]">Maaş (Eşim)</span>
-            <span id="maasEsimTutar" class="font-bold text-zinc-200">₺0</span>
-          </div>
-          <div class="bg-zinc-950 p-2.5 rounded-2xl border border-zinc-800">
-            <span class="text-zinc-500 block text-[10px]">Faturalar & Aidat</span>
-            <span id="toplamFatura" class="font-bold text-amber-400">₺0</span>
-          </div>
-          <div class="bg-zinc-950 p-2.5 rounded-2xl border border-zinc-800">
-            <span class="text-zinc-500 block text-[10px]">Harcamalar</span>
-            <span id="toplamGider" class="font-bold text-rose-400">₺0</span>
-          </div>
+          <div class="bg-zinc-950 p-2.5 rounded-2xl border border-zinc-800"><span class="text-zinc-500 block text-[10px]">Maaş (Ben)</span><span id="maasBenTutar" class="font-bold text-zinc-200">₺0</span></div>
+          <div class="bg-zinc-950 p-2.5 rounded-2xl border border-zinc-800"><span class="text-zinc-500 block text-[10px]">Maaş (Eşim)</span><span id="maasEsimTutar" class="font-bold text-zinc-200">₺0</span></div>
+          <div class="bg-zinc-950 p-2.5 rounded-2xl border border-zinc-800"><span class="text-zinc-500 block text-[10px]">Faturalar & Aidat</span><span id="toplamFatura" class="font-bold text-amber-400">₺0</span></div>
+          <div class="bg-zinc-950 p-2.5 rounded-2xl border border-zinc-800"><span class="text-zinc-500 block text-[10px]">Harcamalar</span><span id="toplamGider" class="font-bold text-rose-400">₺0</span></div>
         </div>
       </div>
-
-      <!-- Kategori Kırılımı (Nereye Ne Gitti?) -->
       <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-3xl space-y-2.5">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400"><i class="fa-solid fa-chart-pie text-indigo-400 mr-1.5"></i> Harcama & Gider Kırılımı</h3>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400"><i class="fa-solid fa-chart-pie text-indigo-400 mr-1.5"></i> Gider Kırılımı</h3>
         <div id="kategoriKirilimListe" class="space-y-2 pt-1 text-xs"></div>
       </div>
-
-      <!-- İşlem Geçmişi -->
       <div class="space-y-2">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500 px-1">Bu Ayın İşlemleri</h3>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500 px-1">İşlem Geçmişi</h3>
         <div id="finansListe" class="space-y-2"></div>
       </div>
     </section>
 
-    <!-- 3. ALIŞVERİŞ LİSTESİ BÖLÜMÜ -->
-    <section id="tab-alisveris" class="space-y-3 hidden">
-      <div id="alisverisListe" class="space-y-2"></div>
-    </section>
+    <!-- ALIŞVERİŞ -->
+    <section id="tab-alisveris" class="space-y-3 hidden"><div id="alisverisListe" class="space-y-2"></div></section>
 
-    <!-- 4. İSTEK LİSTESİ (WISHLIST) BÖLÜMÜ -->
-    <section id="tab-istekler" class="space-y-3 hidden">
-      <div id="istekListe" class="grid grid-cols-1 gap-2.5"></div>
-    </section>
-
+    <!-- İSTEKLER -->
+    <section id="tab-istekler" class="space-y-3 hidden"><div id="istekListe" class="grid grid-cols-1 gap-2.5"></div></section>
   </main>
 
-  <!-- Alt Menü -->
   <nav class="fixed bottom-0 left-0 right-0 z-40 bg-[#09090b]/85 backdrop-blur-xl border-t border-zinc-800 safe-bottom">
     <div class="max-w-lg mx-auto px-6 py-2 flex justify-between">
       <button onclick="sekmeDegistir('kiler', 'Kiler & Stok')" class="nav-btn active flex flex-col items-center py-1 text-indigo-400" data-tab="kiler">
-        <i class="fa-solid fa-boxes-stacked text-base mb-1"></i>
-        <span class="text-[10px] font-semibold">Kiler</span>
+        <i class="fa-solid fa-boxes-stacked text-base mb-1"></i><span class="text-[10px] font-semibold">Kiler</span>
       </button>
       <button onclick="sekmeDegistir('finans', 'Finans & Faturalar')" class="nav-btn flex flex-col items-center py-1 text-zinc-500" data-tab="finans">
-        <i class="fa-solid fa-wallet text-base mb-1"></i>
-        <span class="text-[10px] font-semibold">Finans</span>
+        <i class="fa-solid fa-wallet text-base mb-1"></i><span class="text-[10px] font-semibold">Finans</span>
       </button>
       <button onclick="sekmeDegistir('alisveris', 'Alışveriş')" class="nav-btn flex flex-col items-center py-1 text-zinc-500" data-tab="alisveris">
-        <i class="fa-solid fa-basket-shopping text-base mb-1"></i>
-        <span class="text-[10px] font-semibold">Alışveriş</span>
+        <i class="fa-solid fa-basket-shopping text-base mb-1"></i><span class="text-[10px] font-semibold">Alışveriş</span>
       </button>
       <button onclick="sekmeDegistir('istekler', 'İstek Listesi')" class="nav-btn flex flex-col items-center py-1 text-zinc-500" data-tab="istekler">
-        <i class="fa-solid fa-gift text-base mb-1"></i>
-        <span class="text-[10px] font-semibold">İstekler</span>
+        <i class="fa-solid fa-gift text-base mb-1"></i><span class="text-[10px] font-semibold">İstekler</span>
       </button>
     </div>
   </nav>
@@ -185,7 +139,6 @@
 
       <div id="modalGovde" class="space-y-3"></div>
 
-      <!-- Kamera Tarayıcı Penceresi -->
       <div id="kameraKutusu" class="hidden rounded-2xl overflow-hidden border border-zinc-800 bg-black">
         <div id="reader" style="width: 100%;"></div>
         <button type="button" onclick="kameraKapat()" class="w-full bg-zinc-800 py-2.5 text-xs font-semibold text-zinc-300">Kamerayı Kapat</button>
@@ -202,109 +155,60 @@
     // ==========================================
     // ⚙️ APPS SCRIPT /EXEC BAĞLANTINIZI BURAYA GİRİN:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxo5K-rfBCYvKReX1fLhgi7NeTC2D-4jqJIceyH4Kj65ZAjrztTg2ROkpdIRTazifY/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbx13bwHp5VCav4h0qt1F43fZNm-OI6yBhJVTdHwMYkaCoePVNR13trkycssB8p5lS33/exec";
 
-    let aktifSekme = 'kiler';
-    let seciliKilerKategori = 'Tümü';
-    let html5QrCode = null;
-    let linkDebounceTimer = null;
-
-    let appVerisi = JSON.parse(localStorage.getItem('bizimEvVerisi')) || {
-      kiler: [], finans: [], alisveris: [], istekler: []
-    };
+    let aktifSekme = 'kiler', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null;
+    let appVerisi = JSON.parse(localStorage.getItem('bizimEvVerisi')) || { kiler: [], finans: [], alisveris: [], istekler: [] };
 
     window.onload = function() {
-      // Varsayılan dönemi bugünün ayı ve yılı yap
       const simdi = new Date();
-      const buAy = String(simdi.getMonth() + 1).padStart(2, '0');
-      const buYil = String(simdi.getFullYear());
-      document.getElementById('finansAySec').value = buAy;
-      document.getElementById('finansYilSec').value = buYil;
-
+      document.getElementById('finansAySec').value = String(simdi.getMonth() + 1).padStart(2, '0');
+      document.getElementById('finansYilSec').value = String(simdi.getFullYear());
       ekraniGuncelle();
-      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
-        verileriYukle(false);
-      }
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) verileriYukle(false);
     };
 
     function verileriYukle(gosterAnim) {
       if (!API_URL || API_URL.includes("BURAYA_EXEC")) return;
       if (gosterAnim) document.getElementById('yenileIcon').classList.add('animate-spin');
-
-      fetch(`${API_URL}?islem=verileriGetir`)
-        .then(res => res.json())
-        .then(data => {
-          appVerisi = data;
-          localStorage.setItem('bizimEvVerisi', JSON.stringify(data));
-          ekraniGuncelle();
-        })
-        .catch(err => console.error("Veri çekme hatası:", err))
-        .finally(() => {
-          document.getElementById('yenileIcon').classList.remove('animate-spin');
-        });
+      fetch(`${API_URL}?islem=verileriGetir`).then(res => res.json()).then(data => {
+          appVerisi = data; localStorage.setItem('bizimEvVerisi', JSON.stringify(data)); ekraniGuncelle();
+      }).finally(() => document.getElementById('yenileIcon').classList.remove('animate-spin'));
     }
 
     function arkaPlanSenkronize(paramsObj) {
-      const rozet = document.getElementById('senkRozeti');
-      rozet.classList.remove('hidden');
-
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(paramsObj)
-      })
-      .then(res => res.json())
-      .then(data => {
-        appVerisi = data;
-        localStorage.setItem('bizimEvVerisi', JSON.stringify(data));
-        ekraniGuncelle();
-      })
-      .catch(err => console.error("Senkronizasyon hatası:", err))
-      .finally(() => {
-        rozet.classList.add('hidden');
-      });
+      document.getElementById('senkRozeti').classList.remove('hidden');
+      fetch(API_URL, { method: 'POST', body: JSON.stringify(paramsObj) })
+      .then(res => res.json()).then(data => {
+        appVerisi = data; localStorage.setItem('bizimEvVerisi', JSON.stringify(data)); ekraniGuncelle();
+      }).finally(() => document.getElementById('senkRozeti').classList.add('hidden'));
     }
 
     function sekmeDegistir(sekme, baslik) {
-      aktifSekme = sekme;
-      document.getElementById('sayfaBaslik').innerText = baslik;
-      ['kiler', 'finans', 'alisveris', 'istekler'].forEach(s => {
-        document.getElementById('tab-' + s).classList.add('hidden');
-      });
+      aktifSekme = sekme; document.getElementById('sayfaBaslik').innerText = baslik;
+      ['kiler', 'finans', 'alisveris', 'istekler'].forEach(s => document.getElementById('tab-' + s).classList.add('hidden'));
       document.getElementById('tab-' + sekme).classList.remove('hidden');
-
       document.querySelectorAll('.nav-btn').forEach(btn => {
-        if(btn.dataset.tab === sekme) {
-          btn.classList.add('text-indigo-400');
-          btn.classList.remove('text-zinc-500');
-        } else {
-          btn.classList.remove('text-indigo-400');
-          btn.classList.add('text-zinc-500');
-        }
+        btn.classList.toggle('text-indigo-400', btn.dataset.tab === sekme);
+        btn.classList.toggle('text-zinc-500', btn.dataset.tab !== sekme);
       });
     }
 
     function kilerFiltrele(kat) {
       seciliKilerKategori = kat;
       document.querySelectorAll('.kiler-filtre-btn').forEach(b => {
-        if (b.innerText === kat) {
-          b.className = "kiler-filtre-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white whitespace-nowrap";
-        } else {
-          b.className = "kiler-filtre-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-zinc-900 border border-zinc-800 text-zinc-400 whitespace-nowrap";
-        }
+        b.className = b.innerText === kat 
+          ? "kiler-filtre-btn active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white whitespace-nowrap"
+          : "kiler-filtre-btn px-3.5 py-1.5 rounded-xl text-xs font-bold bg-zinc-900 border border-zinc-800 text-zinc-400 whitespace-nowrap";
       });
       ekraniGuncelle();
     }
 
-    function modalDisTiklama(e) {
-      if (e.target.id === 'formModal') modalKapat();
-    }
+    function modalDisTiklama(e) { if (e.target.id === 'formModal') modalKapat(); }
 
     function modalAc() {
-      const modal = document.getElementById('formModal');
-      const g = document.getElementById('modalGovde');
-      g.innerHTML = '';
+      const g = document.getElementById('modalGovde'); g.innerHTML = '';
       document.getElementById('kameraKutusu').classList.add('hidden');
-
       if (aktifSekme === 'kiler') {
         document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
         g.innerHTML = `
@@ -313,59 +217,37 @@
             <button type="button" onclick="kameraAc()" class="bg-indigo-600 px-4 rounded-xl text-white active:scale-95"><i class="fa-solid fa-barcode"></i> Tara</button>
           </div>
           <p id="barkodDurum" class="text-[11px] text-zinc-400 hidden"></p>
-
           <div id="urunOnizlemeKutusu" class="hidden flex items-center gap-3 bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
             <img id="f_onizlemeResim" src="" class="w-12 h-12 rounded-lg object-cover">
-            <div>
-              <p id="f_onizlemeAd" class="text-xs font-bold text-zinc-200"></p>
-              <span id="f_onizlemeKat" class="text-[10px] text-emerald-400"></span>
-            </div>
+            <div><p id="f_onizlemeAd" class="text-xs font-bold text-zinc-200"></p><span id="f_onizlemeKat" class="text-[10px] text-emerald-400"></span></div>
           </div>
-
           <input id="f_ad" type="text" placeholder="Ürün Adı" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-          
           <select id="f_kategori" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-            <option value="Gıda & Mutfak">Kategori: Gıda & Mutfak</option>
-            <option value="Temizlik & Hijyen">Kategori: Temizlik & Hijyen</option>
-            <option value="Kişisel Bakım">Kategori: Kişisel Bakım</option>
-            <option value="Ev & Yaşam">Kategori: Ev & Yaşam</option>
+            <option value="Gıda & Mutfak">Kategori: Gıda & Mutfak</option><option value="Temizlik & Hijyen">Kategori: Temizlik & Hijyen</option>
+            <option value="Kişisel Bakım">Kategori: Kişisel Bakım</option><option value="Ev & Yaşam">Kategori: Ev & Yaşam</option>
           </select>
-
           <input id="f_resim" type="hidden">
-
           <div class="grid grid-cols-2 gap-2">
             <input id="f_stok" type="number" placeholder="Stok" value="1" class="bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
             <input id="f_birim" type="text" placeholder="Birim (Adet, Lt)" value="Adet" class="bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
           </div>
-
           <div>
             <label class="block text-[11px] text-zinc-400 mb-1 font-semibold">Son Kullanma Tarihi (SKT)</label>
             <input id="f_skt" type="date" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
           </div>`;
-
-        setTimeout(() => {
-          document.getElementById('f_barkod').addEventListener('change', function() {
-            barkodlaUrunAra(this.value.trim());
-          });
-        }, 50);
-
+        setTimeout(() => document.getElementById('f_barkod').addEventListener('change', function() { barkodlaUrunAra(this.value.trim()); }), 50);
       } else if (aktifSekme === 'finans') {
         document.getElementById('modalBaslik').innerText = 'Finans / Harcama Ekle';
-        const simdiStr = new Date().toISOString().split('T')[0];
         g.innerHTML = `
           <select id="f_tip" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-            <option value="Gider">Günlük Harcama (Gider)</option>
-            <option value="Fatura">Fatura / Aidat</option>
-            <option value="Maas_Ben">Maaş (Ben)</option>
-            <option value="Maas_Esim">Maaş (Eşim)</option>
+            <option value="Gider">Günlük Harcama (Gider)</option><option value="Fatura">Fatura / Aidat</option>
+            <option value="Maas_Ben">Maaş (Ben)</option><option value="Maas_Esim">Maaş (Eşim)</option>
           </select>
-          <input id="f_tarih" type="date" value="${simdiStr}" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-          <input id="f_kategori" type="text" placeholder="Kategori (Aidat, Market, Benzin, Mutfak vb.)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+          <input id="f_tarih" type="date" value="${new Date().toISOString().split('T')[0]}" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+          <input id="f_kategori" type="text" placeholder="Kategori (Aidat, Market vb.)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
           <input id="f_tutar" type="number" placeholder="Tutar (₺)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
           <select id="f_kisi" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-            <option value="Ben">Kişi: Ben</option>
-            <option value="Eşim">Kişi: Eşim</option>
-            <option value="Ortak">Ortak Hane</option>
+            <option value="Ben">Kişi: Ben</option><option value="Eşim">Kişi: Eşim</option><option value="Ortak">Ortak Hane</option>
           </select>
           <input id="f_not" type="text" placeholder="Açıklama / Not" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">`;
       } else if (aktifSekme === 'alisveris') {
@@ -374,17 +256,15 @@
           <input id="f_urun" type="text" placeholder="Alınacak Ürün Adı" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
           <input id="f_adet" type="number" value="1" placeholder="Adet" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
           <select id="f_ekleyen" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-            <option value="Ben">Ekleyen: Ben</option>
-            <option value="Eşim">Ekleyen: Eşim</option>
+            <option value="Ben">Ekleyen: Ben</option><option value="Eşim">Ekleyen: Eşim</option>
           </select>`;
       } else if (aktifSekme === 'istekler') {
         document.getElementById('modalBaslik').innerText = 'İstek / Wishlist Ekle';
         g.innerHTML = `
           <div class="space-y-1">
-            <input id="f_link" type="text" oninput="linkGirildi(this.value)" placeholder="Ürün Linki Yapıştır (Trendyol, Amazon, Hepsiburada)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-            <p id="linkDurum" class="text-[11px] text-indigo-400 hidden"><i class="fa-solid fa-spinner animate-spin"></i> Bilgiler taranıyor...</p>
+            <input id="f_link" type="text" oninput="linkGirildi(this.value)" placeholder="Link Yapıştır (Trendyol, Amazon, Hepsiburada)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+            <p id="linkDurum" class="text-[11px] text-indigo-400 hidden"></p>
           </div>
-
           <div id="linkOnizlemeKutusu" class="hidden flex items-center gap-3 bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
             <img id="f_linkResimOnizle" src="" class="w-14 h-14 rounded-lg object-cover">
             <div class="overflow-hidden">
@@ -392,31 +272,22 @@
               <p id="f_linkFiyatOnizle" class="text-xs font-extrabold text-emerald-400"></p>
             </div>
           </div>
-
           <input id="f_ad" type="text" placeholder="Ürün Adı" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
           <input id="f_fiyat" type="number" placeholder="Fiyatı (₺)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
           <input id="f_resim" type="hidden">
           <select id="f_ekleyen" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-            <option value="Ben">Ekleyen: Ben</option>
-            <option value="Eşim">Ekleyen: Eşim</option>
+            <option value="Ben">Ekleyen: Ben</option><option value="Eşim">Ekleyen: Eşim</option>
           </select>`;
       }
-
-      modal.style.display = 'flex';
+      document.getElementById('formModal').style.display = 'flex';
     }
 
-    function modalKapat() {
-      try { kameraKapat(); } catch (e) {}
-      document.getElementById('formModal').style.display = 'none';
-    }
+    function modalKapat() { try { kameraKapat(); } catch (e) {} document.getElementById('formModal').style.display = 'none'; }
 
-    // Barkod Arama Motoru (Genişletilmiş)
     async function barkodlaUrunAra(barkod) {
       if (!barkod) return;
       const d = document.getElementById('barkodDurum');
-      d.innerText = "Gıda ve gıda dışı veritabanlarında aranıyor...";
-      d.classList.remove('hidden');
-
+      d.innerText = "Yerel veritabanlarında aranıyor..."; d.classList.remove('hidden');
       if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
         try {
           const res = await fetch(`${API_URL}?islem=barkodAra&barkod=${barkod}`);
@@ -431,16 +302,14 @@
               document.getElementById('f_onizlemeKat').innerText = data.kategori;
               document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
             }
-            d.innerText = "Ürün bulundu: " + data.ad;
-            return;
+            d.innerText = "Ürün bulundu: " + data.ad; return;
           }
         } catch (e) {}
       }
-
-      d.innerText = "Ürün bulunamadı, ürün adını manuel yazabilirsiniz.";
+      d.innerText = "Bulunamadı, lütfen adını kendiniz yazın.";
     }
 
-    // Microlink API ile Bot Korumasını Aşan Link Çözücü
+    // CORS Proxy ile Link Çözücü
     function linkGirildi(url) {
       clearTimeout(linkDebounceTimer);
       if (!url || !url.startsWith("http")) return;
@@ -448,339 +317,163 @@
       linkDebounceTimer = setTimeout(async () => {
         const d = document.getElementById('linkDurum');
         d.classList.remove('hidden');
-        d.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Bilgiler çekiliyor...';
+        d.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Güvenlik duvarı aşılıyor, bilgiler çekiliyor...';
 
         try {
-          const apiEndpoint = `https://api.microlink.io?url=${encodeURIComponent(url)}&palette=true`;
-          const res = await fetch(apiEndpoint);
+          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+          const res = await fetch(proxyUrl);
           const json = await res.json();
+          
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(json.contents, "text/html");
 
-          if (json.status === 'success' && json.data) {
-            const data = json.data;
-            const baslik = data.title || "";
-            const resim = (data.image && data.image.url) ? data.image.url : "";
+          let baslik = "";
+          const ogTitle = doc.querySelector('meta[property="og:title"], meta[name="twitter:title"]');
+          if (ogTitle) baslik = ogTitle.getAttribute("content");
+          else baslik = doc.title;
+          if (baslik) baslik = baslik.replace(/\s*-\s*Trendyol|\s*-\s*Hepsiburada|\s*\|\s*Amazon.com.tr/gi, '').trim();
 
-            if (baslik) {
-              document.getElementById('f_ad').value = baslik;
-              document.getElementById('f_linkBaslikOnizle').innerText = baslik;
-            }
-            if (resim) {
-              document.getElementById('f_resim').value = resim;
-              document.getElementById('f_linkResimOnizle').src = resim;
-              document.getElementById('urunOnizlemeKutusu')?.classList.remove('hidden');
-              document.getElementById('linkOnizlemeKutusu').classList.remove('hidden');
-            }
-            d.innerText = "Ürün bilgileri başarıyla çekildi!";
+          let resim = "";
+          const ogImage = doc.querySelector('meta[property="og:image"], meta[name="twitter:image"]');
+          if (ogImage) resim = ogImage.getAttribute("content");
+
+          let fiyat = "";
+          const ogPrice = doc.querySelector('meta[property="product:price:amount"]');
+          if (ogPrice) {
+            fiyat = ogPrice.getAttribute("content");
           } else {
-            d.innerText = "Otomatik çekilemedi, lütfen ürün adını kendiniz yazın.";
+            const priceEl = doc.querySelector('.prc-dsc, .a-price-whole');
+            if (priceEl) fiyat = priceEl.innerText.replace(/[^0-9,.]/g, '').split(',')[0];
           }
+
+          if (baslik) {
+            document.getElementById('f_ad').value = baslik;
+            document.getElementById('f_linkBaslikOnizle').innerText = baslik;
+          }
+          if (fiyat) {
+            document.getElementById('f_fiyat').value = fiyat;
+            document.getElementById('f_linkFiyatOnizle').innerText = '₺' + fiyat;
+          }
+          if (resim) {
+            document.getElementById('f_resim').value = resim;
+            document.getElementById('f_linkResimOnizle').src = resim;
+            document.getElementById('urunOnizlemeKutusu')?.classList.remove('hidden');
+            document.getElementById('linkOnizlemeKutusu').classList.remove('hidden');
+          }
+          d.innerText = "Ürün bilgileri başarıyla çekildi!";
         } catch (e) {
-          d.innerText = "Bağlantı kurulamadı, manuel doldurabilirsiniz.";
+          d.innerText = "Site engelledi, lütfen bilgileri kendiniz doldurun.";
         }
-      }, 400);
-    }
-
-    // "Bitti -> Alışverişe At" Butonu
-    function kilerUrunBitti(index, ad) {
-      if (confirm(`${ad} bitti olarak işaretlenip Alışveriş Listesi'ne eklensin mi?`)) {
-        appVerisi.kiler[index][2] = "0"; // Stoğu sıfırla
-        appVerisi.alisveris.push([ad, '1', 'Kiler', 'Bugün']);
-        ekraniGuncelle();
-
-        if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
-          arkaPlanSenkronize({ islem: 'kilerBitti', index: index, ad: ad, ekleyen: 'Kiler' });
-        }
-      }
+      }, 600);
     }
 
     function formKaydet() {
       let payload = { islem: '' };
-
       if (aktifSekme === 'kiler') {
-        payload.islem = 'kilerEkle';
-        payload.ad = document.getElementById('f_ad').value;
-        payload.barkod = document.getElementById('f_barkod').value;
-        payload.stok = document.getElementById('f_stok').value;
-        payload.birim = document.getElementById('f_birim').value;
-        payload.skt = document.getElementById('f_skt').value;
-        payload.resim = document.getElementById('f_resim').value;
-        payload.kategori = document.getElementById('f_kategori').value;
-        payload.kritik = '1';
-
+        payload = { islem: 'kilerEkle', ad: document.getElementById('f_ad').value, barkod: document.getElementById('f_barkod').value, stok: document.getElementById('f_stok').value, birim: document.getElementById('f_birim').value, skt: document.getElementById('f_skt').value, resim: document.getElementById('f_resim').value, kategori: document.getElementById('f_kategori').value, kritik: '1' };
         appVerisi.kiler.push([payload.ad, payload.barkod, payload.stok, payload.birim, payload.kritik, payload.skt, payload.resim, payload.kategori]);
-
       } else if (aktifSekme === 'finans') {
-        payload.islem = 'finansEkle';
-        payload.tip = document.getElementById('f_tip').value;
-        payload.tarih = document.getElementById('f_tarih').value;
-        payload.kategori = document.getElementById('f_kategori').value || 'Diğer';
-        payload.tutar = document.getElementById('f_tutar').value;
-        payload.kisi = document.getElementById('f_kisi').value;
-        payload.not = document.getElementById('f_not').value;
-
+        payload = { islem: 'finansEkle', tip: document.getElementById('f_tip').value, tarih: document.getElementById('f_tarih').value, kategori: document.getElementById('f_kategori').value || 'Diğer', tutar: document.getElementById('f_tutar').value, kisi: document.getElementById('f_kisi').value, not: document.getElementById('f_not').value };
         appVerisi.finans.unshift([payload.tarih, payload.tip, payload.kategori, payload.tutar, payload.kisi, payload.not]);
-
       } else if (aktifSekme === 'alisveris') {
-        payload.islem = 'alisverisEkle';
-        payload.urun = document.getElementById('f_urun').value;
-        payload.adet = document.getElementById('f_adet').value;
-        payload.ekleyen = document.getElementById('f_ekleyen').value;
-
+        payload = { islem: 'alisverisEkle', urun: document.getElementById('f_urun').value, adet: document.getElementById('f_adet').value, ekleyen: document.getElementById('f_ekleyen').value };
         appVerisi.alisveris.push([payload.urun, payload.adet, payload.ekleyen, 'Bugün']);
-
       } else if (aktifSekme === 'istekler') {
-        payload.islem = 'istekEkle';
-        payload.link = document.getElementById('f_link').value;
-        payload.ad = document.getElementById('f_ad').value;
-        payload.fiyat = document.getElementById('f_fiyat').value;
-        payload.ekleyen = document.getElementById('f_ekleyen').value;
-        payload.resim = document.getElementById('f_resim').value;
-
+        payload = { islem: 'istekEkle', link: document.getElementById('f_link').value, ad: document.getElementById('f_ad').value, fiyat: document.getElementById('f_fiyat').value, ekleyen: document.getElementById('f_ekleyen').value, resim: document.getElementById('f_resim').value };
         appVerisi.istekler.push([payload.link, payload.ad, payload.fiyat, payload.ekleyen, payload.resim]);
       }
+      ekraniGuncelle(); modalKapat();
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize(payload);
+    }
 
-      ekraniGuncelle();
-      modalKapat();
-
-      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
-        arkaPlanSenkronize(payload);
+    function kilerUrunBitti(index, ad) {
+      if (confirm(`${ad} stoğu sıfırlanıp Alışveriş Listesine aktarılsın mı?`)) {
+        appVerisi.kiler[index][2] = "0";
+        appVerisi.alisveris.push([ad, '1', 'Kiler', 'Bugün']);
+        ekraniGuncelle();
+        if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'kilerBitti', index: index, ad: ad });
       }
     }
 
     function alisverisTamamla(index) {
-      appVerisi.alisveris.splice(index, 1);
-      ekraniGuncelle();
-      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
-        arkaPlanSenkronize({ islem: 'alisverisSil', index: index });
-      }
-    }
-
-    function sktDurumHesapla(sktStr) {
-      if (!sktStr) return null;
-      const bugun = new Date();
-      bugun.setHours(0,0,0,0);
-      const p = sktStr.split('-');
-      if (p.length !== 3) return null;
-      const hedef = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
-      return Math.ceil((hedef - bugun) / (1000 * 60 * 60 * 24));
+      appVerisi.alisveris.splice(index, 1); ekraniGuncelle();
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) arkaPlanSenkronize({ islem: 'alisverisSil', index: index });
     }
 
     function ekraniGuncelle() {
-      // 1. KİLER GÜNCELLEMESİ
-      const kBox = document.getElementById('kilerListe');
-      const sktBox = document.getElementById('sktUyariAlani');
-      kBox.innerHTML = '';
-      sktBox.innerHTML = '';
-      let sktKritik = [];
+      // 1. Kiler
+      const kBox = document.getElementById('kilerListe'); const sktBox = document.getElementById('sktUyariAlani');
+      kBox.innerHTML = ''; sktBox.innerHTML = ''; let sktKritik = [];
+      const bugun = new Date(); bugun.setHours(0,0,0,0);
 
       (appVerisi.kiler || []).forEach((item, index) => {
-        const ad = item[0], barkod = item[1], stok = Number(item[2]) || 0, birim = item[3] || 'Adet';
-        const skt = item[5], resim = item[6], kategori = item[7] || 'Gıda & Mutfak';
+        const ad = item[0], barkod = item[1], stok = Number(item[2])||0, birim = item[3]||'Adet', skt = item[5], resim = item[6], kat = item[7]||'Gıda & Mutfak';
+        if (seciliKilerKategori !== 'Tümü' && kat !== seciliKilerKategori) return;
 
-        if (seciliKilerKategori !== 'Tümü' && kategori !== seciliKilerKategori) return;
-
-        const fark = sktDurumHesapla(skt);
-        let sktBadge = '';
-
+        let fark = null, sktBadge = '';
+        if(skt){ const p=skt.split('-'); fark = Math.ceil((new Date(Number(p[0]), Number(p[1])-1, Number(p[2])) - bugun)/86400000); }
         if (fark !== null) {
-          if (fark < 0) {
-            sktBadge = `<span class="bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2 py-0.5 rounded text-[10px] font-bold">Tarihi Geçti (${Math.abs(fark)}g)</span>`;
-            sktKritik.push(`${ad} ürününün tarihi ${Math.abs(fark)} gün önce geçti!`);
-          } else if (fark === 0) {
-            sktBadge = `<span class="bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2 py-0.5 rounded text-[10px] font-bold">Bugün Son Gün!</span>`;
-            sktKritik.push(`${ad} için son gün bugün!`);
-          } else if (fark <= 3) {
-            sktBadge = `<span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded text-[10px] font-bold">Son ${fark} Gün!</span>`;
-            sktKritik.push(`${ad} için son ${fark} gün kaldı!`);
-          } else {
-            sktBadge = `<span class="text-zinc-500 text-[10px]">${fark} gün kaldı</span>`;
-          }
+          if (fark < 0) { sktBadge = `<span class="bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded text-[10px] font-bold">Tarihi Geçti</span>`; sktKritik.push(`${ad} (${Math.abs(fark)} gün geçti)`); }
+          else if (fark <= 3) { sktBadge = `<span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold">Son ${fark} Gün</span>`; sktKritik.push(`${ad} (Son ${fark} gün)`); }
         }
-
-        const imgHtml = resim 
-          ? `<img src="${resim}" class="w-12 h-12 object-cover rounded-xl bg-zinc-800 border border-zinc-700/50">`
-          : `<div class="w-12 h-12 rounded-xl bg-zinc-800 border border-zinc-700/50 flex items-center justify-center text-zinc-500"><i class="fa-solid fa-box text-sm"></i></div>`;
-
+        
         kBox.innerHTML += `
           <div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl space-y-2.5">
-            <div class="flex items-center justify-between">
+            <div class="flex justify-between items-center">
               <div class="flex items-center gap-3">
-                ${imgHtml}
-                <div>
-                  <p class="font-bold text-sm text-zinc-100">${ad}</p>
-                  <div class="flex items-center gap-2 mt-0.5">
-                    ${sktBadge}
-                    <span class="text-[10px] text-zinc-500 font-medium">${kategori}</span>
-                  </div>
-                </div>
+                ${resim ? `<img src="${resim}" class="w-12 h-12 rounded-xl object-cover">` : `<div class="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-500"><i class="fa-solid fa-box text-sm"></i></div>`}
+                <div><p class="font-bold text-sm">${ad}</p><div class="flex items-center gap-2 mt-0.5">${sktBadge}<span class="text-[10px] text-zinc-500">${kat}</span></div></div>
               </div>
-              <div class="text-right">
-                <span class="px-2.5 py-1 rounded-xl bg-zinc-800 border border-zinc-700 text-xs font-black ${stok === 0 ? 'text-rose-400' : 'text-zinc-200'}">
-                  ${stok} ${birim}
-                </span>
-              </div>
+              <span class="px-2.5 py-1 rounded-xl bg-zinc-800 text-xs font-black ${stok===0?'text-rose-400':'text-zinc-200'}">${stok} ${birim}</span>
             </div>
             <div class="flex justify-end pt-1 border-t border-zinc-800/60">
-              <button onclick="kilerUrunBitti(${index}, '${ad}')" class="text-[11px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-500/20 active:scale-95 transition-transform flex items-center gap-1.5">
-                <i class="fa-solid fa-cart-plus"></i> Bitti → Alışverişe Ekle
-              </button>
+              <button onclick="kilerUrunBitti(${index}, '${ad}')" class="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-500/20"><i class="fa-solid fa-cart-plus"></i> Bitti → Alışverişe Ekle</button>
             </div>
           </div>`;
       });
+      if(sktKritik.length>0) sktBox.innerHTML = `<div class="bg-amber-500/10 border border-amber-500/30 p-3 rounded-2xl text-xs text-amber-400 font-bold mb-2">⚠ SKT Uyarısı: ${sktKritik.join(', ')}</div>`;
 
-      if (sktKritik.length > 0) {
-        sktBox.innerHTML = `
-          <div class="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-2xl space-y-1">
-            <div class="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase"><i class="fa-solid fa-triangle-exclamation"></i> Tüketim & SKT Uyarısı</div>
-            ${sktKritik.map(m => `<p class="text-xs text-amber-200 font-medium">• ${m}</p>`).join('')}
-          </div>`;
-      }
-
-      // 2. FİNANS VE KATEGORİ KIRILIMI (Döneme Göre Filtreli)
-      const seciliAy = document.getElementById('finansAySec').value;
-      const seciliYil = document.getElementById('finansYilSec').value;
-      const donemFiltre = `${seciliYil}-${seciliAy}`;
-
-      let maasBen = 0, maasEsim = 0, fatura = 0, gider = 0;
-      let kategoriHarcamalari = {};
-
-      const fBox = document.getElementById('finansListe');
-      fBox.innerHTML = '';
-
+      // 2. Finans
+      const donemFiltre = `${document.getElementById('finansYilSec').value}-${document.getElementById('finansAySec').value}`;
+      let mBen=0, mEsim=0, ftr=0, gdr=0, kirilim={};
+      const fBox = document.getElementById('finansListe'); fBox.innerHTML = '';
       (appVerisi.finans || []).forEach(item => {
-        const tarih = item[0] || '';
-        if (!tarih.startsWith(donemFiltre)) return; // Seçilen ay ve yıla uymayanları filtrele
+        if (!item[0].startsWith(donemFiltre)) return;
+        const tip=item[1], kat=item[2]||'Diğer', t=Number(item[3])||0;
+        if(tip==='Maas_Ben') mBen+=t; else if(tip==='Maas_Esim') mEsim+=t;
+        else if(tip==='Fatura'){ ftr+=t; kirilim[kat]=(kirilim[kat]||0)+t; }
+        else{ gdr+=t; kirilim[kat]=(kirilim[kat]||0)+t; }
+        fBox.innerHTML += `<div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl flex justify-between"><div><p class="font-bold text-sm">${kat}</p><p class="text-[11px] text-zinc-500">${item[0]} • ${item[4]}</p></div><span class="font-black text-sm ${tip.startsWith('Maas')?'text-emerald-400':(tip==='Fatura'?'text-amber-400':'text-rose-400')}">${tip.startsWith('Maas')?'+':'-'}₺${t.toLocaleString('tr-TR')}</span></div>`;
+      });
+      document.getElementById('maasBenTutar').innerText='₺'+mBen.toLocaleString('tr-TR');
+      document.getElementById('maasEsimTutar').innerText='₺'+mEsim.toLocaleString('tr-TR');
+      document.getElementById('toplamFatura').innerText='₺'+ftr.toLocaleString('tr-TR');
+      document.getElementById('toplamGider').innerText='₺'+gdr.toLocaleString('tr-TR');
+      document.getElementById('toplamGelir').innerText='₺'+(mBen+mEsim).toLocaleString('tr-TR');
+      document.getElementById('netKalan').innerText='₺'+((mBen+mEsim)-(ftr+gdr)).toLocaleString('tr-TR');
 
-        const tip = item[1], kategori = item[2] || 'Diğer', tutar = Number(item[3]) || 0;
-        const isGelir = tip.startsWith('Maas');
-
-        if (tip === 'Maas_Ben') maasBen += tutar;
-        else if (tip === 'Maas_Esim') maasEsim += tutar;
-        else if (tip === 'Fatura') {
-          fatura += tutar;
-          kategoriHarcamalari[kategori] = (kategoriHarcamalari[kategori] || 0) + tutar;
-        } else {
-          gider += tutar;
-          kategoriHarcamalari[kategori] = (kategoriHarcamalari[kategori] || 0) + tutar;
-        }
-
-        const color = isGelir ? 'text-emerald-400' : (tip === 'Fatura' ? 'text-amber-400' : 'text-rose-400');
-
-        fBox.innerHTML += `
-          <div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl flex items-center justify-between">
-            <div>
-              <p class="font-bold text-sm text-zinc-200">${kategori}</p>
-              <p class="text-[11px] text-zinc-500">${tarih} • ${item[4]} ${item[5] ? '• ' + item[5] : ''}</p>
-            </div>
-            <span class="font-black text-sm ${color}">${isGelir ? '+' : '-'}₺${tutar.toLocaleString('tr-TR')}</span>
-          </div>`;
+      const kBox = document.getElementById('kategoriKirilimListe'); kBox.innerHTML='';
+      Object.keys(kirilim).sort((a,b)=>kirilim[b]-kirilim[a]).forEach(k => {
+        let yuzde = (ftr+gdr)>0 ? Math.round((kirilim[k]/(ftr+gdr))*100) : 0;
+        kBox.innerHTML += `<div class="space-y-1"><div class="flex justify-between text-zinc-300 font-bold"><span>${k} (%${yuzde})</span><span>₺${kirilim[k].toLocaleString('tr-TR')}</span></div><div class="w-full bg-zinc-800 h-1.5 rounded-full"><div class="bg-indigo-500 h-full rounded-full" style="width:${yuzde}%"></div></div></div>`;
       });
 
-      const toplamGelir = maasBen + maasEsim;
-      const toplamGiden = fatura + gider;
-      const netKalan = toplamGelir - toplamGiden;
-
-      document.getElementById('maasBenTutar').innerText = '₺' + maasBen.toLocaleString('tr-TR');
-      document.getElementById('maasEsimTutar').innerText = '₺' + maasEsim.toLocaleString('tr-TR');
-      document.getElementById('toplamFatura').innerText = '₺' + fatura.toLocaleString('tr-TR');
-      document.getElementById('toplamGider').innerText = '₺' + gider.toLocaleString('tr-TR');
-      document.getElementById('toplamGelir').innerText = '₺' + toplamGelir.toLocaleString('tr-TR');
-      document.getElementById('netKalan').innerText = '₺' + netKalan.toLocaleString('tr-TR');
-
-      // Kategori Kırılım Çubukları
-      const kKirilimBox = document.getElementById('kategoriKirilimListe');
-      kKirilimBox.innerHTML = '';
-      const katKeys = Object.keys(kategoriHarcamalari);
-
-      if (katKeys.length === 0) {
-        kKirilimBox.innerHTML = '<p class="text-zinc-500 text-center py-2">Bu dönemde henüz gider kaydı yok.</p>';
-      } else {
-        katKeys.sort((a,b) => kategoriHarcamalari[b] - kategoriHarcamalari[a]);
-        katKeys.forEach(kat => {
-          const ktutar = kategoriHarcamalari[kat];
-          const yuzde = toplamGiden > 0 ? Math.round((ktutar / toplamGiden) * 100) : 0;
-          kKirilimBox.innerHTML += `
-            <div class="space-y-1">
-              <div class="flex justify-between font-bold text-zinc-300">
-                <span>${kat} (%${yuzde})</span>
-                <span>₺${ktutar.toLocaleString('tr-TR')}</span>
-              </div>
-              <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-                <div class="bg-indigo-500 h-full rounded-full" style="width: ${yuzde}%"></div>
-              </div>
-            </div>`;
-        });
-      }
-
-      // 3. ALIŞVERİŞ
-      const aBox = document.getElementById('alisverisListe');
-      aBox.innerHTML = '';
-      (appVerisi.alisveris || []).forEach((item, index) => {
-        aBox.innerHTML += `
-          <div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <button onclick="alisverisTamamla(${index})" class="w-6 h-6 rounded-full border border-zinc-700 hover:border-emerald-500 text-emerald-400 flex items-center justify-center">
-                <i class="fa-solid fa-check text-xs"></i>
-              </button>
-              <div>
-                <p class="font-bold text-sm text-zinc-200">${item[0]}</p>
-                <p class="text-[11px] text-zinc-500">${item[1]} adet • Ekleyen: ${item[2]}</p>
-              </div>
-            </div>
-          </div>`;
-      });
-
-      // 4. İSTEKLER
-      const iBox = document.getElementById('istekListe');
-      iBox.innerHTML = '';
-      (appVerisi.istekler || []).forEach(item => {
-        const link = item[0], ad = item[1], fiyat = Number(item[2]) || 0, ekleyen = item[3], resim = item[4];
-        const imgEl = resim 
-          ? `<img src="${resim}" class="w-14 h-14 object-cover rounded-xl bg-zinc-800">`
-          : `<div class="w-14 h-14 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-500"><i class="fa-solid fa-gift"></i></div>`;
-
-        iBox.innerHTML += `
-          <div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl flex items-center justify-between">
-            <div class="flex items-center gap-3 overflow-hidden">
-              ${imgEl}
-              <div class="overflow-hidden">
-                <p class="font-bold text-sm text-zinc-200 truncate">${ad}</p>
-                <p class="text-[11px] text-zinc-500">${ekleyen} istedi</p>
-                ${link ? `<a href="${link}" target="_blank" class="text-[11px] text-indigo-400 font-semibold underline">Ürüne Git</a>` : ''}
-              </div>
-            </div>
-            <p class="font-black text-sm text-zinc-200 whitespace-nowrap pl-2">₺${fiyat.toLocaleString('tr-TR')}</p>
-          </div>`;
-      });
+      // 3. Alışveriş & 4. İstekler (Aynı Hızlı Şekilde Doldurulur)
+      const aBox = document.getElementById('alisverisListe'); aBox.innerHTML='';
+      (appVerisi.alisveris || []).forEach((i, idx) => aBox.innerHTML+=`<div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl flex gap-3"><button onclick="alisverisTamamla(${idx})" class="w-6 h-6 rounded-full border border-zinc-700 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-check text-xs"></i></button><div><p class="font-bold text-sm">${i[0]}</p><p class="text-[11px] text-zinc-500">${i[1]} Adet • ${i[2]}</p></div></div>`);
+      
+      const iBox = document.getElementById('istekListe'); iBox.innerHTML='';
+      (appVerisi.istekler || []).forEach(i => iBox.innerHTML+=`<div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl flex justify-between items-center"><div class="flex gap-3 overflow-hidden">${i[4]?`<img src="${i[4]}" class="w-14 h-14 rounded-xl object-cover">`:`<div class="w-14 h-14 bg-zinc-800 rounded-xl"></div>`}<div class="overflow-hidden"><p class="font-bold text-sm truncate">${i[1]}</p><p class="text-[11px] text-zinc-500">${i[3]} istedi</p></div></div><p class="font-black text-sm pl-2">₺${Number(i[2]).toLocaleString('tr-TR')}</p></div>`);
     }
 
     function kameraAc() {
       document.getElementById('kameraKutusu').classList.remove('hidden');
       html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 250 },
-        (decodedText) => {
-          document.getElementById('f_barkod').value = decodedText;
-          kameraKapat();
-          barkodlaUrunAra(decodedText);
-        },
-        () => {}
-      ).catch(() => alert("Kamera açılamadı."));
+      html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
+        document.getElementById('f_barkod').value = txt; kameraKapat(); barkodlaUrunAra(txt);
+      }, ()=>{}).catch(()=>alert("Kamera izni gerekli."));
     }
-
-    function kameraKapat() {
-      if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-          html5QrCode.clear();
-          document.getElementById('kameraKutusu').classList.add('hidden');
-        }).catch(() => {
-          document.getElementById('kameraKutusu').classList.add('hidden');
-        });
-      } else {
-        document.getElementById('kameraKutusu').classList.add('hidden');
-      }
-    }
+    function kameraKapat() { if(html5QrCode){html5QrCode.stop(); html5QrCode.clear();} document.getElementById('kameraKutusu').classList.add('hidden'); }
   </script>
 </body>
 </html>
