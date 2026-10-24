@@ -15,79 +15,76 @@
     body {
       -webkit-tap-highlight-color: transparent;
       user-select: none;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
-      padding-bottom: 100px;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+      padding-bottom: 110px;
     }
-    .safe-top { padding-top: env(safe-area-inset-top, 24px); }
+    .safe-top { padding-top: env(safe-area-inset-top, 20px); }
     .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 20px); }
   </style>
 </head>
 <body class="bg-[#09090b] text-zinc-100 antialiased min-h-screen">
 
-  <!-- iOS Üst Navigasyon -->
+  <!-- Üst Başlık & Eylem Çubuğu -->
   <header class="sticky top-0 z-40 bg-[#09090b]/80 backdrop-blur-xl border-b border-zinc-800/80 safe-top">
     <div class="flex justify-between items-center px-5 py-3">
       <div>
-        <p class="text-[10px] font-bold tracking-widest uppercase text-zinc-500">Hane Asistanı</p>
-        <h1 id="sayfaBaslik" class="text-2xl font-extrabold tracking-tight text-white">Kiler & Stok</h1>
+        <p class="text-[10px] font-bold tracking-widest uppercase text-zinc-500">Hane Yönetimi</p>
+        <h1 id="sayfaBaslik" class="text-2xl font-black tracking-tight text-white">Kiler & Stok</h1>
       </div>
       <div class="flex items-center gap-2">
-        <button onclick="verileriYukle()" class="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 active:scale-95">
+        <button onclick="verileriYukle(true)" class="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 active:scale-95">
           <i id="yenileIcon" class="fa-solid fa-arrows-rotate text-xs"></i>
         </button>
-        <button onclick="modalAc()" class="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 active:scale-95">
+        <button onclick="modalAc()" class="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-600/30 active:scale-95">
           <i class="fa-solid fa-plus text-sm"></i>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Yükleniyor Bildirimi -->
-  <div id="yukleniyor" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-zinc-900 border border-zinc-800 px-5 py-3.5 rounded-2xl flex items-center gap-3">
-      <div class="animate-spin rounded-full h-4 w-4 border-2 border-indigo-500 border-t-transparent"></div>
-      <span class="text-xs font-semibold tracking-wide text-zinc-300">Senkronize Ediliyor...</span>
-    </div>
+  <!-- Küçük Arka Plan Senkronizasyon Rozeti -->
+  <div id="senkRozeti" class="fixed top-16 right-5 z-50 bg-indigo-600/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg flex items-center gap-1.5 hidden">
+    <div class="w-2 h-2 rounded-full bg-white animate-ping"></div>
+    İşleniyor...
   </div>
 
   <main class="p-4 space-y-4 max-w-lg mx-auto">
 
-    <!-- 1. KİLER & STOK MODÜLÜ -->
+    <!-- 1. KİLER & STOK SEKME -->
     <section id="tab-kiler" class="space-y-3">
       <div id="sktUyariAlani"></div>
       <div id="kilerListe" class="space-y-2.5"></div>
     </section>
 
-    <!-- 2. BÜTÇE & FATURALAR (BİRLEŞTİRİLMİŞ FİNANS) -->
+    <!-- 2. BÜTÇE & FATURALAR (FİNANS) SEKME -->
     <section id="tab-finans" class="space-y-4 hidden">
-      <!-- Maaş ve Net Durum Kartları -->
-      <div class="bg-zinc-900/90 border border-zinc-800 p-4 rounded-3xl space-y-3">
-        <div class="flex justify-between items-center border-b border-zinc-800/80 pb-3">
+      <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-3xl space-y-3 shadow-sm">
+        <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
           <div>
-            <span class="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Net Kalan Bütçe</span>
+            <span class="text-[10px] uppercase font-bold text-zinc-500 tracking-wider">Net Kalan Bakiye</span>
             <p id="netKalan" class="text-2xl font-black text-white mt-0.5">₺0</p>
           </div>
           <div class="text-right">
-            <span class="text-[10px] uppercase font-bold text-emerald-500 tracking-wider">Toplam Gelir</span>
-            <p id="toplamGelir" class="text-sm font-bold text-emerald-400 mt-0.5">₺0</p>
+            <span class="text-[10px] uppercase font-bold text-emerald-500 tracking-wider">Toplam Maaş</span>
+            <p id="toplamGelir" class="text-sm font-extrabold text-emerald-400 mt-0.5">₺0</p>
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-2 text-xs">
-          <div class="bg-zinc-950 p-2.5 rounded-xl border border-zinc-850">
-            <span class="text-zinc-500 block text-[10px]">Maaş 1 (Ben)</span>
+          <div class="bg-zinc-950 p-2.5 rounded-2xl border border-zinc-800">
+            <span class="text-zinc-500 block text-[10px]">Maaş (Ben)</span>
             <span id="maasBenTutar" class="font-bold text-zinc-200">₺0</span>
           </div>
-          <div class="bg-zinc-950 p-2.5 rounded-xl border border-zinc-850">
-            <span class="text-zinc-500 block text-[10px]">Maaş 2 (Eşim)</span>
+          <div class="bg-zinc-950 p-2.5 rounded-2xl border border-zinc-800">
+            <span class="text-zinc-500 block text-[10px]">Maaş (Eşim)</span>
             <span id="maasEsimTutar" class="font-bold text-zinc-200">₺0</span>
           </div>
-          <div class="bg-zinc-950 p-2.5 rounded-xl border border-zinc-850">
+          <div class="bg-zinc-950 p-2.5 rounded-2xl border border-zinc-800">
             <span class="text-zinc-500 block text-[10px]">Faturalar & Aidat</span>
             <span id="toplamFatura" class="font-bold text-amber-400">₺0</span>
           </div>
-          <div class="bg-zinc-950 p-2.5 rounded-xl border border-zinc-850">
-            <span class="text-zinc-500 block text-[10px]">Diğer Giderler</span>
+          <div class="bg-zinc-950 p-2.5 rounded-2xl border border-zinc-800">
+            <span class="text-zinc-500 block text-[10px]">Harcamalar</span>
             <span id="toplamGider" class="font-bold text-rose-400">₺0</span>
           </div>
         </div>
@@ -95,115 +92,127 @@
 
       <div class="space-y-2">
         <div class="flex justify-between items-center px-1">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500">Son İşlemler</h3>
-          <span class="text-[10px] text-zinc-500">Maaş / Fatura / Harcama</span>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-500">İşlem Geçmişi</h3>
+          <span class="text-[10px] text-zinc-500">Maaş / Fatura / Gider</span>
         </div>
         <div id="finansListe" class="space-y-2"></div>
       </div>
     </section>
 
-    <!-- 3. ALIŞVERİŞ LİSTESİ -->
+    <!-- 3. ALIŞVERİŞ LİSTESİ SEKME -->
     <section id="tab-alisveris" class="space-y-3 hidden">
       <div id="alisverisListe" class="space-y-2"></div>
     </section>
 
-    <!-- 4. İSTEK LİSTESİ (WISHLIST) -->
+    <!-- 4. İSTEK LİSTESİ (WISHLIST) SEKME -->
     <section id="tab-istekler" class="space-y-3 hidden">
-      <div id="istekListe" class="space-y-2"></div>
+      <div id="istekListe" class="grid grid-cols-1 gap-2.5"></div>
     </section>
 
   </main>
 
-  <!-- iOS Alt Gezinme Çubuğu (4 Sekme) -->
-  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-[#09090b]/85 backdrop-blur-xl border-t border-zinc-850 safe-bottom">
+  <!-- iOS Alt Gezinme Çubuğu -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-[#09090b]/85 backdrop-blur-xl border-t border-zinc-800 safe-bottom">
     <div class="max-w-lg mx-auto px-6 py-2 flex justify-between">
       <button onclick="sekmeDegistir('kiler', 'Kiler & Stok')" class="nav-btn active flex flex-col items-center py-1 text-indigo-400" data-tab="kiler">
         <i class="fa-solid fa-boxes-stacked text-base mb-1"></i>
-        <span class="text-[10px] font-medium">Kiler</span>
+        <span class="text-[10px] font-semibold">Kiler</span>
       </button>
-      <button onclick="sekmeDegistir('finans', 'Bütçe & Faturalar')" class="nav-btn flex flex-col items-center py-1 text-zinc-500" data-tab="finans">
+      <button onclick="sekmeDegistir('finans', 'Finans & Faturalar')" class="nav-btn flex flex-col items-center py-1 text-zinc-500" data-tab="finans">
         <i class="fa-solid fa-wallet text-base mb-1"></i>
-        <span class="text-[10px] font-medium">Finans</span>
+        <span class="text-[10px] font-semibold">Finans</span>
       </button>
       <button onclick="sekmeDegistir('alisveris', 'Alışveriş')" class="nav-btn flex flex-col items-center py-1 text-zinc-500" data-tab="alisveris">
         <i class="fa-solid fa-basket-shopping text-base mb-1"></i>
-        <span class="text-[10px] font-medium">Alışveriş</span>
+        <span class="text-[10px] font-semibold">Alışveriş</span>
       </button>
       <button onclick="sekmeDegistir('istekler', 'İstek Listesi')" class="nav-btn flex flex-col items-center py-1 text-zinc-500" data-tab="istekler">
         <i class="fa-solid fa-gift text-base mb-1"></i>
-        <span class="text-[10px] font-medium">İstekler</span>
+        <span class="text-[10px] font-semibold">İstekler</span>
       </button>
     </div>
   </nav>
 
-  <!-- Form Modalı -->
-  <div id="formModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-t-[32px] sm:rounded-3xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto space-y-4 safe-bottom">
+  <!-- FORM MODAL (Kilitlenmeyen, Dış Tıklamayla Kapanan Yapı) -->
+  <div id="formModal" style="display: none;" onclick="modalDisTiklama(event)" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-t-[32px] sm:rounded-3xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto space-y-4 safe-bottom shadow-2xl">
       <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
         <h3 id="modalBaslik" class="font-bold text-base text-zinc-100">Yeni Ekle</h3>
-        <button onclick="modalKapat()" class="w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 flex items-center justify-center font-bold">&times;</button>
+        <button type="button" onclick="modalKapat()" class="w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center font-bold text-lg active:scale-90">&times;</button>
       </div>
 
       <div id="modalGovde" class="space-y-3"></div>
 
-      <!-- Barkod Kamera Alanı -->
+      <!-- Kamera Tarayıcı Penceresi -->
       <div id="kameraKutusu" class="hidden rounded-2xl overflow-hidden border border-zinc-800 bg-black">
         <div id="reader" style="width: 100%;"></div>
-        <button onclick="kameraKapat()" class="w-full bg-zinc-800 py-2.5 text-xs font-semibold text-zinc-300">Kamerayı Kapat</button>
+        <button type="button" onclick="kameraKapat()" class="w-full bg-zinc-800 py-2.5 text-xs font-semibold text-zinc-300">Kamerayı Kapat</button>
       </div>
 
-      <button id="kaydetBtn" onclick="formKaydet()" class="w-full bg-indigo-600 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-indigo-600/30 active:scale-95 transition-all">
-        Kaydet
-      </button>
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="modalKapat()" class="w-1/3 bg-zinc-800 text-zinc-300 py-3.5 rounded-2xl font-bold active:scale-95">Vazgeç</button>
+        <button type="button" id="kaydetBtn" onclick="formKaydet()" class="flex-1 bg-indigo-600 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-indigo-600/30 active:scale-95">Kaydet</button>
+      </div>
     </div>
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzLtLu55qtNDj8YWeZwRpma5EqmawcCtzZBFwwbcPl9kedk_ZCEOhxwJjsZDQ2mQxph/exec";
+    // ==========================================
+    // ⚙️ APPS SCRIPT /EXEC BAĞLANTINIZI BURAYA GİRİN:
+    // ==========================================
+    const API_URL = "https://script.google.com/macros/s/AKfycbwDsqtEtksq-hJmwHitm-IEUpCTtedOcKMpyOMe90cbPKzH9g-DDU6ITXMrvYkrkxwC/exec";
 
     let aktifSekme = 'kiler';
     let html5QrCode = null;
+    let linkDebounceTimer = null;
 
-    let appVerisi = {
-      kiler: [
-        ["Süt", "8690504033215", "1", "Litre", "1", "2026-10-25", "https://images.openfoodfacts.org/images/products/869/050/403/3215/front_tr.3.200.jpg"],
-        ["Yumurta", "8690000000001", "15", "Adet", "5", "2026-10-22", ""]
-      ],
-      finans: [
-        ["2026-10-15", "Maas_Ben", "Maaş", "55000", "Ben", "Ekim Maaşı"],
-        ["2026-10-15", "Maas_Esim", "Maaş", "48000", "Eşim", "Ekim Maaşı"],
-        ["2026-10-20", "Fatura", "Aidat", "3200", "Ortak", "Ekim Aidatı + Ortak Isınma"],
-        ["2026-10-21", "Fatura", "Elektrik", "750", "Ben", "Enerjisa"],
-        ["2026-10-23", "Gider", "Market", "1450", "Eşim", "Haftalık Market"]
-      ],
-      alisveris: [["Zeytinyağı", "2", "Eşim", "2026-10-24"]],
-      istekler: [["https://trendyol.com", "Airfryer", "4200", "Eşim"]]
+    // Yerel önbellekten verileri yükle (Sıfır bekleme)
+    let appVerisi = JSON.parse(localStorage.getItem('bizimEvVerisi')) || {
+      kiler: [], finans: [], alisveris: [], istekler: []
     };
 
     window.onload = function() {
+      ekraniGuncelle();
       if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
-        verileriYukle();
-      } else {
-        ekraniGuncelle();
+        verileriYukle(false);
       }
     };
 
-    function verileriYukle() {
+    function verileriYukle(gosterAnim) {
       if (!API_URL || API_URL.includes("BURAYA_EXEC")) return;
-      yukleniyorGoster(true);
-      document.getElementById('yenileIcon').classList.add('animate-spin');
+      if (gosterAnim) document.getElementById('yenileIcon').classList.add('animate-spin');
 
-      fetch(`${API_URL}?islem=verileriGetir`, { method: 'GET', redirect: 'follow' })
+      fetch(`${API_URL}?islem=verileriGetir`)
         .then(res => res.json())
         .then(data => {
           appVerisi = data;
+          localStorage.setItem('bizimEvVerisi', JSON.stringify(data));
           ekraniGuncelle();
         })
-        .catch(err => console.error("Veri senkronizasyon hatası:", err))
+        .catch(err => console.error("Veri çekme hatası:", err))
         .finally(() => {
-          yukleniyorGoster(false);
           document.getElementById('yenileIcon').classList.remove('animate-spin');
         });
+    }
+
+    function arkaPlanSenkronize(paramsObj) {
+      const rozet = document.getElementById('senkRozeti');
+      rozet.classList.remove('hidden');
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(paramsObj)
+      })
+      .then(res => res.json())
+      .then(data => {
+        appVerisi = data;
+        localStorage.setItem('bizimEvVerisi', JSON.stringify(data));
+        ekraniGuncelle();
+      })
+      .catch(err => console.error("Senkronizasyon hatası:", err))
+      .finally(() => {
+        rozet.classList.add('hidden');
+      });
     }
 
     function sekmeDegistir(sekme, baslik) {
@@ -225,122 +234,360 @@
       });
     }
 
-    // SKT Fark Gün Hesaplama (Bugün baz alınır)
+    function modalDisTiklama(e) {
+      if (e.target.id === 'formModal') modalKapat();
+    }
+
+    function modalAc() {
+      const modal = document.getElementById('formModal');
+      const g = document.getElementById('modalGovde');
+      g.innerHTML = '';
+      document.getElementById('kameraKutusu').classList.add('hidden');
+
+      if (aktifSekme === 'kiler') {
+        document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
+        g.innerHTML = `
+          <div class="flex gap-2">
+            <input id="f_barkod" type="text" placeholder="Barkod Tara veya Yaz" class="flex-1 bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+            <button type="button" onclick="kameraAc()" class="bg-indigo-600 px-4 rounded-xl text-white active:scale-95"><i class="fa-solid fa-barcode"></i> Tara</button>
+          </div>
+          <p id="barkodDurum" class="text-[11px] text-zinc-400 hidden"></p>
+
+          <div id="urunOnizlemeKutusu" class="hidden flex items-center gap-3 bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
+            <img id="f_onizlemeResim" src="" class="w-12 h-12 rounded-lg object-cover">
+            <div>
+              <p id="f_onizlemeAd" class="text-xs font-bold text-zinc-200"></p>
+              <span class="text-[10px] text-emerald-400">Ürün internetten bulundu</span>
+            </div>
+          </div>
+
+          <input id="f_ad" type="text" placeholder="Ürün Adı" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+          <input id="f_resim" type="hidden">
+
+          <div class="grid grid-cols-2 gap-2">
+            <input id="f_stok" type="number" placeholder="Mevcut Stok" value="1" class="bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+            <input id="f_birim" type="text" placeholder="Birim (Adet, Lt)" value="Adet" class="bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+          </div>
+
+          <div>
+            <label class="block text-[11px] text-zinc-400 mb-1 font-semibold">Son Kullanma Tarihi (SKT)</label>
+            <input id="f_skt" type="date" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+          </div>`;
+
+        setTimeout(() => {
+          document.getElementById('f_barkod').addEventListener('change', function() {
+            barkodlaUrunAra(this.value.trim());
+          });
+        }, 50);
+
+      } else if (aktifSekme === 'finans') {
+        document.getElementById('modalBaslik').innerText = 'Finans / Harcama Ekle';
+        g.innerHTML = `
+          <select id="f_tip" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+            <option value="Gider">Günlük Harcama (Gider)</option>
+            <option value="Fatura">Fatura / Aidat</option>
+            <option value="Maas_Ben">Maaş (Ben)</option>
+            <option value="Maas_Esim">Maaş (Eşim)</option>
+          </select>
+          <input id="f_kategori" type="text" placeholder="Kategori (Aidat, Mutfak, Benzin)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+          <input id="f_tutar" type="number" placeholder="Tutar (₺)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+          <select id="f_kisi" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+            <option value="Ben">Kişi: Ben</option>
+            <option value="Eşim">Kişi: Eşim</option>
+            <option value="Ortak">Ortak Hane</option>
+          </select>
+          <input id="f_not" type="text" placeholder="Açıklama (Örn: Kasım Aidatı)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">`;
+      } else if (aktifSekme === 'alisveris') {
+        document.getElementById('modalBaslik').innerText = 'Alışverişe Ürün Ekle';
+        g.innerHTML = `
+          <input id="f_urun" type="text" placeholder="Alınacak Ürün Adı" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+          <input id="f_adet" type="number" value="1" placeholder="Adet" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+          <select id="f_ekleyen" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+            <option value="Ben">Ekleyen: Ben</option>
+            <option value="Eşim">Ekleyen: Eşim</option>
+          </select>`;
+      } else if (aktifSekme === 'istekler') {
+        document.getElementById('modalBaslik').innerText = 'İstek / Wishlist Ekle';
+        g.innerHTML = `
+          <div class="space-y-1">
+            <input id="f_link" type="text" oninput="linkGirildi(this.value)" placeholder="Ürün Linki Yapıştır (Trendyol, Amazon)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+            <p id="linkDurum" class="text-[11px] text-indigo-400 hidden"><i class="fa-solid fa-spinner animate-spin"></i> Bilgiler çekiliyor...</p>
+          </div>
+
+          <div id="linkOnizlemeKutusu" class="hidden flex items-center gap-3 bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
+            <img id="f_linkResimOnizle" src="" class="w-14 h-14 rounded-lg object-cover">
+            <div class="overflow-hidden">
+              <p id="f_linkBaslikOnizle" class="text-xs font-bold text-zinc-200 truncate"></p>
+              <p id="f_linkFiyatOnizle" class="text-xs font-extrabold text-emerald-400"></p>
+            </div>
+          </div>
+
+          <input id="f_ad" type="text" placeholder="Ürün Adı" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+          <input id="f_fiyat" type="number" placeholder="Fiyatı (₺)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+          <input id="f_resim" type="hidden">
+          <select id="f_ekleyen" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
+            <option value="Ben">Ekleyen: Ben</option>
+            <option value="Eşim">Ekleyen: Eşim</option>
+          </select>`;
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function modalKapat() {
+      try { kameraKapat(); } catch (e) {}
+      document.getElementById('formModal').style.display = 'none';
+    }
+
+    // Barkod Arama (Waterfall: Open Food Facts + Arka Plan Motoru)
+    async function barkodlaUrunAra(barkod) {
+      if (!barkod) return;
+      const d = document.getElementById('barkodDurum');
+      d.innerText = "İnternetten aranıyor...";
+      d.classList.remove('hidden');
+
+      // 1. Önce Open Food Facts dene
+      try {
+        const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barkod}.json`);
+        const data = await res.json();
+        if (data.status === 1 && data.product) {
+          const ad = data.product.product_name_tr || data.product.product_name || "";
+          const img = data.product.image_front_small_url || data.product.image_url || "";
+          if (ad) {
+            urunBilgisiBas(ad, img);
+            d.innerText = "Ürün bulundu!";
+            return;
+          }
+        }
+      } catch (e) {}
+
+      // 2. Bulunamazsa Google Script Sunucusuna Sor
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
+        try {
+          const res2 = await fetch(`${API_URL}?islem=barkodAra&barkod=${barkod}`);
+          const data2 = await res2.json();
+          if (data2.ad) {
+            urunBilgisiBas(data2.ad, data2.resim || "");
+            d.innerText = "Ürün internetten bulundu!";
+            return;
+          }
+        } catch (e) {}
+      }
+
+      d.innerText = "Ürün bulunamadı, lütfen adı kendiniz yazın.";
+    }
+
+    function urunBilgisiBas(ad, img) {
+      document.getElementById('f_ad').value = ad;
+      if (img) {
+        document.getElementById('f_resim').value = img;
+        document.getElementById('f_onizlemeResim').src = img;
+        document.getElementById('f_onizlemeAd').innerText = ad;
+        document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
+      }
+    }
+
+    // Link Yapıştırıldığında Bilgi Çekme
+    function linkGirildi(url) {
+      clearTimeout(linkDebounceTimer);
+      if (!url || !url.startsWith("http")) return;
+
+      linkDebounceTimer = setTimeout(async () => {
+        const d = document.getElementById('linkDurum');
+        d.classList.remove('hidden');
+
+        try {
+          const res = await fetch(`${API_URL}?islem=linkCoz&url=${encodeURIComponent(url)}`);
+          const data = await res.json();
+
+          if (data.baslik) {
+            document.getElementById('f_ad').value = data.baslik;
+            document.getElementById('f_linkBaslikOnizle').innerText = data.baslik;
+          }
+          if (data.fiyat) {
+            document.getElementById('f_fiyat').value = data.fiyat;
+            document.getElementById('f_linkFiyatOnizle').innerText = '₺' + data.fiyat;
+          }
+          if (data.resim) {
+            document.getElementById('f_resim').value = data.resim;
+            document.getElementById('f_linkResimOnizle').src = data.resim;
+            document.getElementById('linkOnizlemeKutusu').classList.remove('hidden');
+          }
+          d.classList.add('hidden');
+        } catch (e) {
+          d.innerText = "Bilgi otomatik çekilemedi, manuel doldurabilirsiniz.";
+        }
+      }, 500);
+    }
+
+    // Form Kayıt
+    function formKaydet() {
+      let payload = { islem: '' };
+
+      if (aktifSekme === 'kiler') {
+        payload.islem = 'kilerEkle';
+        payload.ad = document.getElementById('f_ad').value;
+        payload.barkod = document.getElementById('f_barkod').value;
+        payload.stok = document.getElementById('f_stok').value;
+        payload.birim = document.getElementById('f_birim').value;
+        payload.skt = document.getElementById('f_skt').value;
+        payload.resim = document.getElementById('f_resim').value;
+        payload.kritik = '1';
+
+        // Anında arayüze ekle (Optimistic UI)
+        appVerisi.kiler.push([payload.ad, payload.barkod, payload.stok, payload.birim, payload.kritik, payload.skt, payload.resim]);
+
+      } else if (aktifSekme === 'finans') {
+        payload.islem = 'finansEkle';
+        payload.tip = document.getElementById('f_tip').value;
+        payload.kategori = document.getElementById('f_kategori').value;
+        payload.tutar = document.getElementById('f_tutar').value;
+        payload.kisi = document.getElementById('f_kisi').value;
+        payload.not = document.getElementById('f_not').value;
+
+        appVerisi.finans.unshift([new Date().toISOString().split('T')[0], payload.tip, payload.kategori, payload.tutar, payload.kisi, payload.not]);
+
+      } else if (aktifSekme === 'alisveris') {
+        payload.islem = 'alisverisEkle';
+        payload.urun = document.getElementById('f_urun').value;
+        payload.adet = document.getElementById('f_adet').value;
+        payload.ekleyen = document.getElementById('f_ekleyen').value;
+
+        appVerisi.alisveris.push([payload.urun, payload.adet, payload.ekleyen, 'Bugün']);
+
+      } else if (aktifSekme === 'istekler') {
+        payload.islem = 'istekEkle';
+        payload.link = document.getElementById('f_link').value;
+        payload.ad = document.getElementById('f_ad').value;
+        payload.fiyat = document.getElementById('f_fiyat').value;
+        payload.ekleyen = document.getElementById('f_ekleyen').value;
+        payload.resim = document.getElementById('f_resim').value;
+
+        appVerisi.istekler.push([payload.link, payload.ad, payload.fiyat, payload.ekleyen, payload.resim]);
+      }
+
+      ekraniGuncelle();
+      modalKapat();
+
+      // Arka planda sunucuya yaz
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
+        arkaPlanSenkronize(payload);
+      }
+    }
+
+    function alisverisTamamla(index) {
+      appVerisi.alisveris.splice(index, 1);
+      ekraniGuncelle();
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
+        arkaPlanSenkronize({ islem: 'alisverisSil', index: index });
+      }
+    }
+
     function sktDurumHesapla(sktStr) {
       if (!sktStr) return null;
       const bugun = new Date();
       bugun.setHours(0,0,0,0);
-      const parcalar = sktStr.split('-');
-      if (parcalar.length !== 3) return null;
-      const hedef = new Date(Number(parcalar[0]), Number(parcalar[1]) - 1, Number(parcalar[2]));
+      const p = sktStr.split('-');
+      if (p.length !== 3) return null;
+      const hedef = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
       return Math.ceil((hedef - bugun) / (1000 * 60 * 60 * 24));
     }
 
     function ekraniGuncelle() {
-      // 1. KİLER VE SKT KONTROLÜ
-      const kilerBox = document.getElementById('kilerListe');
+      // 1. KİLER
+      const kBox = document.getElementById('kilerListe');
       const sktBox = document.getElementById('sktUyariAlani');
-      kilerBox.innerHTML = '';
+      kBox.innerHTML = '';
       sktBox.innerHTML = '';
-
-      let sktKritikListesi = [];
+      let sktKritik = [];
 
       (appVerisi.kiler || []).forEach(item => {
-        const ad = item[0], barkod = item[1], stok = item[2], birim = item[3] || 'adet';
+        const ad = item[0], barkod = item[1], stok = item[2], birim = item[3] || 'Adet';
         const skt = item[5], resim = item[6];
-        const farkGun = sktDurumHesapla(skt);
+        const fark = sktDurumHesapla(skt);
 
         let sktBadge = '';
-        if (farkGun !== null) {
-          if (farkGun < 0) {
-            sktBadge = `<span class="bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold">SKT Geçti (${Math.abs(farkGun)}g)</span>`;
-            sktKritikListesi.push({ ad, msg: `${ad} ürününün tarihi ${Math.abs(farkGun)} gün önce geçti!`, tip: 'gecmiis' });
-          } else if (farkGun <= 3) {
-            sktBadge = `<span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md text-[10px] font-bold">Son ${farkGun === 0 ? 'Bugün' : farkGun + ' Gün'}</span>`;
-            sktKritikListesi.push({ ad, msg: `${ad} için son ${farkGun === 0 ? 'bugün' : farkGun + ' gün'} kaldı!`, tip: 'yakin' });
-          } else {
-            sktBadge = `<span class="text-zinc-500 text-[10px]">SKT: ${skt}</span>`;
+        if (fark !== null) {
+          if (fark < 0) {
+            sktBadge = `<span class="bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2 py-0.5 rounded text-[10px] font-bold">SKT Geçti (${Math.abs(fark)}g)</span>`;
+            sktKritik.push(`${ad} ürününün tarihi ${Math.abs(fark)} gün önce geçti!`);
+          } else if (fark <= 3) {
+            sktBadge = `<span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded text-[10px] font-bold">Son ${fark === 0 ? 'Bugün' : fark + ' Gün'}</span>`;
+            sktKritik.push(`${ad} için son ${fark === 0 ? 'bugün' : fark + ' gün'} kaldı!`);
           }
         }
 
-        const resimHTML = resim 
+        const imgHtml = resim 
           ? `<img src="${resim}" class="w-12 h-12 object-cover rounded-xl bg-zinc-800 border border-zinc-700/50">`
           : `<div class="w-12 h-12 rounded-xl bg-zinc-800 border border-zinc-700/50 flex items-center justify-center text-zinc-500"><i class="fa-solid fa-box text-sm"></i></div>`;
 
-        kilerBox.innerHTML += `
-          <div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl flex items-center justify-between">
+        kBox.innerHTML += `
+          <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-2xl flex items-center justify-between">
             <div class="flex items-center gap-3">
-              ${resimHTML}
+              ${imgHtml}
               <div>
                 <p class="font-bold text-sm text-zinc-100">${ad}</p>
                 <div class="flex items-center gap-2 mt-1">
                   ${sktBadge}
-                  <span class="text-[11px] text-zinc-500">${barkod ? '#' + barkod : ''}</span>
+                  <span class="text-[10px] text-zinc-500">${barkod ? '#' + barkod : ''}</span>
                 </div>
               </div>
             </div>
-            <span class="px-3 py-1.5 rounded-xl bg-zinc-800 border border-zinc-700 text-xs font-extrabold text-zinc-200">
+            <span class="px-3 py-1.5 rounded-xl bg-zinc-800 border border-zinc-700 text-xs font-black text-zinc-200">
               ${stok} ${birim}
             </span>
           </div>`;
       });
 
-      if (sktKritikListesi.length > 0) {
+      if (sktKritik.length > 0) {
         sktBox.innerHTML = `
-          <div class="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-2xl space-y-1.5">
-            <div class="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
-              <i class="fa-solid fa-triangle-exclamation"></i> Tüketim & SKT Uyarısı
-            </div>
-            ${sktKritikListesi.map(u => `<p class="text-xs text-amber-200/90 font-medium">• ${u.msg}</p>`).join('')}
+          <div class="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-2xl space-y-1">
+            <div class="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase"><i class="fa-solid fa-triangle-exclamation"></i> SKT Uyarısı</div>
+            ${sktKritik.map(m => `<p class="text-xs text-amber-200">• ${m}</p>`).join('')}
           </div>`;
       }
 
-      // 2. FİNANS (2 MAAŞ, FATURALAR VE HARCAMALAR)
-      let maasBen = 0, maasEsim = 0, toplamFatura = 0, digerGider = 0;
-      const finansBox = document.getElementById('finansListe');
-      finansBox.innerHTML = '';
+      // 2. FİNANS
+      let maasBen = 0, maasEsim = 0, fatura = 0, gider = 0;
+      const fBox = document.getElementById('finansListe');
+      fBox.innerHTML = '';
 
       (appVerisi.finans || []).forEach(item => {
         const tip = item[1], tutar = Number(item[3]) || 0;
         if (tip === 'Maas_Ben') maasBen += tutar;
         else if (tip === 'Maas_Esim') maasEsim += tutar;
-        else if (tip === 'Fatura') toplamFatura += tutar;
-        else digerGider += tutar;
+        else if (tip === 'Fatura') fatura += tutar;
+        else gider += tutar;
 
         const isGelir = tip.startsWith('Maas');
-        const badgeColor = isGelir ? 'text-emerald-400' : (tip === 'Fatura' ? 'text-amber-400' : 'text-rose-400');
-        const sign = isGelir ? '+' : '-';
+        const color = isGelir ? 'text-emerald-400' : (tip === 'Fatura' ? 'text-amber-400' : 'text-rose-400');
 
-        finansBox.innerHTML += `
+        fBox.innerHTML += `
           <div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl flex items-center justify-between">
             <div>
               <p class="font-bold text-sm text-zinc-200">${item[2]}</p>
               <p class="text-[11px] text-zinc-500">${item[0]} • ${item[4]} ${item[5] ? '• ' + item[5] : ''}</p>
             </div>
-            <span class="font-black text-sm ${badgeColor}">
-              ${sign}₺${tutar.toLocaleString('tr-TR')}
-            </span>
+            <span class="font-black text-sm ${color}">${isGelir ? '+' : '-'}₺${tutar.toLocaleString('tr-TR')}</span>
           </div>`;
       });
 
       const toplamGelir = maasBen + maasEsim;
-      const netKalan = toplamGelir - (toplamFatura + digerGider);
-
       document.getElementById('maasBenTutar').innerText = '₺' + maasBen.toLocaleString('tr-TR');
       document.getElementById('maasEsimTutar').innerText = '₺' + maasEsim.toLocaleString('tr-TR');
-      document.getElementById('toplamFatura').innerText = '₺' + toplamFatura.toLocaleString('tr-TR');
-      document.getElementById('toplamGider').innerText = '₺' + digerGider.toLocaleString('tr-TR');
+      document.getElementById('toplamFatura').innerText = '₺' + fatura.toLocaleString('tr-TR');
+      document.getElementById('toplamGider').innerText = '₺' + gider.toLocaleString('tr-TR');
       document.getElementById('toplamGelir').innerText = '₺' + toplamGelir.toLocaleString('tr-TR');
-      document.getElementById('netKalan').innerText = '₺' + netKalan.toLocaleString('tr-TR');
+      document.getElementById('netKalan').innerText = '₺' + (toplamGelir - (fatura + gider)).toLocaleString('tr-TR');
 
       // 3. ALIŞVERİŞ
-      const aliBox = document.getElementById('alisverisListe');
-      aliBox.innerHTML = '';
+      const aBox = document.getElementById('alisverisListe');
+      aBox.innerHTML = '';
       (appVerisi.alisveris || []).forEach((item, index) => {
-        aliBox.innerHTML += `
+        aBox.innerHTML += `
           <div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <button onclick="alisverisTamamla(${index})" class="w-6 h-6 rounded-full border border-zinc-700 hover:border-emerald-500 hover:bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <button onclick="alisverisTamamla(${index})" class="w-6 h-6 rounded-full border border-zinc-700 hover:border-emerald-500 text-emerald-400 flex items-center justify-center">
                 <i class="fa-solid fa-check text-xs"></i>
               </button>
               <div>
@@ -352,209 +599,30 @@
       });
 
       // 4. İSTEKLER
-      const istBox = document.getElementById('istekListe');
-      istBox.innerHTML = '';
+      const iBox = document.getElementById('istekListe');
+      iBox.innerHTML = '';
       (appVerisi.istekler || []).forEach(item => {
-        istBox.innerHTML += `
+        const link = item[0], ad = item[1], fiyat = Number(item[2]) || 0, ekleyen = item[3], resim = item[4];
+        const imgEl = resim 
+          ? `<img src="${resim}" class="w-14 h-14 object-cover rounded-xl bg-zinc-800">`
+          : `<div class="w-14 h-14 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-500"><i class="fa-solid fa-gift"></i></div>`;
+
+        iBox.innerHTML += `
           <div class="bg-zinc-900 border border-zinc-800 p-3.5 rounded-2xl flex items-center justify-between">
-            <div>
-              <p class="font-bold text-sm text-zinc-200">${item[1]}</p>
-              <p class="text-[11px] text-zinc-500">${item[3]} istedi</p>
-              ${item[0] ? `<a href="${item[0]}" target="_blank" class="text-xs text-indigo-400 underline mt-1 inline-block">Ürün Linki</a>` : ''}
+            <div class="flex items-center gap-3 overflow-hidden">
+              ${imgEl}
+              <div class="overflow-hidden">
+                <p class="font-bold text-sm text-zinc-200 truncate">${ad}</p>
+                <p class="text-[11px] text-zinc-500">${ekleyen} istedi</p>
+                ${link ? `<a href="${link}" target="_blank" class="text-[11px] text-indigo-400 font-semibold underline">Ürüne Git</a>` : ''}
+              </div>
             </div>
-            <p class="font-extrabold text-sm text-zinc-200">₺${Number(item[2]).toLocaleString('tr-TR')}</p>
+            <p class="font-black text-sm text-zinc-200 whitespace-nowrap pl-2">₺${fiyat.toLocaleString('tr-TR')}</p>
           </div>`;
       });
     }
 
-    function modalAc() {
-      const g = document.getElementById('modalGovde');
-      g.innerHTML = '';
-      document.getElementById('kameraKutusu').classList.add('hidden');
-
-      if (aktifSekme === 'kiler') {
-        document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
-        g.innerHTML = `
-          <!-- Barkod Okuma ve Görsel Önizleme -->
-          <div class="flex gap-2">
-            <input id="f_barkod" type="text" placeholder="Barkod Numarası" class="flex-1 bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-            <button onclick="kameraAc()" class="bg-indigo-600 px-4 rounded-xl text-white active:scale-95"><i class="fa-solid fa-barcode"></i> Tara</button>
-          </div>
-          <p id="apiDurum" class="text-[11px] text-zinc-500 hidden"></p>
-
-          <div id="urunOnizlemeKutusu" class="hidden flex items-center gap-3 bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
-            <img id="f_onizlemeResim" src="" class="w-12 h-12 rounded-lg object-cover">
-            <div>
-              <p id="f_onizlemeAd" class="text-xs font-bold text-zinc-200"></p>
-              <span class="text-[10px] text-emerald-400">Ürün veritabanından çekildi</span>
-            </div>
-          </div>
-
-          <input id="f_ad" type="text" placeholder="Ürün Adı" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-          <input id="f_resim" type="hidden">
-
-          <div class="grid grid-cols-2 gap-2">
-            <input id="f_stok" type="number" placeholder="Mevcut Stok" class="bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-            <input id="f_birim" type="text" placeholder="Birim (Adet, Paket, Lt)" class="bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-          </div>
-
-          <div>
-            <label class="block text-[11px] text-zinc-400 mb-1 font-semibold">Son Kullanma Tarihi (SKT)</label>
-            <input id="f_skt" type="date" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-          </div>
-          <input id="f_kritik" type="hidden" value="1">`;
-
-        // Barkod elle yazılırsa da API'yi tetikle
-        setTimeout(() => {
-          document.getElementById('f_barkod').addEventListener('change', function() {
-            barkodlaUrunAra(this.value.trim());
-          });
-        }, 100);
-
-      } else if (aktifSekme === 'finans') {
-        document.getElementById('modalBaslik').innerText = 'Gelir / Fatura / Gider Ekle';
-        g.innerHTML = `
-          <select id="f_tip" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-            <option value="Gider">Günlük Harcama (Gider)</option>
-            <option value="Fatura">Fatura veya Aidat</option>
-            <option value="Maas_Ben">Maaş (Ben)</option>
-            <option value="Maas_Esim">Maaş (Eşim)</option>
-          </select>
-          <input id="f_kategori" type="text" placeholder="Kategori (Aidat, Market, Elektrik vb.)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-          <input id="f_tutar" type="number" placeholder="Tutar (₺)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-          <select id="f_kisi" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-            <option value="Ben">Kişi: Ben</option>
-            <option value="Eşim">Kişi: Eşim</option>
-            <option value="Ortak">Ortak Hane</option>
-          </select>
-          <input id="f_not" type="text" placeholder="Açıklama (Örn: Ekim payölçer dahil)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">`;
-      } else if (aktifSekme === 'alisveris') {
-        document.getElementById('modalBaslik').innerText = 'Alınacak Ürün';
-        g.innerHTML = `
-          <input id="f_urun" type="text" placeholder="Alınacak Ürün Adı" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-          <input id="f_adet" type="number" value="1" placeholder="Adet" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-          <select id="f_ekleyen" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-            <option value="Ben">Ekleyen: Ben</option>
-            <option value="Eşim">Ekleyen: Eşim</option>
-          </select>`;
-      } else if (aktifSekme === 'istekler') {
-        document.getElementById('modalBaslik').innerText = 'İstek / Wishlist Ekle';
-        g.innerHTML = `
-          <input id="f_link" type="text" placeholder="Ürün Linki (Trendyol, Amazon)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-          <input id="f_ad" type="text" placeholder="Ürün Adı" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-          <input id="f_fiyat" type="number" placeholder="Fiyat (₺)" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-          <select id="f_ekleyen" class="w-full bg-zinc-800 border border-zinc-700/80 p-3.5 rounded-xl text-sm text-zinc-100 outline-none">
-            <option value="Ben">Ekleyen: Ben</option>
-            <option value="Eşim">Ekleyen: Eşim</option>
-          </select>`;
-      }
-      document.getElementById('formModal').classList.remove('hidden');
-    }
-
-    function modalKapat() {
-      kameraKapat();
-      document.getElementById('formModal').classList.add('hidden');
-    }
-
-    // Open Food Facts API ile barkoddan ürün bilgisi ve görsel çekme
-    async function barkodlaUrunAra(barkod) {
-      if (!barkod) return;
-      const apiDurum = document.getElementById('apiDurum');
-      apiDurum.innerText = "Ürün aranıyor...";
-      apiDurum.classList.remove('hidden');
-
-      try {
-        const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barkod}.json`);
-        const data = await res.json();
-
-        if (data.status === 1 && data.product) {
-          const p = data.product;
-          const urunAdi = p.product_name_tr || p.product_name || p.generic_name || "";
-          const resimUrl = p.image_front_small_url || p.image_front_url || p.image_url || "";
-
-          if (urunAdi) document.getElementById('f_ad').value = urunAdi;
-          if (resimUrl) {
-            document.getElementById('f_resim').value = resimUrl;
-            document.getElementById('f_onizlemeResim').src = resimUrl;
-            document.getElementById('f_onizlemeAd').innerText = urunAdi;
-            document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
-          }
-          apiDurum.innerText = "Ürün başarıyla bulundu!";
-        } else {
-          apiDurum.innerText = "Ürün bulunamadı, lütfen adı kendiniz yazın.";
-        }
-      } catch (err) {
-        apiDurum.innerText = "Bağlantı hatası, ürün adı manuel girilebilir.";
-      }
-    }
-
-    function formKaydet() {
-      let params = new URLSearchParams();
-
-      if (aktifSekme === 'kiler') {
-        params.append('islem', 'kilerEkle');
-        params.append('ad', document.getElementById('f_ad').value);
-        params.append('barkod', document.getElementById('f_barkod').value);
-        params.append('stok', document.getElementById('f_stok').value);
-        params.append('birim', document.getElementById('f_birim').value);
-        params.append('kritik', document.getElementById('f_kritik').value);
-        params.append('skt', document.getElementById('f_skt').value);
-        params.append('resim', document.getElementById('f_resim').value);
-      } else if (aktifSekme === 'finans') {
-        params.append('islem', 'finansEkle');
-        params.append('tip', document.getElementById('f_tip').value);
-        params.append('kategori', document.getElementById('f_kategori').value);
-        params.append('tutar', document.getElementById('f_tutar').value);
-        params.append('kisi', document.getElementById('f_kisi').value);
-        params.append('not', document.getElementById('f_not').value);
-      } else if (aktifSekme === 'alisveris') {
-        params.append('islem', 'alisverisEkle');
-        params.append('urun', document.getElementById('f_urun').value);
-        params.append('adet', document.getElementById('f_adet').value);
-        params.append('ekleyen', document.getElementById('f_ekleyen').value);
-      } else if (aktifSekme === 'istekler') {
-        params.append('islem', 'istekEkle');
-        params.append('link', document.getElementById('f_link').value);
-        params.append('ad', document.getElementById('f_ad').value);
-        params.append('fiyat', document.getElementById('f_fiyat').value);
-        params.append('ekleyen', document.getElementById('f_ekleyen').value);
-      }
-
-      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
-        yukleniyorGoster(true);
-        fetch(`${API_URL}?${params.toString()}`, { method: 'GET', redirect: 'follow' })
-          .then(res => res.json())
-          .then(data => {
-            appVerisi = data;
-            ekraniGuncelle();
-            modalKapat();
-          })
-          .catch(() => {
-            modalKapat();
-            verileriYukle();
-          })
-          .finally(() => yukleniyorGoster(false));
-      } else {
-        modalKapat();
-      }
-    }
-
-    function alisverisTamamla(index) {
-      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
-        yukleniyorGoster(true);
-        fetch(`${API_URL}?islem=alisverisSil&index=${index}`, { method: 'GET', redirect: 'follow' })
-          .then(res => res.json())
-          .then(data => {
-            appVerisi = data;
-            ekraniGuncelle();
-          })
-          .finally(() => yukleniyorGoster(false));
-      } else {
-        appVerisi.alisveris.splice(index, 1);
-        ekraniGuncelle();
-      }
-    }
-
+    // Kamera Kontrolleri
     function kameraAc() {
       document.getElementById('kameraKutusu').classList.remove('hidden');
       html5QrCode = new Html5Qrcode("reader");
@@ -567,7 +635,7 @@
           barkodlaUrunAra(decodedText);
         },
         () => {}
-      ).catch(() => alert("Kamera açılamadı, Safari izinlerini kontrol edin."));
+      ).catch(() => alert("Kamera açılamadı."));
     }
 
     function kameraKapat() {
@@ -575,12 +643,12 @@
         html5QrCode.stop().then(() => {
           html5QrCode.clear();
           document.getElementById('kameraKutusu').classList.add('hidden');
-        }).catch(() => {});
+        }).catch(() => {
+          document.getElementById('kameraKutusu').classList.add('hidden');
+        });
+      } else {
+        document.getElementById('kameraKutusu').classList.add('hidden');
       }
-    }
-
-    function yukleniyorGoster(durum) {
-      document.getElementById('yukleniyor').classList.toggle('hidden', !durum);
     }
   </script>
 </body>
