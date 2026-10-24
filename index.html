@@ -157,7 +157,7 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbzFYfvheaFitp599p1R6pMULhIuX5wcwk_iS_jbVYTK172hVgz_WVcUAEFjoLf3roaE/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycby9WUp5Mv0Ub847IDV-huasuwd8p5nR87XewXkx0Sen5te6hTiISUTSUkndYLhz-76U/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
@@ -224,7 +224,7 @@
       if (aktifSekme === 'kiler') {
         document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
         g.innerHTML = `
-          <!-- YAPAY ZEKA GÖRSEL MOTORU (RESILIENT PIPELINE) -->
+          <!-- YAPAY ZEKA GÖRSEL MOTORU -->
           <div class="bg-gradient-to-r from-blue-900/40 via-indigo-900/40 to-purple-900/40 p-4 rounded-2xl border border-blue-500/30 text-center space-y-2.5">
             <div class="flex justify-between items-center px-1">
               <span class="text-[12px] font-bold text-blue-300 flex items-center gap-1.5">
@@ -235,7 +235,7 @@
             <button type="button" onclick="document.getElementById('aiFotoInput').click()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-blue-600/30 transition-all text-sm">
               <i class="fa-solid fa-camera text-base"></i> Paketin Fotoğrafını Çek
             </button>
-            <p class="text-[10px] text-gray-400">Paketin önünü çekin; anında tanımlanıp görsel alternatifleri listelensin.</p>
+            <p class="text-[10px] text-gray-400">Ambalajı çekin; doğrudan hesabınızdaki aktif Gemini modeliyle tanınsın.</p>
             <input type="file" id="aiFotoInput" accept="image/*" capture="environment" class="hidden" onchange="aiUrunAnalizEt(event)">
             <p id="aiDurumYazisi" class="text-[12px] hidden font-semibold pt-0.5"></p>
           </div>
@@ -396,7 +396,7 @@
       resimSecenekleriGetir(ad, document.getElementById('f_resim').value);
     }
 
-    // ⚡ ÇOK MODELLİ YEDEKLEMELİ ANALİZ (HIGH DEMAND VE DEPRECATION ENGELİNİ AŞAR)
+    // ⚡ CANLI MODEL LİSTESİYLE ÇALIŞAN HATA-SIZ YAPAY ZEKA ÇAĞRISI
     async function aiUrunAnalizEt(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -451,33 +451,55 @@
           }
         };
 
-        // Otomatik sıralı fallback: biri yoğunsa veya kapalıysa hemen sonrakine geçer
-        const adayModeller = [
-          "gemini-3.8-flash",
-          "gemini-2.5-flash",
-          "gemini-2.0-flash",
-          "gemini-1.5-flash"
-        ];
+        // 🔍 HESABINDA AKTİF VE CANLI OLAN MODELLERİ GOOGLE'DAN ÇEK
+        durum.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Aktif Gemini modeli tespit ediliyor...';
+        let aktifModeller = [];
+        try {
+          const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+          const listData = await listRes.json();
+          if (listData.models) {
+            const uygunlar = listData.models
+              .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"))
+              .map(m => m.name.replace("models/", ""));
+            
+            // 3.8 veya flash modellerini öne al
+            const flashlar = uygunlar.filter(m => m.includes("3.8") || m.includes("flash"));
+            const digerleri = uygunlar.filter(m => !flashlar.includes(m));
+            aktifModeller = [...flashlar, ...digerleri];
+          }
+        } catch (e) {}
+
+        if (aktifModeller.length === 0) {
+          aktifModeller = ["gemini-3.8-flash"];
+        }
 
         let basarili = false;
         let sonHata = "";
 
-        for (const model of adayModeller) {
+        // SADECE CANLI MODELLERİ DENE
+        for (const model of aktifModeller) {
           try {
-            durum.innerHTML = `<i class="fa-solid fa-bolt animate-pulse text-amber-300"></i> ${model} sorgulanıyor...`;
+            durum.innerHTML = `<i class="fa-solid fa-bolt animate-pulse text-amber-300"></i> ${model} ambalajı inceliyor...`;
             
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 6000);
-
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+            let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload),
-              signal: controller.signal
+              body: JSON.stringify(payload)
             });
-            clearTimeout(timeoutId);
 
-            const data = await res.json();
+            let data = await res.json();
+
+            // EĞER YOĞUNLUK VARSA (HIGH DEMAND) 1 SANİYE BEKLEYİP AYNI MODELİ TEKRAR DENE!
+            if (data.error && (data.error.message.includes("high demand") || data.error.code === 503)) {
+              durum.innerHTML = `<i class="fa-solid fa-rotate animate-spin text-orange-400"></i> Sunucu yoğun, yeniden deneniyor...`;
+              await new Promise(r => setTimeout(r, 1200));
+              res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+              });
+              data = await res.json();
+            }
 
             if (res.ok && data.candidates && data.candidates[0].content) {
               const parts = data.candidates[0].content.parts || [];
