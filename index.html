@@ -157,7 +157,7 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbw3OceTdYzmixCxCCiwhbTMLyXfxRwWuV2W3qA_qwgB6-XHzTa7YrgF1v6UBS9lDRRD/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbycFRhidr-VFrgAOqXlG3gm_tsPj8waeRo5i7JKxreGW9nNTbfq_jYA3ib6oO7QIBMo/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
@@ -278,7 +278,6 @@
       alert("Kayıtlı Gemini şifresi silindi. Bir sonraki fotoğrafta yeni şifreniz sorulacaktır.");
     }
 
-    // 📸 RESMİ OTOMATİK 600PX SIKIŞTIRMA (BELLEK KORUMASI)
     function resmiKucultBase64(file, maxBoyut = 600) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -302,17 +301,16 @@
       });
     }
 
-    // 🧠 DOĞRUDAN GOOGLE GEMINI VISION ÇAĞRISI (SAFARI VE CORS UYUMLU)
+    // 🚀 DİNAMİK MODEL SEÇİCİ İLE ZIRHLI YAPAY ZEKA ÇAĞRISI
     async function aiUrunAnalizEt(e) {
       const file = e.target.files[0];
       if (!file) return;
       const durum = document.getElementById('aiDurumYazisi');
       const previewBox = document.getElementById('urunOnizlemeKutusu');
       
-      // 1. Cihaz hafızasındaki şifreyi kontrol et
       let apiKey = localStorage.getItem('bizimEvGeminiKey') || '';
       if (!apiKey || apiKey.trim().length < 10) {
-        apiKey = prompt("Yapay zeka ile ürün tanımak için Google AI Studio anahtarınızı (API Key) yapıştırın:\n\n(Bu şifre GitHub'a GİTMEZ, sadece telefonunuzda saklanır):");
+        apiKey = prompt("Google AI Studio anahtarınızı yapıştırın (Şifre sadece telefonunuzda saklanır):");
         if (!apiKey || apiKey.trim().length < 10) {
           durum.classList.remove('hidden');
           durum.innerHTML = '<i class="fa-solid fa-circle-exclamation text-orange-400"></i> API anahtarı girilmedi.';
@@ -329,15 +327,36 @@
 
       try {
         const base64Url = await resmiKucultBase64(file, 600);
-        
-        // Fotoğrafı kutucuğa ekle
         document.getElementById('f_resim').value = base64Url;
         document.getElementById('f_onizlemeResim').src = base64Url;
         document.getElementById('f_onizlemeAd').innerText = "Yapay zeka inceliyor...";
         document.getElementById('f_onizlemeKat').innerText = "Lütfen bekleyin";
         previewBox.classList.remove('hidden');
         
-        durum.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles animate-pulse text-amber-300"></i> Yapay zeka ambalajı okuyor...';
+        durum.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles animate-pulse text-amber-300"></i> Hesabınızdaki en güncel yapay zeka bağlanıyor...';
+
+        // 1. Hesabında aktif olan modelleri doğrudan Google'dan öğren
+        let secilenModeller = [];
+        try {
+          const mRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+          if (mRes.ok) {
+            const mData = await mRes.json();
+            if (mData.models && mData.models.length > 0) {
+              const aktifler = mData.models
+                .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"))
+                .map(m => m.name.replace("models/", ""));
+              
+              // Flash modellerini en başa al (hızlı ve görme yetenekli)
+              const flashlar = aktifler.filter(m => m.includes("flash"));
+              secilenModeller = [...flashlar, ...aktifler];
+            }
+          }
+        } catch(err) {}
+
+        // Eğer dinamik liste alınamazsa yedek güncel liste
+        if (secilenModeller.length === 0) {
+          secilenModeller = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-flash-latest"];
+        }
 
         const pureBase64 = base64Url.split(',')[1];
         const promptText = "Bu fotoğraftaki market ürününü tespit et. Türkiye'deki market ürünlerini (BİM Dost/Aknaz/Peripella, A101 Birşah/Peynes/Vera, Şok Mis/Piyale/Mintax, Migros, Sütaş, Pınar, Ülker, Eti vb.) çok iyi biliyorsun. Paketin üzerindeki marka ve ürün adını net bir şekilde tespit et. Yanıt olarak SADECE geçerli bir JSON döndür, markdown veya başka açıklama yazma: {\"ad\": \"Marka ve Ürün Adı\", \"kategori\": \"Kategori\"}. Kategori seçenekleri sadece şunlardır: 'Gıda & Mutfak', 'Temizlik & Hijyen', 'Kişisel Bakım', 'Ev & Yaşam'.";
@@ -346,17 +365,16 @@
           contents: [{
             parts: [
               { text: promptText },
-              { inlineData: { mimeType: "image/jpeg", data: pureBase64 } }
+              { inline_data: { mime_type: "image/jpeg", data: pureBase64 } }
             ]
           }]
         };
 
-        // Modelleri sırayla dene (Hem 2.0 hem 1.5 desteği)
-        const modeller = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"];
         let basarili = false;
         let sonHataMetni = "";
 
-        for (const model of modeller) {
+        // Hesaptaki modelleri tek tek dene, çalışan ilk model sonucu getirsin
+        for (const model of secilenModeller) {
           try {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             const res = await fetch(url, {
@@ -376,16 +394,16 @@
                 if (sonuc.kategori) document.getElementById('f_kategori').value = sonuc.kategori;
                 document.getElementById('f_onizlemeAd').innerText = sonuc.ad;
                 document.getElementById('f_onizlemeKat').innerText = sonuc.kategori || "Gıda & Mutfak";
-                durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>Yapay Zeka Tanıdı:</b> ${sonuc.ad}`;
+                durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>Yapay Zeka (${model}) Tanıdı:</b> ${sonuc.ad}`;
                 durum.className = "text-[12px] text-emerald-400 font-semibold block px-1";
                 basarili = true;
                 break;
               }
             } else if (data.error) {
               sonHataMetni = data.error.message;
-              if (data.error.message.includes("API key not valid") || data.error.status === "INVALID_ARGUMENT") {
+              if (data.error.message.includes("API key not valid")) {
                 localStorage.removeItem('bizimEvGeminiKey');
-                durum.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-400"></i> API Şifresi Geçersiz! Lütfen butona tekrar basıp yeni şifre yapıştırın.`;
+                durum.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-400"></i> API Şifresi Geçersiz. Lütfen doğru şifreyi girin.`;
                 durum.className = "text-[12px] text-red-400 font-semibold block px-1";
                 return;
               }
@@ -396,7 +414,7 @@
         }
 
         if (!basarili) {
-          durum.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-orange-400"></i> ${sonHataMetni || "Ambalaj net okunamadı, lütfen ürün adını yazınız."}`;
+          durum.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-orange-400"></i> ${sonHataMetni || "Ambalaj okunamadı, lütfen ürün adını yazınız."}`;
           durum.className = "text-[12px] text-orange-400 font-semibold block px-1";
         }
       } catch (err) {
