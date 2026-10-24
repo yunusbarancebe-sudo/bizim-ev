@@ -157,9 +157,9 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxp8KABr7TBijTrzbVTnuRKr0Y_cX9GeGd35PgqVoY4Z1BVoXps_QNOHT-AYYadqFBp/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbw0jlZ3ysGcLubQ9PVn0Oixr0uU3TB70RBzn0640Wq8_JSl8drEmBPpmGhA3WHcGZoK/exec";
 
-    let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null;
+    let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
     const defaultVeri = { kiler: [], finans: [], alisveris: [], istekler: [], barkodHavuzu: [] };
     let appVerisi = defaultVeri;
@@ -224,15 +224,17 @@
       if (aktifSekme === 'kiler') {
         document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
         g.innerHTML = `
-          <div class="flex gap-2"><input id="f_barkod" type="text" placeholder="Barkod Tara veya Yaz" class="${inputClass} flex-1"><button type="button" onclick="kameraAc()" class="bg-[#2c2c2e] px-4 rounded-xl text-blue-400 font-bold"><i class="fa-solid fa-barcode text-lg"></i></button></div>
+          <div class="flex gap-2">
+            <input id="f_barkod" type="text" placeholder="Barkod Tara veya Yaz" class="${inputClass} flex-1" oninput="barkodHizliYazma(this.value)">
+            <button type="button" onclick="kameraAc()" class="bg-[#2c2c2e] px-4 rounded-xl text-blue-400 font-bold"><i class="fa-solid fa-barcode text-lg"></i></button>
+          </div>
           <p id="barkodDurum" class="text-[12px] hidden font-medium"></p>
           <div id="urunOnizlemeKutusu" class="hidden flex items-center gap-3 bg-[#2c2c2e] p-3 rounded-xl border border-white/5"><img id="f_onizlemeResim" src="" class="w-12 h-12 rounded-lg object-cover bg-black"><div><p id="f_onizlemeAd" class="text-[13px] font-bold text-white"></p><span id="f_onizlemeKat" class="text-[11px] text-emerald-400 font-medium"></span></div></div>
-          <input id="f_ad" type="text" placeholder="Ürün Adı (Yazınca Resmi Bulur)" class="${inputClass}" onblur="isimdenResimBul(this.value)">
+          <input id="f_ad" type="text" placeholder="Ürün Adı" class="${inputClass}" onblur="isimdenResimBul(this.value)">
           <select id="f_kategori" class="${inputClass}"><option value="Gıda & Mutfak">Kategori: Gıda</option><option value="Temizlik & Hijyen">Kategori: Temizlik</option><option value="Kişisel Bakım">Kategori: Kişisel Bakım</option><option value="Ev & Yaşam">Kategori: Ev & Yaşam</option></select>
           <input id="f_resim" type="hidden">
           <div class="grid grid-cols-2 gap-3"><input id="f_stok" type="number" placeholder="Stok" value="1" class="${inputClass}"><input id="f_birim" type="text" placeholder="Birim (Adet, Lt)" value="Adet" class="${inputClass}"></div>
           <div><label class="block text-[12px] text-gray-400 mb-1.5 px-1">SKT (Son Kullanma Tarihi)</label><input id="f_skt" type="date" class="${inputClass}"></div>`;
-        setTimeout(() => document.getElementById('f_barkod').addEventListener('change', function() { barkodlaUrunAra(this.value.trim()); }), 50);
       } 
       else if (aktifSekme === 'finans') {
         document.getElementById('modalBaslik').innerText = 'Harcama / Gelir Ekle';
@@ -250,6 +252,106 @@
     }
 
     function modalKapat() { try { kameraKapat(); } catch (e) {} document.getElementById('formModal').classList.add('hidden'); document.getElementById('formModal').classList.remove('flex'); }
+
+    function barkodHizliYazma(val) {
+      clearTimeout(barkodTimer);
+      if (!val) return;
+      val = val.trim();
+      if (val.length === 8 || val.length === 12 || val.length === 13) {
+        barkodlaUrunAra(val);
+      } else if (val.length > 5) {
+        barkodTimer = setTimeout(() => barkodlaUrunAra(val), 600);
+      }
+    }
+
+    // 🚀 TELEFONDAN DOĞRUDAN ÇALIŞAN ZIRHLI BARKOD MOTORU (BOT ENGELİ YOK!)
+    async function barkodlaUrunAra(barkod) {
+      if (!barkod) return;
+      barkod = String(barkod).trim();
+      const d = document.getElementById('barkodDurum');
+      d.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Veritabanları taranıyor...';
+      d.className = "text-[12px] text-blue-400 font-semibold block px-1";
+
+      // 1. Önce cihazdaki kayıtlı Barkod Havuzuna bak (Anında yanıt)
+      const yerel = (appVerisi.barkodHavuzu||[]).find(u => String(u[0]) === barkod);
+      if (yerel && yerel[1]) {
+        document.getElementById('f_ad').value = yerel[1];
+        if(yerel[2]) {
+          document.getElementById('f_resim').value = yerel[2];
+          document.getElementById('f_onizlemeResim').src = yerel[2];
+          document.getElementById('f_onizlemeAd').innerText = yerel[1];
+          document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
+        }
+        if(yerel[3]) document.getElementById('f_kategori').value = yerel[3];
+        d.innerHTML = `<i class="fa-solid fa-circle-check"></i> Havuzunuzdan bulundu: <b>${yerel[1]}</b>`;
+        d.className = "text-[12px] text-emerald-400 font-semibold block px-1";
+        return;
+      }
+
+      // 2. OpenFoodFacts (Dünya & Türkiye Gıda Ağı - Doğrudan telefondan, engelsiz!)
+      try {
+        const resOFF = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barkod}.json`);
+        if (resOFF.ok) {
+          const dataOFF = await resOFF.json();
+          if (dataOFF.status === 1 && dataOFF.product) {
+            const prod = dataOFF.product;
+            const marka = prod.brands ? prod.brands.split(',')[0].trim() : '';
+            let ad = prod.product_name_tr || prod.product_name || prod.generic_name_tr || prod.generic_name || '';
+            if (marka && ad && !ad.toLowerCase().includes(marka.toLowerCase())) ad = marka + ' ' + ad;
+            else if (!ad && marka) ad = marka + ' Ürünü';
+
+            if (ad) {
+              document.getElementById('f_ad').value = ad;
+              document.getElementById('f_kategori').value = "Gıda & Mutfak";
+              const resim = prod.image_front_small_url || prod.image_url || '';
+              if (resim) {
+                document.getElementById('f_resim').value = resim;
+                document.getElementById('f_onizlemeResim').src = resim;
+                document.getElementById('f_onizlemeAd').innerText = ad;
+                document.getElementById('f_onizlemeKat').innerText = "Gıda & Mutfak";
+                document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
+              }
+              d.innerHTML = `<i class="fa-solid fa-circle-check"></i> Bulundu: <b>${ad}</b>`;
+              d.className = "text-[12px] text-emerald-400 font-semibold block px-1";
+              return;
+            }
+          }
+        }
+      } catch (err) {}
+
+      // 3. OpenBeautyFacts (Kişisel Bakım / Şampuan / Kozmetik)
+      try {
+        const resOBF = await fetch(`https://world.openbeautyfacts.org/api/v0/product/${barkod}.json`);
+        if (resOBF.ok) {
+          const dataOBF = await resOBF.json();
+          if (dataOBF.status === 1 && dataOBF.product) {
+            const prod = dataOBF.product;
+            const marka = prod.brands ? prod.brands.split(',')[0].trim() : '';
+            let ad = prod.product_name_tr || prod.product_name || '';
+            if (marka && ad && !ad.toLowerCase().includes(marka.toLowerCase())) ad = marka + ' ' + ad;
+            if (ad) {
+              document.getElementById('f_ad').value = ad;
+              document.getElementById('f_kategori').value = "Kişisel Bakım";
+              const resim = prod.image_front_small_url || prod.image_url || '';
+              if (resim) {
+                document.getElementById('f_resim').value = resim;
+                document.getElementById('f_onizlemeResim').src = resim;
+                document.getElementById('f_onizlemeAd').innerText = ad;
+                document.getElementById('f_onizlemeKat').innerText = "Kişisel Bakım";
+                document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
+              }
+              d.innerHTML = `<i class="fa-solid fa-circle-check"></i> Bulundu: <b>${ad}</b>`;
+              d.className = "text-[12px] text-emerald-400 font-semibold block px-1";
+              return;
+            }
+          }
+        }
+      } catch (err) {}
+
+      // 4. Bulunamadıysa: Kullanıcıya kibarca bildir, yazınca sisteme kaydetsin
+      d.innerHTML = `<i class="fa-solid fa-circle-plus"></i> Bulunamadı. Adını yazıp kaydedin, hafızaya alınsın.`;
+      d.className = "text-[12px] text-orange-400 font-semibold block px-1";
+    }
 
     async function isimdenResimBul(isim) {
       if(!isim || isim.length < 3 || document.getElementById('f_resim').value) return;
@@ -276,20 +378,6 @@
           d.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Ürün adını kendiniz girebilirsiniz.`; d.className = "text-[12px] text-emerald-400 font-medium block px-1";
         } catch(e) { document.getElementById('f_ad').value = "Yeni Ürün"; d.innerHTML = `<i class="fa-solid fa-info-circle text-gray-400"></i> Lütfen ürün adını giriniz.`; }
       }, 700);
-    }
-
-    async function barkodlaUrunAra(barkod) {
-      if (!barkod) return;
-      const d = document.getElementById('barkodDurum'); d.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Taranıyor...'; d.className = "text-[12px] text-blue-400 font-semibold block px-1";
-      const yerel = (appVerisi.barkodHavuzu||[]).find(u => String(u[0]) === String(barkod));
-      if (yerel) { document.getElementById('f_ad').value = yerel[1] || ''; if(yerel[2]) { document.getElementById('f_resim').value = yerel[2]; document.getElementById('f_onizlemeResim').src = yerel[2]; document.getElementById('f_onizlemeAd').innerText = yerel[1]; document.getElementById('urunOnizlemeKutusu').classList.remove('hidden'); } if(yerel[3]) document.getElementById('f_kategori').value = yerel[3]; d.innerHTML = `<i class="fa-solid fa-circle-check"></i> Havuzunuzdan bulundu.`; d.className = "text-[12px] text-emerald-400 font-semibold block px-1"; return; }
-      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
-        try {
-          const data = await fetch(`${API_URL}?islem=barkodAra&barkod=${barkod}`).then(r=>r.json());
-          if (data.ad) { document.getElementById('f_ad').value = data.ad; d.innerHTML = `<i class="fa-solid fa-circle-check"></i> İnternetten bulundu.`; d.className = "text-[12px] text-emerald-400 font-semibold block px-1"; return; }
-        } catch(e) {}
-      }
-      d.innerHTML = `<i class="fa-solid fa-circle-plus"></i> Yeni Ürün. Adını yazın, sisteme kaydedilsin.`; d.className = "text-[12px] text-orange-400 font-semibold block px-1";
     }
 
     function whatsappPaylas() {
@@ -337,7 +425,7 @@
         const bugun = new Date(); bugun.setHours(0,0,0,0);
         let kilerKritikHtml = ""; let bekleYenAlisveris = 0; let istekSayisi = 0;
 
-        // ================= YENİ: KİLER SKT KUTUCUĞU =================
+        // KİLER
         const kBox = document.getElementById('kilerListe'); kBox.innerHTML = ''; 
         (appVerisi.kiler || []).forEach((item, index) => {
           const ad = item[0]||'', stok = Number(item[2])||0, birim = item[3]||'Adet', skt = item[5], resim = item[6], kat = item[7]||'Gıda';
@@ -443,8 +531,25 @@
       } catch (e) {}
     }
 
-    function kameraAc() { document.getElementById('kameraKutusu').classList.remove('hidden'); html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => { document.getElementById('f_barkod').value = txt; kameraKapat(); barkodlaUrunAra(txt); }, ()=>{}).catch(()=>alert("Kamera izni gerekli.")); }
-    function kameraKapat() { try { if(html5QrCode){html5QrCode.stop(); html5QrCode.clear();} } catch(e){} document.getElementById('kameraKutusu').classList.add('hidden'); }
+    function kameraAc() { 
+      document.getElementById('kameraKutusu').classList.remove('hidden'); 
+      html5QrCode = new Html5Qrcode("reader"); 
+      html5QrCode.start(
+        { facingMode: "environment" }, 
+        { fps: 15, qrbox: { width: 280, height: 160 } }, 
+        (txt) => { 
+          document.getElementById('f_barkod').value = txt; 
+          kameraKapat(); 
+          barkodlaUrunAra(txt); 
+        }, 
+        ()=>{}
+      ).catch(()=>alert("Kamera izni gerekli.")); 
+    }
+    
+    function kameraKapat() { 
+      try { if(html5QrCode){html5QrCode.stop(); html5QrCode.clear();} } catch(e){} 
+      document.getElementById('kameraKutusu').classList.add('hidden'); 
+    }
   </script>
 </body>
 </html>
