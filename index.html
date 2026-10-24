@@ -157,7 +157,7 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbzd13co3Og4rtZR945lu6P2g828JkpRnbmXdL1RwS6z_lITQq7Nnn2XGZOMOmheQIfE/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxkV3jgHcPh620MjkLqXxjE53dwDerH_szNzmuFZLKLqrJgNVl9jTM9cntU-p8oLxRV/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
@@ -333,7 +333,6 @@
       gDurum.innerText = "Görseller taranıyor...";
       gListe.innerHTML = "";
 
-      // 1. Seçenek: Çekilen Kamera Fotoğrafı
       if (kameraFotografi) {
         gListe.innerHTML += `
           <div onclick="resimSec(this, '${kameraFotografi}')" class="gorsel-secim-kart ring-2 ring-blue-500 rounded-xl overflow-hidden shrink-0 cursor-pointer relative w-16 h-16 bg-black">
@@ -344,7 +343,6 @@
 
       let bulunanlar = [];
 
-      // Google Görsellerden 4-5 seçenek çek
       if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
         try {
           const res = await fetch(`${API_URL}?islem=resimBul&ad=${encodeURIComponent(urunAdi)}`);
@@ -355,7 +353,6 @@
         } catch (e) {}
       }
 
-      // OpenFoodFacts Türkiye'den de alternatif çek
       try {
         const offRes = await fetch(`https://tr.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(urunAdi)}&search_simple=1&action=process&json=1&page_size=2`);
         if (offRes.ok) {
@@ -369,7 +366,6 @@
         }
       } catch(e) {}
 
-      // Bulunan temiz katalog görsellerini yan yana diz
       bulunanlar.forEach((url, i) => {
         gListe.innerHTML += `
           <div onclick="resimSec(this, '${url}')" class="gorsel-secim-kart ring-1 ring-white/10 rounded-xl overflow-hidden shrink-0 cursor-pointer relative w-16 h-16 bg-black hover:ring-2 hover:ring-blue-400 transition-all">
@@ -378,7 +374,6 @@
           </div>`;
       });
 
-      // Eğer Google'dan temiz resim geldiyse, otomatik olarak ilk temiz resmi varsayılan seç!
       if (bulunanlar.length > 0) {
         const ilkKatalog = gListe.querySelectorAll('.gorsel-secim-kart')[1];
         if (ilkKatalog) resimSec(ilkKatalog, bulunanlar[0]);
@@ -404,7 +399,7 @@
       resimSecenekleriGetir(ad, document.getElementById('f_resim').value);
     }
 
-    // ⚡ 1 SANİYELİK TURBO JET YAPAY ZEKA ÇAĞRISI (THINKING KAPALI)
+    // ⚡ ZIRHLI VE ÇOK KATMANLI YAPAY ZEKA ÇAĞRISI (JSON HATASI VERMEZ)
     async function aiUrunAnalizEt(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -425,7 +420,7 @@
       }
 
       durum.classList.remove('hidden');
-      durum.innerHTML = '<i class="fa-solid fa-bolt animate-pulse text-amber-300"></i> 1 saniyede taranıyor...';
+      durum.innerHTML = '<i class="fa-solid fa-bolt animate-pulse text-amber-300"></i> İnceleniyor...';
       durum.className = "text-[12px] text-amber-300 font-semibold block px-1";
 
       const baslangicZamani = Date.now();
@@ -441,7 +436,6 @@
 
         const pureBase64 = base64Url.split(',')[1];
         
-        // 🚀 DÜŞÜNME (THINKING) SÜRESİ TAMAMEN SIFIRLANMIŞ YENİ NESİL PAYLOAD
         const payload = {
           contents: [{
             parts: [
@@ -455,12 +449,8 @@
             ]
           }],
           generationConfig: {
-            responseMimeType: "application/json",
-            thinkingConfig: {
-              thinkingBudget: 0
-            },
-            temperature: 0.1,
-            maxOutputTokens: 60
+            maxOutputTokens: 500, // Kesilmeye karşı genişletildi
+            temperature: 0.1
           }
         };
 
@@ -475,27 +465,70 @@
         if (res.ok && data.candidates && data.candidates[0].content) {
           const parts = data.candidates[0].content.parts || [];
           let rawText = "";
-          for (const p of parts) { if (p.text && !p.thought) rawText = p.text; }
-          if (!rawText && parts.length > 0) rawText = parts[parts.length - 1].text || "";
+          
+          // Düşünce tokenlarını filtrele ve metni topla
+          for (const p of parts) {
+            if (p.text && !p.thought) rawText += p.text + " ";
+          }
+          if (!rawText.trim() && parts.length > 0) {
+            rawText = parts.map(p => p.text || "").join(" ");
+          }
 
-          const match = rawText.match(/\{[\s\S]*?\}/);
-          if (match) {
-            const sonuc = JSON.parse(match[0]);
+          let temizMetin = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+          let parsedAd = "";
+          let parsedKat = "Gıda & Mutfak";
+
+          // 1. Standart JSON denemesi
+          try {
+            const obj = JSON.parse(temizMetin);
+            if (obj.ad) parsedAd = obj.ad;
+            if (obj.kat || obj.kategori) parsedKat = obj.kat || obj.kategori;
+          } catch(e) {}
+
+          // 2. Regex ile { ... } ayıklama denemesi
+          if (!parsedAd) {
+            const m = temizMetin.match(/\{[\s\S]*?\}/);
+            if (m) {
+              try {
+                const obj = JSON.parse(m[0]);
+                if (obj.ad) parsedAd = obj.ad;
+                if (obj.kat || obj.kategori) parsedKat = obj.kat || obj.kategori;
+              } catch(e) {}
+            }
+          }
+
+          // 3. Kesintiye uğramış JSON ayıklama denemesi
+          if (!parsedAd) {
+            const adMatch = temizMetin.match(/"ad"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)"?/i);
+            if (adMatch && adMatch[1]) {
+              parsedAd = adMatch[1].replace(/\\"/g, '"').trim();
+            }
+          }
+
+          // 4. Düz metin kurtarma denemesi
+          if (!parsedAd) {
+            const lines = temizMetin.split('\n').map(l => l.replace(/[{}\[\]"]/g, '').trim()).filter(l => l.length > 2);
+            if (lines.length > 0) {
+              parsedAd = lines[0].substring(0, 50).trim();
+            }
+          }
+
+          if (parsedAd) {
             const sure = ((Date.now() - baslangicZamani) / 1000).toFixed(1);
             
-            // Formu doldur
-            document.getElementById('f_ad').value = sonuc.ad;
-            if (sonuc.kat) document.getElementById('f_kategori').value = sonuc.kat;
-            document.getElementById('f_onizlemeAd').innerText = sonuc.ad;
-            document.getElementById('f_onizlemeKat').innerText = sonuc.kat || "Gıda & Mutfak";
+            // Alanları doldur
+            document.getElementById('f_ad').value = parsedAd;
+            document.getElementById('f_kategori').value = parsedKat;
+            document.getElementById('f_onizlemeAd').innerText = parsedAd;
+            document.getElementById('f_onizlemeKat').innerText = parsedKat;
             
-            durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>${sonuc.ad}</b> (${sure} sn)`;
+            durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>${parsedAd}</b> (${sure} sn)`;
             durum.className = "text-[12px] text-emerald-400 font-semibold block px-1";
 
-            // 🎯 GOOGLE GÖRSELLERİ BUL VE SEÇENEKLERİ DİZ
-            resimSecenekleriGetir(sonuc.ad, base64Url);
+            // Google Görselleri getir
+            resimSecenekleriGetir(parsedAd, base64Url);
           } else {
-            throw new Error("JSON yanıtı çözümlenemedi.");
+            throw new Error("Metin ayıklanamadı.");
           }
         } else if (data.error) {
           if (data.error.message.includes("API key not valid")) {
