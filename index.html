@@ -157,7 +157,7 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbyxkfMxL1yG5nkDr7GwQvAqFmvAr-GyLVW5Xc9fIKeLFWFEEFRyBn-8ipLtWeYq9Ttf/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbz5SBBdArWaFckhXV2vCYvu_93VpwCOF1V3PPHGgq8iZ37cU3o5k_1fMtZC5IIh9nFH/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
@@ -224,20 +224,20 @@
       if (aktifSekme === 'kiler') {
         document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
         g.innerHTML = `
-          <!-- HIZLI YAPAY ZEKA GÖRSEL MOTORU -->
-          <div class="bg-gradient-to-r from-blue-900/30 via-indigo-900/30 to-purple-900/30 p-4 rounded-2xl border border-blue-500/30 text-center space-y-2">
+          <!-- YAPAY ZEKA GÖRSEL MOTORU (YILDIRIM MOD) -->
+          <div class="bg-gradient-to-r from-blue-900/40 via-indigo-900/40 to-purple-900/40 p-4 rounded-2xl border border-blue-500/30 text-center space-y-2.5">
             <div class="flex justify-between items-center px-1">
               <span class="text-[12px] font-bold text-blue-300 flex items-center gap-1.5">
-                <i class="fa-solid fa-bolt text-amber-300"></i> Hızlı Fotoğraf Tanıma
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Hızlı Fotoğraf Tanıma
               </span>
               <button type="button" onclick="geminiKeySifirla()" class="text-[10px] text-gray-400 underline hover:text-white">Şifre Değiştir</button>
             </div>
             <button type="button" onclick="document.getElementById('aiFotoInput').click()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-blue-600/30 transition-all text-sm">
               <i class="fa-solid fa-camera text-base"></i> Paketin Fotoğrafını Çek
             </button>
-            <p class="text-[10px] text-gray-400">Ambalajın ön yüzünü çekin; 1 saniyede otomatik tanımlansın.</p>
+            <p class="text-[10px] text-gray-400">BİM, A101, Şok, Migros... Ambalajı çekin, 1 saniyede otomatik tanımlansın.</p>
             <input type="file" id="aiFotoInput" accept="image/*" capture="environment" class="hidden" onchange="aiUrunAnalizEt(event)">
-            <p id="aiDurumYazisi" class="text-[12px] hidden font-semibold pt-1"></p>
+            <p id="aiDurumYazisi" class="text-[12px] hidden font-semibold pt-0.5"></p>
           </div>
 
           <div class="flex items-center gap-2 py-1"><div class="h-px bg-white/10 flex-1"></div><span class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">VEYA BARKOD OKUT</span><div class="h-px bg-white/10 flex-1"></div></div>
@@ -284,32 +284,28 @@
       alert("Kayıtlı Gemini şifresi silindi. Bir sonraki fotoğrafta yeni şifreniz sorulacaktır.");
     }
 
-    // 🚀 ULTRA HIZLI GÖRSEL SIKIŞTIRICI (10-15 KB - GECİKME YOK)
+    // 🚀 ULTRA HIZLI VE KESİNTİSİZ SIKIŞTIRMA (iOS BELLEK KİLİTLENMESİNİ ENGELLER)
     function optimizeGorsel(file) {
       return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let w = img.width, h = img.height;
-            const maxBoyut = 360;
-            if (w > h && w > maxBoyut) { h = Math.round((h * maxBoyut) / w); w = maxBoyut; }
-            else if (h > maxBoyut) { w = Math.round((w * maxBoyut) / h); h = maxBoyut; }
-            canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-            resolve(canvas.toDataURL('image/jpeg', 0.50));
-          };
-          img.onerror = reject;
-          img.src = e.target.result;
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(img.src);
+          const canvas = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          const max = 360;
+          if (w > h && w > max) { h = Math.round((h * max) / w); w = max; }
+          else if (h > max) { w = Math.round((w * max) / h); h = max; }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.50));
         };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+        img.onerror = () => reject(new Error("Görsel yüklenemedi."));
+        img.src = URL.createObjectURL(file);
       });
     }
 
-    // ⚡ 1 SANİYELİK YILDIRIM HIZINDA YAPAY ZEKA MOTORU
+    // ⚡ 1 SANİYELİK JET YAPAY ZEKA MOTORU (GARANTİLİ VE SAĞLAM)
     async function aiUrunAnalizEt(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -330,13 +326,15 @@
       }
 
       durum.classList.remove('hidden');
-      durum.innerHTML = '<i class="fa-solid fa-bolt animate-pulse text-amber-300"></i> İnceleniyor...';
+      durum.innerHTML = '<i class="fa-solid fa-bolt animate-pulse text-amber-300"></i> Yapay zekaya aktarılıyor...';
       durum.className = "text-[12px] text-amber-300 font-semibold block px-1";
+
+      const baslangicZamani = Date.now();
 
       try {
         const base64Url = await optimizeGorsel(file);
         
-        // Çekilen fotoğrafı anında önizlemeye koy ve ürünün resmi yap!
+        // Çekilen ambalaj fotoğrafını hemen önizlemeye ve ürüne ata
         document.getElementById('f_resim').value = base64Url;
         document.getElementById('f_onizlemeResim').src = base64Url;
         document.getElementById('f_onizlemeAd').innerText = "Tanımlanıyor...";
@@ -344,10 +342,12 @@
         previewBox.classList.remove('hidden');
 
         const pureBase64 = base64Url.split(',')[1];
+        
+        // Google Protobuf REST Formatı
         const payload = {
           contents: [{
             parts: [
-              { text: "Fotoğraftaki market ürününün marka ve adını Türkçe yaz. Sadece JSON döndür: {\"ad\":\"Marka Ürün Adı\",\"kat\":\"Gıda & Mutfak\"}. Kategori seçenekleri sadece: 'Gıda & Mutfak', 'Temizlik & Hijyen', 'Kişisel Bakım', 'Ev & Yaşam'." },
+              { text: "Fotoğraftaki Türk market ürününün marka ve tam adını tespit et (Örn: Dost Yarım Yağlı Süt, Birşah Yoğurt, Fairy Limon). Yanıt olarak SADECE geçerli bir JSON döndür: {\"ad\":\"Marka ve Ürün Adı\",\"kat\":\"Gıda & Mutfak\"}. Kategori sadece şunlardan biri olabilir: 'Gıda & Mutfak', 'Temizlik & Hijyen', 'Kişisel Bakım', 'Ev & Yaşam'." },
               {
                 inlineData: {
                   mimeType: "image/jpeg",
@@ -357,18 +357,23 @@
             ]
           }],
           generationConfig: {
-            maxOutputTokens: 60,
+            responseMimeType: "application/json",
+            maxOutputTokens: 80,
             temperature: 0.1
           }
         };
 
+        // En kararlı, mevcut ve hızlı çalışan iki resmi model
         const modeller = ["gemini-1.5-flash", "gemini-2.0-flash"];
         let basarili = false;
+        let hataDetayi = "";
 
         for (const model of modeller) {
           try {
+            durum.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles animate-pulse text-amber-300"></i> ${model} ambalajı inceliyor...`;
+            
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 saniye emniyet kilidi
+            const timeoutId = setTimeout(() => controller.abort(), 7000); // 7 saniye tavan süre
 
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
               method: "POST",
@@ -385,38 +390,42 @@
               const match = raw.match(/\{[\s\S]*?\}/);
               if (match) {
                 const sonuc = JSON.parse(match[0]);
+                const sure = ((Date.now() - baslangicZamani) / 1000).toFixed(1);
                 
-                // ANINDA ALANLARI DOLDUR (BEKLEMEK YOK!)
+                // Formu anında doldur
                 document.getElementById('f_ad').value = sonuc.ad;
                 if (sonuc.kat) document.getElementById('f_kategori').value = sonuc.kat;
                 document.getElementById('f_onizlemeAd').innerText = sonuc.ad;
                 document.getElementById('f_onizlemeKat').innerText = sonuc.kat || "Gıda & Mutfak";
                 
-                durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>${sonuc.ad}</b> olarak tanındı!`;
+                durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>${sonuc.ad}</b> (${sure} sn)`;
                 durum.className = "text-[12px] text-emerald-400 font-semibold block px-1";
                 basarili = true;
                 break;
               }
             } else if (data.error) {
+              hataDetayi = data.error.message;
               if (data.error.message.includes("API key not valid")) {
                 localStorage.removeItem('bizimEvGeminiKey');
-                durum.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-400"></i> Şifre geçersiz. Lütfen butona tekrar basıp şifreyi girin.`;
+                durum.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-400"></i> API Şifresi Geçersiz. Lütfen butona tekrar basıp girin.`;
                 durum.className = "text-[12px] text-red-400 font-semibold block px-1";
                 return;
               }
             }
-          } catch (e) {}
+          } catch (e) {
+            hataDetayi = e.message;
+          }
         }
 
         if (!basarili) {
           document.getElementById('f_onizlemeAd').innerText = "Manuel Giriş";
-          document.getElementById('f_onizlemeKat').innerText = "Ürün adını yazabilirsiniz";
-          durum.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-orange-400"></i> Otomatik okunamadı, lütfen ürün adını yazınız.`;
+          document.getElementById('f_onizlemeKat').innerText = "Adını yazabilirsiniz";
+          durum.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-orange-400"></i> Hata: ${hataDetayi || "Okunamadı, lütfen ürün adını yazınız."}`;
           durum.className = "text-[12px] text-orange-400 font-semibold block px-1";
         }
       } catch (err) {
         document.getElementById('f_onizlemeAd').innerText = "Manuel Giriş";
-        durum.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-400"></i> Hata oluştu.`;
+        durum.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-400"></i> Hata: ${err.message}`;
         durum.className = "text-[12px] text-red-400 font-semibold block px-1";
       }
     }
@@ -548,7 +557,7 @@
         const bugun = new Date(); bugun.setHours(0,0,0,0);
         let kilerKritikHtml = ""; let bekleYenAlisveris = 0; let istekSayisi = 0;
 
-        // KİLER
+        // KİLER LİSTESİ VE SİLME BUTONU
         const kBox = document.getElementById('kilerListe'); kBox.innerHTML = ''; 
         (appVerisi.kiler || []).forEach((item, index) => {
           const ad = item[0]||'', stok = Number(item[2])||0, birim = item[3]||'Adet', skt = item[5], resim = item[6], kat = item[7]||'Gıda';
