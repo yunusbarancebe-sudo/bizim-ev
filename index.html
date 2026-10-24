@@ -157,7 +157,7 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbwseDyzuAJsyobT8JR4uDFRj843J8DShLNpJOZRNEGJF8K8lns_8Aah9qvp5N7XNZyC/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbw3OceTdYzmixCxCCiwhbTMLyXfxRwWuV2W3qA_qwgB6-XHzTa7YrgF1v6UBS9lDRRD/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
@@ -226,13 +226,16 @@
         g.innerHTML = `
           <!-- YAPAY ZEKA GÖRSEL MOTORU -->
           <div class="bg-gradient-to-r from-blue-900/30 via-indigo-900/30 to-purple-900/30 p-4 rounded-2xl border border-blue-500/30 text-center space-y-2">
-            <p class="text-[12px] font-bold text-blue-300 flex items-center justify-center gap-1.5">
-              <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Yapay Zeka ile Otomatik Tanı
-            </p>
+            <div class="flex justify-between items-center px-1">
+              <span class="text-[12px] font-bold text-blue-300 flex items-center gap-1.5">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Yapay Zeka ile Otomatik Tanı
+              </span>
+              <button type="button" onclick="geminiKeySifirla()" class="text-[10px] text-gray-400 underline hover:text-white">Şifre Değiştir</button>
+            </div>
             <button type="button" onclick="document.getElementById('aiFotoInput').click()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-blue-600/30 transition-all text-sm">
               <i class="fa-solid fa-camera text-base"></i> Paketin Fotoğrafını Çek
             </button>
-            <p class="text-[10px] text-gray-400">BİM, A101, Şok, Migros... Paketin ön yüzünü çekin, yapay zeka adını ve reyonunu saniyesinde bulsun.</p>
+            <p class="text-[10px] text-gray-400">BİM, A101, Şok, Migros... Paketin önünü çekin, adını ve reyonunu saniyesinde bulsun.</p>
             <input type="file" id="aiFotoInput" accept="image/*" capture="environment" class="hidden" onchange="aiUrunAnalizEt(event)">
             <p id="aiDurumYazisi" class="text-[12px] hidden font-semibold pt-1"></p>
           </div>
@@ -270,6 +273,11 @@
 
     function modalKapat() { try { kameraKapat(); } catch (e) {} document.getElementById('formModal').classList.add('hidden'); document.getElementById('formModal').classList.remove('flex'); }
 
+    function geminiKeySifirla() {
+      localStorage.removeItem('bizimEvGeminiKey');
+      alert("Kayıtlı Gemini şifresi silindi. Bir sonraki fotoğrafta yeni şifreniz sorulacaktır.");
+    }
+
     // 📸 RESMİ OTOMATİK 600PX SIKIŞTIRMA (BELLEK KORUMASI)
     function resmiKucultBase64(file, maxBoyut = 600) {
       return new Promise((resolve, reject) => {
@@ -294,13 +302,27 @@
       });
     }
 
-    // 🧠 YAPAY ZEKA GÖRSEL MOTORU (KOD.GS ÜZERİNDEN GÜVENLİ İLETİŞİM)
+    // 🧠 DOĞRUDAN GOOGLE GEMINI VISION ÇAĞRISI (SAFARI VE CORS UYUMLU)
     async function aiUrunAnalizEt(e) {
       const file = e.target.files[0];
       if (!file) return;
       const durum = document.getElementById('aiDurumYazisi');
       const previewBox = document.getElementById('urunOnizlemeKutusu');
       
+      // 1. Cihaz hafızasındaki şifreyi kontrol et
+      let apiKey = localStorage.getItem('bizimEvGeminiKey') || '';
+      if (!apiKey || apiKey.trim().length < 10) {
+        apiKey = prompt("Yapay zeka ile ürün tanımak için Google AI Studio anahtarınızı (API Key) yapıştırın:\n\n(Bu şifre GitHub'a GİTMEZ, sadece telefonunuzda saklanır):");
+        if (!apiKey || apiKey.trim().length < 10) {
+          durum.classList.remove('hidden');
+          durum.innerHTML = '<i class="fa-solid fa-circle-exclamation text-orange-400"></i> API anahtarı girilmedi.';
+          durum.className = "text-[12px] text-orange-400 font-semibold block px-1";
+          return;
+        }
+        apiKey = apiKey.trim();
+        localStorage.setItem('bizimEvGeminiKey', apiKey);
+      }
+
       durum.classList.remove('hidden');
       durum.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Fotoğraf işleniyor...';
       durum.className = "text-[12px] text-blue-400 font-semibold block px-1";
@@ -317,30 +339,68 @@
         
         durum.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles animate-pulse text-amber-300"></i> Yapay zeka ambalajı okuyor...';
 
-        // Google Apps Script sunucusuna gönder (CORS preflight engeline takılmaz!)
-        const res = await fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            islem: "aiFotoTani",
-            resim: base64Url
-          })
-        });
+        const pureBase64 = base64Url.split(',')[1];
+        const promptText = "Bu fotoğraftaki market ürününü tespit et. Türkiye'deki market ürünlerini (BİM Dost/Aknaz/Peripella, A101 Birşah/Peynes/Vera, Şok Mis/Piyale/Mintax, Migros, Sütaş, Pınar, Ülker, Eti vb.) çok iyi biliyorsun. Paketin üzerindeki marka ve ürün adını net bir şekilde tespit et. Yanıt olarak SADECE geçerli bir JSON döndür, markdown veya başka açıklama yazma: {\"ad\": \"Marka ve Ürün Adı\", \"kategori\": \"Kategori\"}. Kategori seçenekleri sadece şunlardır: 'Gıda & Mutfak', 'Temizlik & Hijyen', 'Kişisel Bakım', 'Ev & Yaşam'.";
 
-        const data = await res.json();
+        const payload = {
+          contents: [{
+            parts: [
+              { text: promptText },
+              { inlineData: { mimeType: "image/jpeg", data: pureBase64 } }
+            ]
+          }]
+        };
 
-        if (data.basarili && data.ad) {
-          document.getElementById('f_ad').value = data.ad;
-          if (data.kategori) document.getElementById('f_kategori').value = data.kategori;
-          document.getElementById('f_onizlemeAd').innerText = data.ad;
-          document.getElementById('f_onizlemeKat').innerText = data.kategori || "Gıda & Mutfak";
-          durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>Yapay Zeka Tanıdı:</b> ${data.ad}`;
-          durum.className = "text-[12px] text-emerald-400 font-semibold block px-1";
-        } else {
-          durum.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-orange-400"></i> ${data.mesaj || "Ambalaj okunamadı, lütfen ürün adını yazınız."}`;
+        // Modelleri sırayla dene (Hem 2.0 hem 1.5 desteği)
+        const modeller = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"];
+        let basarili = false;
+        let sonHataMetni = "";
+
+        for (const model of modeller) {
+          try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const res = await fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.candidates && data.candidates[0].content) {
+              const rawYanit = data.candidates[0].content.parts[0].text;
+              const jsonMatch = rawYanit.match(/\{[\s\S]*?\}/);
+              if (jsonMatch) {
+                const sonuc = JSON.parse(jsonMatch[0]);
+                document.getElementById('f_ad').value = sonuc.ad;
+                if (sonuc.kategori) document.getElementById('f_kategori').value = sonuc.kategori;
+                document.getElementById('f_onizlemeAd').innerText = sonuc.ad;
+                document.getElementById('f_onizlemeKat').innerText = sonuc.kategori || "Gıda & Mutfak";
+                durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>Yapay Zeka Tanıdı:</b> ${sonuc.ad}`;
+                durum.className = "text-[12px] text-emerald-400 font-semibold block px-1";
+                basarili = true;
+                break;
+              }
+            } else if (data.error) {
+              sonHataMetni = data.error.message;
+              if (data.error.message.includes("API key not valid") || data.error.status === "INVALID_ARGUMENT") {
+                localStorage.removeItem('bizimEvGeminiKey');
+                durum.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-400"></i> API Şifresi Geçersiz! Lütfen butona tekrar basıp yeni şifre yapıştırın.`;
+                durum.className = "text-[12px] text-red-400 font-semibold block px-1";
+                return;
+              }
+            }
+          } catch (e) {
+            sonHataMetni = e.message;
+          }
+        }
+
+        if (!basarili) {
+          durum.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-orange-400"></i> ${sonHataMetni || "Ambalaj net okunamadı, lütfen ürün adını yazınız."}`;
           durum.className = "text-[12px] text-orange-400 font-semibold block px-1";
         }
       } catch (err) {
-        durum.innerHTML = '<i class="fa-solid fa-circle-exclamation text-red-400"></i> Bağlantı hatası oluştu, lütfen tekrar deneyin.';
+        durum.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-400"></i> Hata: ${err.message}`;
         durum.className = "text-[12px] text-red-400 font-semibold block px-1";
       }
     }
@@ -381,7 +441,7 @@
         }
       } catch (err) {}
 
-      d.innerHTML = `<i class="fa-solid fa-circle-plus"></i> Barkod kayıtlı değil. Yukarıdaki "Fotoğrafını Çek" butonunu kullanın.`; d.className = "text-[12px] text-orange-400 font-semibold block px-1";
+      d.innerHTML = `<i class="fa-solid fa-circle-plus"></i> Barkod kayıtlı değil. Yukarıdaki "Paketin Fotoğrafını Çek" butonunu kullanın.`; d.className = "text-[12px] text-orange-400 font-semibold block px-1";
     }
 
     function akilliLinkCozucu(url) {
