@@ -157,7 +157,7 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbxkVkQ-HCaKYLxGQ1Bo4LeRZmxFcmyQFoBfjjiGour5weaeouYHj-UvB-a1FXf1-HI/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwseDyzuAJsyobT8JR4uDFRj843J8DShLNpJOZRNEGJF8K8lns_8Aah9qvp5N7XNZyC/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
@@ -224,20 +224,20 @@
       if (aktifSekme === 'kiler') {
         document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
         g.innerHTML = `
-          <!-- YAPAY ZEKA GÖRSEL TANIMA ALANI (HERO) -->
-          <div class="bg-gradient-to-r from-purple-900/30 via-indigo-900/30 to-blue-900/30 p-4 rounded-2xl border border-purple-500/30 text-center space-y-2">
-            <p class="text-[12px] font-bold text-purple-300 flex items-center justify-center gap-1.5">
+          <!-- YAPAY ZEKA GÖRSEL MOTORU -->
+          <div class="bg-gradient-to-r from-blue-900/30 via-indigo-900/30 to-purple-900/30 p-4 rounded-2xl border border-blue-500/30 text-center space-y-2">
+            <p class="text-[12px] font-bold text-blue-300 flex items-center justify-center gap-1.5">
               <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Yapay Zeka ile Otomatik Tanı
             </p>
-            <button type="button" onclick="document.getElementById('aiFotoInput').click()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-purple-600/30 transition-all text-sm">
-              <i class="fa-solid fa-camera text-base"></i> Ürünün Fotoğrafını Çek
+            <button type="button" onclick="document.getElementById('aiFotoInput').click()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-blue-600/30 transition-all text-sm">
+              <i class="fa-solid fa-camera text-base"></i> Paketin Fotoğrafını Çek
             </button>
-            <p class="text-[10px] text-gray-400">BİM, A101, Şok, Migros... Paketin önünü çekin, yapay zeka adını ve reyonunu saniyesinde bulsun.</p>
-            <input type="file" id="aiFotoInput" accept="image/*" capture="environment" class="hidden" onchange="aiUrunTanima(event)">
+            <p class="text-[10px] text-gray-400">BİM, A101, Şok, Migros... Paketin ön yüzünü çekin, yapay zeka adını ve reyonunu saniyesinde bulsun.</p>
+            <input type="file" id="aiFotoInput" accept="image/*" capture="environment" class="hidden" onchange="aiUrunAnalizEt(event)">
             <p id="aiDurumYazisi" class="text-[12px] hidden font-semibold pt-1"></p>
           </div>
 
-          <div class="flex items-center gap-2 py-1"><div class="h-px bg-white/10 flex-1"></div><span class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">VEYA MANUEL / BARKOD</span><div class="h-px bg-white/10 flex-1"></div></div>
+          <div class="flex items-center gap-2 py-1"><div class="h-px bg-white/10 flex-1"></div><span class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">VEYA BARKOD OKUT</span><div class="h-px bg-white/10 flex-1"></div></div>
 
           <div class="flex gap-2">
             <input id="f_barkod" type="text" placeholder="Barkod Okut / Yaz" class="${inputClass} flex-1" oninput="barkodHizliYazma(this.value)">
@@ -270,7 +270,7 @@
 
     function modalKapat() { try { kameraKapat(); } catch (e) {} document.getElementById('formModal').classList.add('hidden'); document.getElementById('formModal').classList.remove('flex'); }
 
-    // 📸 RESMİ OTOMATİK 600PX SIKIŞTIRMA (TARAYICI KİLİTLENMESİNİ ENGELLER)
+    // 📸 RESMİ OTOMATİK 600PX SIKIŞTIRMA (BELLEK KORUMASI)
     function resmiKucultBase64(file, maxBoyut = 600) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -294,16 +294,16 @@
       });
     }
 
-    // 🧠 YAPAY ZEKA GÖRSEL ANALİZ MOTORU (SIFIR AYAR - ANINDA TEŞHİS)
-    async function aiUrunTanima(e) {
+    // 🧠 YAPAY ZEKA GÖRSEL MOTORU (KOD.GS ÜZERİNDEN GÜVENLİ İLETİŞİM)
+    async function aiUrunAnalizEt(e) {
       const file = e.target.files[0];
       if (!file) return;
       const durum = document.getElementById('aiDurumYazisi');
       const previewBox = document.getElementById('urunOnizlemeKutusu');
       
       durum.classList.remove('hidden');
-      durum.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-purple-400"></i> Fotoğraf işleniyor...';
-      durum.className = "text-[12px] text-purple-400 font-semibold block px-1";
+      durum.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Fotoğraf işleniyor...';
+      durum.className = "text-[12px] text-blue-400 font-semibold block px-1";
 
       try {
         const base64Url = await resmiKucultBase64(file, 600);
@@ -311,52 +311,37 @@
         // Fotoğrafı kutucuğa ekle
         document.getElementById('f_resim').value = base64Url;
         document.getElementById('f_onizlemeResim').src = base64Url;
-        document.getElementById('f_onizlemeAd').innerText = "Tanımlanıyor...";
-        document.getElementById('f_onizlemeKat').innerText = "Yapay Zeka Analizi";
+        document.getElementById('f_onizlemeAd').innerText = "Yapay zeka inceliyor...";
+        document.getElementById('f_onizlemeKat').innerText = "Lütfen bekleyin";
         previewBox.classList.remove('hidden');
         
-        durum.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles animate-pulse text-amber-300"></i> Yapay Zeka ambalajı inceliyor...';
+        durum.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles animate-pulse text-amber-300"></i> Yapay zeka ambalajı okuyor...';
 
-        const prompt = "Bu fotoğraftaki market ürününü tespit et. BİM, A101, Şok, Migros veya Türk markası olabilir (Örn: 'Dost Yarım Yağlı Süt 1L', 'Fairy Bulaşık Deterjanı Limon 650ml', 'Eti Browni Intense'). Bana SADECE geçerli bir JSON ver: {\"ad\": \"Tam Marka ve Ürün Adı\", \"kategori\": \"Gıda & Mutfak\"}. Kategori seçenekleri sadece şunlar olabilir: 'Gıda & Mutfak', 'Temizlik & Hijyen', 'Kişisel Bakım', 'Ev & Yaşam'. Başka metin yazma.";
-
-        const res = await fetch("https://text.pollinations.ai/", {
+        // Google Apps Script sunucusuna gönder (CORS preflight engeline takılmaz!)
+        const res = await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            messages: [
-              {
-                role: "user",
-                content: [
-                  { type: "text", text: prompt },
-                  { type: "image_url", image_url: { url: base64Url } }
-                ]
-              }
-            ],
-            model: "openai",
-            jsonMode: true
+            islem: "aiFotoTani",
+            resim: base64Url
           })
         });
 
-        if (res.ok) {
-          const text = await res.text();
-          const match = text.match(/\{[\s\S]*?\}/);
-          if (match) {
-            const data = JSON.parse(match[0]);
-            if (data.ad) {
-              document.getElementById('f_ad').value = data.ad;
-              if (data.kategori) document.getElementById('f_kategori').value = data.kategori;
-              document.getElementById('f_onizlemeAd').innerText = data.ad;
-              document.getElementById('f_onizlemeKat').innerText = data.kategori || "Gıda & Mutfak";
-              durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>Yapay Zeka Tanıdı:</b> ${data.ad}`;
-              durum.className = "text-[12px] text-emerald-400 font-semibold block px-1";
-              return;
-            }
-          }
+        const data = await res.json();
+
+        if (data.basarili && data.ad) {
+          document.getElementById('f_ad').value = data.ad;
+          if (data.kategori) document.getElementById('f_kategori').value = data.kategori;
+          document.getElementById('f_onizlemeAd').innerText = data.ad;
+          document.getElementById('f_onizlemeKat').innerText = data.kategori || "Gıda & Mutfak";
+          durum.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <b>Yapay Zeka Tanıdı:</b> ${data.ad}`;
+          durum.className = "text-[12px] text-emerald-400 font-semibold block px-1";
+        } else {
+          durum.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-orange-400"></i> ${data.mesaj || "Ambalaj okunamadı, lütfen ürün adını yazınız."}`;
+          durum.className = "text-[12px] text-orange-400 font-semibold block px-1";
         }
-        throw new Error("Yanıt çözümlenemedi");
       } catch (err) {
-        durum.innerHTML = '<i class="fa-solid fa-circle-exclamation text-orange-400"></i> Net okunamadı, lütfen ürün adını yazınız.';
-        durum.className = "text-[12px] text-orange-400 font-semibold block px-1";
+        durum.innerHTML = '<i class="fa-solid fa-circle-exclamation text-red-400"></i> Bağlantı hatası oluştu, lütfen tekrar deneyin.';
+        durum.className = "text-[12px] text-red-400 font-semibold block px-1";
       }
     }
 
