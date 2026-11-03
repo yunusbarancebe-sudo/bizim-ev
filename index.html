@@ -40,7 +40,7 @@
         <button onclick="baglantiTestiYap()" title="Sunucu Bağlantısını Test Et" class="w-10 h-10 rounded-full bg-[#1c1c1e] border border-white/10 flex items-center justify-center text-blue-400 active:scale-90 transition-transform">
           <i id="testIcon" class="fa-solid fa-plug text-sm"></i>
         </button>
-        <button onclick="verileriYukle(true)" title="Verileri Yenile (Eşitle)" class="w-10 h-10 rounded-full bg-[#1c1c1e] border border-white/10 flex items-center justify-center text-gray-300 active:scale-90 transition-transform">
+        <button onclick="verileriYukle(true)" title="Buluttan Verileri Yenile" class="w-10 h-10 rounded-full bg-[#1c1c1e] border border-white/10 flex items-center justify-center text-gray-300 active:scale-90 transition-transform">
           <i id="yenileIcon" class="fa-solid fa-arrows-rotate text-sm"></i>
         </button>
         <button onclick="modalAc()" title="Yeni Ekle" class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/30 active:scale-90 transition-transform">
@@ -50,11 +50,11 @@
     </div>
   </header>
 
-  <!-- CANLI SENKRONİZASYON VE HATA BİLDİRİM PANELİ -->
+  <!-- CANLI SENKRONİZASYON VE HATA BİLDİRİMLERİ -->
   <div id="senkRozeti" class="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-[#1c1c1e] border border-white/10 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 hidden transition-all">
     <div class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></div> Bulutla Eşitleniyor...
   </div>
-  <div id="hataBildirimi" class="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-red-600/90 backdrop-blur-md border border-red-400 text-white text-xs font-semibold px-5 py-2.5 rounded-full shadow-2xl flex items-center gap-2 hidden max-w-sm text-center">
+  <div id="hataBildirimi" class="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-red-600/95 backdrop-blur-md border border-red-400 text-white text-xs font-semibold px-5 py-2.5 rounded-full shadow-2xl flex items-center gap-2 hidden max-w-sm text-center">
     <i class="fa-solid fa-triangle-exclamation"></i> <span id="hataMetni"></span>
   </div>
 
@@ -166,16 +166,16 @@
 
   <script>
     // ==========================================
-    // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA:
+    // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA YAPIŞTIRILACAK:
+    // DİKKAT: Baştaki ve sondaki Tırnak (") işaretlerini SİLMEYİN!
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycby6RGV4u264j8HglR-mrZfDu4bva-gwWR4ilBF1sH7Eu9f_Me7lvivnHbEkI-H67WWG/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbxDDN5wK_mHrZ8VvgVfIHVEB5GqgjGeqLIG3DHe4ox_iHLATaW6rVbRUU3qJIbER9tM/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
-    const defaultVeri = { kiler: [], finans: [], alisveris: [], istekler: [] };
+    const defaultVeri = { kiler: [], finans: [], alisveris: [], istekler: [], barkodKatalog: [] };
     let appVerisi = defaultVeri;
 
-    // LOCAL STORAGE'DAN İLK YÜKLEME
     try {
       const cached = localStorage.getItem('bizimEvVerisi');
       if (cached && cached !== "undefined") {
@@ -190,7 +190,6 @@
       document.getElementById('finansYilSec').value = String(simdi.getFullYear());
       ekraniGuncelle();
       
-      // Uygulama açılır açılmaz Eşinin ve Senin verilerini eşitlemek için sunucuya bağlan:
       if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
         verileriYukle(false);
       }
@@ -211,7 +210,7 @@
       icon.className = "fa-solid fa-spinner animate-spin text-sm text-blue-400";
 
       if (!API_URL || API_URL.includes("BURAYA_EXEC")) {
-        alert("⚠️ API_URL tanımlanmamış! Lütfen kodu YENİ DAĞITIM linkinizle güncelleyin.");
+        alert("⚠️ HATA: API_URL değişkenine linkinizi yapıştırmamışsınız veya yanlış yapıştırmışsınız (Tırnak işaretlerini kontrol edin).");
         icon.className = "fa-solid fa-plug text-sm text-red-400";
         return;
       }
@@ -224,13 +223,13 @@
         });
         const data = await res.json();
         if (data && data.durum === "bagli") {
-          alert(`✅ BAĞLANTI KUSURSUZ!\n\nSenin cihazın ile Eşinin cihazı şu an Google Sheets üzerinden eşzamanlı çalışıyor.\n\nTablo: ${data.tabloAdi}\nSaat: ${data.zaman}`);
+          alert(`✅ BAĞLANTI KUSURSUZ!\n\nSenin ve Eşinin cihazı E-Tablo üzerinden eşzamanlı çalışıyor.\n\nTablo: ${data.tabloAdi}\nSaat: ${data.zaman}`);
           icon.className = "fa-solid fa-circle-check text-sm text-emerald-400";
         } else {
           throw new Error("Ping geçersiz.");
         }
       } catch (err) {
-        alert(`❌ BAĞLANTI HATASI!\nGoogle'a ulaşılamıyor. Lütfen Apps Script'te "Erişimi Olanlar: Herkes" seçtiğinizden emin olun.\nHata: ${err.message}`);
+        alert(`❌ BAĞLANTI HATASI!\nGoogle'a ulaşılamıyor. Lütfen Apps Script'te "Erişimi Olanlar: Herkes" seçtiğinizden emin olun.\nDetay: ${err.message}`);
         icon.className = "fa-solid fa-circle-xmark text-sm text-red-400";
       }
     }
@@ -372,7 +371,7 @@
       } 
       else if (aktifSekme === 'finans') {
         document.getElementById('modalBaslik').innerText = 'Harcama / Gelir Ekle';
-        g.innerHTML = `<select id="f_tip" class="${inputClass}"><option value="Gider">Gider (Harcama)</option><option value="Fatura">Fatura / Aidat</option><option value="Maas_Ben">Maaş (Ben)</option><option value="Maas_Esim">Maaş (Eşim)</option></select><input id="f_tarih" type="date" value="${new Date().toISOString().split('T')[0]}" class="${inputClass}"><input id="f_kategori" type="text" placeholder="Kategori (Market, Benzin vb.)" class="${inputClass}"><div class="grid grid-cols-2 gap-3"><input id="f_tutar" type="number" placeholder="Tutar (₺)" class="${inputClass}"><select id="f_taksit" class="${inputClass}"><option value="1">Tek Çekim</option><option value="2">2 Taksit</option><option value="3">3 Taksit</option><option value="4">4 Taksit</option><option value="5">5 Taksit</option><option value="6">6 Taksit</option><option value="9">9 Taksit</option><option value="12">12 Taksit</option></select></div><select id="f_kisi" class="${inputClass}"><option value="Ben">Ben</option><option value="Eşim">Eşim</option><option value="Ortak">Ortak Hane</option></select><input id="f_not" type="text placeholder="Açıklama (İsteğe Bağlı)" class="${inputClass}">`;
+        g.innerHTML = `<select id="f_tip" class="${inputClass}"><option value="Gider">Gider (Harcama)</option><option value="Fatura">Fatura / Aidat</option><option value="Maas_Ben">Maaş (Ben)</option><option value="Maas_Esim">Maaş (Eşim)</option></select><input id="f_tarih" type="date" value="${new Date().toISOString().split('T')[0]}" class="${inputClass}"><input id="f_kategori" type="text" placeholder="Kategori (Market, Benzin vb.)" class="${inputClass}"><div class="grid grid-cols-2 gap-3"><input id="f_tutar" type="number" placeholder="Tutar (₺)" class="${inputClass}"><select id="f_taksit" class="${inputClass}"><option value="1">Tek Çekim</option><option value="2">2 Taksit</option><option value="3">3 Taksit</option><option value="4">4 Taksit</option><option value="5">5 Taksit</option><option value="6">6 Taksit</option><option value="9">9 Taksit</option><option value="12">12 Taksit</option></select></div><select id="f_kisi" class="${inputClass}"><option value="Ben">Ben</option><option value="Eşim">Eşim</option><option value="Ortak">Ortak Hane</option></select><input id="f_not" type="text" placeholder="Açıklama (İsteğe Bağlı)" class="${inputClass}">`;
       } 
       else if (aktifSekme === 'alisveris') {
         document.getElementById('modalBaslik').innerText = 'Alışveriş Listesi';
@@ -396,19 +395,18 @@
       if (!val) return;
       val = val.trim();
       if (val.length >= 8) {
-        barkodTimer = setTimeout(() => 77K_KatalogundaAra(val), 200);
+        barkodTimer = setTimeout(() => barkodKatalogundaAra(val), 200);
       }
     }
 
     // ⚡ 77.000 SATIRLIK E-TABLODA BARKOD ÇÖZÜCÜ
-    async function 77K_KatalogundaAra(barkod) {
+    async function barkodKatalogundaAra(barkod) {
       if (!barkod) return;
       barkod = String(barkod).trim();
       const d = document.getElementById('barkodDurum');
       d.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Katalog taranıyor...';
       d.className = "text-[12px] text-blue-400 font-semibold block px-1";
 
-      // 1. Önce cihazdaki açık kilerde (aktif stok) var mı bak (Sıfır milisaniye)
       const kilerdeVar = (appVerisi.kiler || []).find(u => String(u[1]).trim() === barkod);
       if (kilerdeVar && kilerdeVar[0]) {
         urunBilgileriniDoldur(kilerdeVar[0], kilerdeVar[7] || 'Gıda & Mutfak', kilerdeVar[3] || 'Adet', kilerdeVar[6] || '', []);
@@ -417,7 +415,6 @@
         return;
       }
 
-      // 2. Yoksa doğrudan Google'a sor (Dev 77K listeyi TextFinder ile 0.03s'de bulur)
       if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
         try {
           const res = await fetch(API_URL, {
@@ -438,7 +435,7 @@
         }
       }
 
-      d.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400"></i> Barkod listede yok. Lütfen ürün adını elle yazın (Yazınca kataloğa eklenecek).`;
+      d.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400"></i> Barkod listede yok. Lütfen ürün adını elle yazın (Kaydedilince E-Tablonuza eklenecektir).`;
       d.className = "text-[12px] text-blue-400 font-medium block px-1";
     }
 
@@ -463,7 +460,7 @@
       }
     }
 
-    // 📸 KENDİ FOTOĞRAFINI KULLAN
+    // 📸 KENDİ FOTOĞRAFINI ÇEKİP KULLANMA
     function kullaniciFotoSecildi(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -574,7 +571,7 @@
         (txt) => { 
           document.getElementById('f_barkod').value = txt; 
           kameraKapat(); 
-          77K_KatalogundaAra(txt); 
+          barkodKatalogundaAra(txt); 
         }, 
         () => {}
       ).catch(() => alert("Kamera izni gerekli.")); 
