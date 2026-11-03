@@ -167,7 +167,7 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA YAPIŞTIRILACAK:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbwIISDZ5saUcQRITAc7Ftv4EBzf1o2TCy77suYJCTk8eONN5HFQiS8h745NIBM3RMnZ/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbx1OFumIJhuQYO_P_EeqIePk19osmYV_FhLIicUkoZ7bfD3RD5ab-PqU4qGNbSCbNiz/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
@@ -188,7 +188,9 @@
       document.getElementById('finansYilSec').value = String(simdi.getFullYear());
       ekraniGuncelle();
       
-      if (API_URL && !API_URL.includes("BURAYA_EXEC")) verileriYukle(false);
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
+        verileriYukle(false);
+      }
     };
 
     function yerelBellegeKaydet() { localStorage.setItem('bizimEvVerisi', JSON.stringify(appVerisi)); }
@@ -203,20 +205,28 @@
     async function baglantiTestiYap() {
       const icon = document.getElementById('testIcon');
       icon.className = "fa-solid fa-spinner animate-spin text-sm text-blue-400";
+
       if (!API_URL || API_URL.includes("BURAYA_EXEC")) {
         alert("⚠️ HATA: API_URL değişkenine linkinizi yapıştırmamışsınız.");
         icon.className = "fa-solid fa-plug text-sm text-red-400";
         return;
       }
+
       try {
-        const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ islem: "ping" }) });
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ islem: "ping" })
+        });
         const data = await res.json();
         if (data && data.durum === "bagli") {
-          alert(`✅ BAĞLANTI KUSURSUZ!\n\nSenin ve Eşinin cihazı E-Tablo üzerinden eşzamanlı çalışıyor.\nTablo: ${data.tabloAdi}`);
+          alert(`✅ BAĞLANTI KUSURSUZ!\n\nSenin ve Eşinin cihazı E-Tablo üzerinden eşzamanlı çalışıyor.\n\nTablo: ${data.tabloAdi}`);
           icon.className = "fa-solid fa-circle-check text-sm text-emerald-400";
-        } else throw new Error("Ping geçersiz.");
+        } else {
+          throw new Error("Ping geçersiz.");
+        }
       } catch (err) {
-        alert(`❌ BAĞLANTI HATASI!\nLütfen Apps Script'te "Erişimi Olanlar: Herkes" seçtiğinizden emin olun.`);
+        alert(`❌ BAĞLANTI HATASI!\nGoogle'a ulaşılamıyor. Lütfen Apps Script'te "Erişimi Olanlar: Herkes" seçtiğinizden emin olun.\nDetay: ${err.message}`);
         icon.className = "fa-solid fa-circle-xmark text-sm text-red-400";
       }
     }
@@ -224,21 +234,45 @@
     async function sunucuyaVeriGonder(payload) {
       document.getElementById('senkRozeti').classList.remove('hidden');
       try {
-        const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
         const data = await res.json();
-        if (data && data.kiler) { appVerisi = { ...defaultVeri, ...data }; yerelBellegeKaydet(); ekraniGuncelle(); }
-      } catch (err) { hataGoster("Google E-Tablo'ya bağlanılamadı."); } 
-      finally { document.getElementById('senkRozeti').classList.add('hidden'); }
+        if (data && data.kiler) {
+          appVerisi = { ...defaultVeri, ...data };
+          yerelBellegeKaydet();
+          ekraniGuncelle();
+        }
+      } catch (err) {
+        hataGoster("Google E-Tablo'ya bağlanılamadı.");
+      } finally {
+        document.getElementById('senkRozeti').classList.add('hidden');
+      }
     }
 
     function verileriYukle(gosterAnim) {
       if (!API_URL || API_URL.includes("BURAYA_EXEC")) return;
       if (gosterAnim && document.getElementById('yenileIcon')) document.getElementById('yenileIcon').classList.add('animate-spin');
-      fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ islem: "verileriGetir" }) })
+      
+      fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ islem: "verileriGetir" })
+      })
       .then(res => res.json())
-      .then(data => { if (data && data.kiler) { appVerisi = { ...defaultVeri, ...data }; yerelBellegeKaydet(); ekraniGuncelle(); } })
+      .then(data => { 
+        if (data && data.kiler) { 
+          appVerisi = { ...defaultVeri, ...data }; 
+          yerelBellegeKaydet(); 
+          ekraniGuncelle(); 
+        }
+      })
       .catch(err => hataGoster("Yenileme başarısız: " + err.message))
-      .finally(() => { if (document.getElementById('yenileIcon')) document.getElementById('yenileIcon').classList.remove('animate-spin'); });
+      .finally(() => { 
+        if (document.getElementById('yenileIcon')) document.getElementById('yenileIcon').classList.remove('animate-spin'); 
+      });
     }
 
     function sekmeDegistir(sekme, baslik) {
@@ -383,7 +417,6 @@
       document.getElementById('formModal').classList.remove('flex'); 
     }
 
-    // ARAMA SÜRESİNİ UZATTIM Kİ SEN YAZARKEN SÜREKLİ İSTEK ATIP SUNUCUYU BOĞMASIN (0.6 Sn bekleme)
     function barkodHizliYazma(val) {
       clearTimeout(barkodTimer);
       if (!val) return;
@@ -393,7 +426,6 @@
       }
     }
 
-    // ⚡ 77.000 SATIRLIK E-TABLODA BARKOD ÇÖZÜCÜ
     async function barkodKatalogundaAra(barkod) {
       if (!barkod) return;
       barkod = String(barkod).trim();
@@ -447,10 +479,11 @@
         document.getElementById('f_onizlemeResim').src = resim;
       }
       
-      if (resimlerListesi && resimlerListesi.length > 0) {
-        gorselListesiniDiz(resimlerListesi, resim);
-      } else {
+      // Arka plan resim bulamadıysa YENİLMEZ ÖN YÜZ PROXY MOTORU DEVREYE GİRER
+      if (!resimlerListesi || resimlerListesi.length < 2) {
         manuelGorselAra(ad);
+      } else {
+        gorselListesiniDiz(resimlerListesi, resim);
       }
     }
 
@@ -490,6 +523,7 @@
       reader.readAsDataURL(file);
     }
 
+    // 🚀 ENGELSİZ, %100 ÇALIŞAN FRONTEND CORS PROXY MOTORU
     async function manuelGorselAra(urunAdi) {
       if (!urunAdi || urunAdi.trim().length < 2) return;
       const gDurum = document.getElementById('gorselDurumText');
@@ -499,26 +533,44 @@
       
       const katEl = document.getElementById('f_kategori');
       document.getElementById('f_onizlemeKat').innerText = katEl ? katEl.value : "Gıda & Mutfak";
-      gDurum.innerText = "Görseller aranıyor...";
+      gDurum.innerText = "Görseller proxy kalkanıyla çekiliyor...";
 
       let bulunanlar = [];
       const mevcut = document.getElementById('f_resim').value;
       if (mevcut && mevcut.startsWith('http')) bulunanlar.push(mevcut);
 
-      if (API_URL && !API_URL.includes("BURAYA_EXEC")) {
-        try {
-          const res = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ islem: "resimBul", ad: urunAdi })
-          });
-          const data = await res.json();
-          if (data && data.resimler && data.resimler.length > 0) {
-            data.resimler.forEach(u => {
-              if (!bulunanlar.includes(u)) bulunanlar.push(u);
-            });
+      try {
+        const query = encodeURIComponent(urunAdi);
+        
+        // 1. Google Görseller (AllOrigins CORS Proxy ile)
+        const gUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://www.google.com/search?tbm=isch&q=' + query)}`;
+        const gRes = await fetch(gUrl);
+        const gData = await gRes.json();
+        const gHtml = gData.contents;
+        
+        const gRe = /(https:\/\/encrypted-tbn0\.gstatic\.com\/images\?q=tbn:[^&"'\s\\]+)/gi;
+        let gMatch;
+        while ((gMatch = gRe.exec(gHtml)) !== null && bulunanlar.length < 5) {
+          let url = gMatch[1].replace(/\\u0026/g, '&');
+          if (!bulunanlar.includes(url)) bulunanlar.push(url);
+        }
+
+        // 2. Bing Görseller (Eğer Google az bulursa)
+        if (bulunanlar.length < 3) {
+          const bUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://www.bing.com/images/search?q=' + query)}`;
+          const bRes = await fetch(bUrl);
+          const bData = await bRes.json();
+          const bHtml = bData.contents;
+          
+          const bRe = /(https?:\/\/tse\d+\.mm\.bing\.net\/th\?id=[a-zA-Z0-9_\-\.]+)/gi;
+          let bMatch;
+          while ((bMatch = bRe.exec(bHtml)) !== null && bulunanlar.length < 6) {
+            let url = bMatch[1].replace(/&amp;/g, '&');
+            if (!bulunanlar.includes(url)) bulunanlar.push(url);
           }
-        } catch (e) {}
+        }
+      } catch (e) {
+        console.error("Görsel Proxy Hatası:", e);
       }
 
       gorselListesiniDiz(bulunanlar, document.getElementById('f_resim').value);
