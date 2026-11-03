@@ -167,9 +167,8 @@
   <script>
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA YAPIŞTIRILACAK:
-    // DİKKAT: Baştaki ve sondaki Tırnak (") işaretlerini SİLMEYİN!
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbyzbXODEfwVS3yNXFkwJDnAuiKl9RzMdyXdYPIomeabn-7HvXgyHSyQzmZkhbT6kTbj/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwEEtqCKj4346yrnLef40R7ABS2i6BHV3uqDqSDiVd8KdeKc4z2GQWn8HoeTc5kfUGW/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, linkDebounceTimer = null, barkodTimer = null;
     let akilliSiralamaAcik = false;
@@ -210,7 +209,7 @@
       icon.className = "fa-solid fa-spinner animate-spin text-sm text-blue-400";
 
       if (!API_URL || API_URL.includes("BURAYA_EXEC")) {
-        alert("⚠️ HATA: API_URL değişkenine linkinizi yapıştırmamışsınız veya yanlış yapıştırmışsınız (Tırnak işaretlerini kontrol edin).");
+        alert("⚠️ HATA: API_URL değişkenine linkinizi yapıştırmamışsınız.");
         icon.className = "fa-solid fa-plug text-sm text-red-400";
         return;
       }
@@ -223,18 +222,18 @@
         });
         const data = await res.json();
         if (data && data.durum === "bagli") {
-          alert(`✅ BAĞLANTI KUSURSUZ!\n\nSenin ve Eşinin cihazı E-Tablo üzerinden eşzamanlı çalışıyor.\n\nTablo: ${data.tabloAdi}\nSaat: ${data.zaman}`);
+          alert(`✅ BAĞLANTI KUSURSUZ!\n\nSenin ve Eşinin cihazı E-Tablo üzerinden eşzamanlı çalışıyor.\n\nTablo: ${data.tabloAdi}`);
           icon.className = "fa-solid fa-circle-check text-sm text-emerald-400";
         } else {
           throw new Error("Ping geçersiz.");
         }
       } catch (err) {
-        alert(`❌ BAĞLANTI HATASI!\nGoogle'a ulaşılamıyor. Lütfen Apps Script'te "Erişimi Olanlar: Herkes" seçtiğinizden emin olun.\nDetay: ${err.message}`);
+        alert(`❌ BAĞLANTI HATASI!\nGoogle'a ulaşılamıyor. Lütfen Apps Script'te "Erişimi Olanlar: Herkes" seçtiğinizden emin olun.`);
         icon.className = "fa-solid fa-circle-xmark text-sm text-red-400";
       }
     }
 
-    // 🚀 CORS ENGELSİZ VERİ TAŞIYICI (POST) - SENKRONİZASYONUN KALBİ
+    // 🚀 CORS ENGELSİZ VERİ TAŞIYICI (POST) - SENKRONİZASYON
     async function sunucuyaVeriGonder(payload) {
       document.getElementById('senkRozeti').classList.remove('hidden');
       try {
@@ -250,13 +249,12 @@
           ekraniGuncelle();
         }
       } catch (err) {
-        hataGoster("Google E-Tablo'ya bağlanılamadı. İnternetinizi kontrol edin.");
+        hataGoster("Google E-Tablo'ya bağlanılamadı.");
       } finally {
         document.getElementById('senkRozeti').classList.add('hidden');
       }
     }
 
-    // 🔄 EKRANI SUNUCUDAKİ EN GÜNCEL HALİNE GETİRİR (Yenile Butonu)
     function verileriYukle(gosterAnim) {
       if (!API_URL || API_URL.includes("BURAYA_EXEC")) return;
       if (gosterAnim && document.getElementById('yenileIcon')) document.getElementById('yenileIcon').classList.add('animate-spin');
@@ -310,7 +308,7 @@
         document.getElementById('modalBaslik').innerText = 'Kilere Ürün Ekle';
         g.innerHTML = `
           <div class="space-y-3">
-            <!-- ⚡ 77K BARKOD ARAMA KUTUSU -->
+            <!-- ⚡ BARKOD VE KAMERA BÖLÜMÜ -->
             <div class="flex gap-2">
               <input id="f_barkod" type="text" placeholder="Barkodu Okutun veya Yazın" class="${inputClass} flex-1 font-mono tracking-wider text-blue-400" oninput="barkodHizliYazma(this.value)">
               <button type="button" onclick="kameraAc()" class="bg-blue-600 px-5 rounded-xl text-white font-bold active:scale-95 transition-transform flex items-center gap-2" title="Kamera ile Barkod Tara">
@@ -369,9 +367,44 @@
             </div>
           </div>`;
       } 
+      // 💰 FİNANS - YENİ KATEGORİ DROPDOWN LİSTESİ İLE 💰
       else if (aktifSekme === 'finans') {
         document.getElementById('modalBaslik').innerText = 'Harcama / Gelir Ekle';
-        g.innerHTML = `<select id="f_tip" class="${inputClass}"><option value="Gider">Gider (Harcama)</option><option value="Fatura">Fatura / Aidat</option><option value="Maas_Ben">Maaş (Ben)</option><option value="Maas_Esim">Maaş (Eşim)</option></select><input id="f_tarih" type="date" value="${new Date().toISOString().split('T')[0]}" class="${inputClass}"><input id="f_kategori" type="text" placeholder="Kategori (Market, Benzin vb.)" class="${inputClass}"><div class="grid grid-cols-2 gap-3"><input id="f_tutar" type="number" placeholder="Tutar (₺)" class="${inputClass}"><select id="f_taksit" class="${inputClass}"><option value="1">Tek Çekim</option><option value="2">2 Taksit</option><option value="3">3 Taksit</option><option value="4">4 Taksit</option><option value="5">5 Taksit</option><option value="6">6 Taksit</option><option value="9">9 Taksit</option><option value="12">12 Taksit</option></select></div><select id="f_kisi" class="${inputClass}"><option value="Ben">Ben</option><option value="Eşim">Eşim</option><option value="Ortak">Ortak Hane</option></select><input id="f_not" type="text" placeholder="Açıklama (İsteğe Bağlı)" class="${inputClass}">`;
+        g.innerHTML = `
+          <select id="f_tip" class="${inputClass}">
+            <option value="Gider">Gider (Harcama)</option>
+            <option value="Maas_Ben">Gelir (Maaş / Ekstra)</option>
+          </select>
+          <input id="f_tarih" type="date" value="${new Date().toISOString().split('T')[0]}" class="${inputClass}">
+          
+          <select id="f_kategori" class="${inputClass}">
+            <option value="" disabled selected>Kategori Seçin...</option>
+            <option value="Market & Süpermarket">Market & Süpermarket</option>
+            <option value="Faturalar & Aidat">Faturalar & Aidat</option>
+            <option value="Akaryakıt & Ulaşım">Akaryakıt & Ulaşım</option>
+            <option value="Giyim & Aksesuar">Giyim & Aksesuar</option>
+            <option value="Dışarıda Yemek / Cafe">Dışarıda Yemek / Cafe</option>
+            <option value="Sağlık & Eczane">Sağlık & Eczane</option>
+            <option value="Eğlence & Tatil">Eğlence & Tatil</option>
+            <option value="Eğitim">Eğitim</option>
+            <option value="Diğer">Diğer</option>
+          </select>
+
+          <div class="grid grid-cols-2 gap-3">
+            <input id="f_tutar" type="number" placeholder="Tutar (₺)" class="${inputClass}">
+            <select id="f_taksit" class="${inputClass}">
+              <option value="1">Tek Çekim</option>
+              <option value="2">2 Taksit</option><option value="3">3 Taksit</option><option value="4">4 Taksit</option>
+              <option value="5">5 Taksit</option><option value="6">6 Taksit</option><option value="9">9 Taksit</option>
+              <option value="12">12 Taksit</option>
+            </select>
+          </div>
+          <select id="f_kisi" class="${inputClass}">
+            <option value="Ortak">Ortak Hane (Ev)</option>
+            <option value="Ben">Kişisel (Ben)</option>
+            <option value="Eşim">Kişisel (Eşim)</option>
+          </select>
+          <input id="f_not" type="text" placeholder="Açıklama (İsteğe Bağlı)" class="${inputClass}">`;
       } 
       else if (aktifSekme === 'alisveris') {
         document.getElementById('modalBaslik').innerText = 'Alışveriş Listesi';
@@ -399,12 +432,12 @@
       }
     }
 
-    // ⚡ 77.000 SATIRLIK E-TABLODA BARKOD ÇÖZÜCÜ
+    // ⚡ 77.000 SATIRLIK E-TABLODA BARKOD ÇÖZÜCÜ (CTRL+F HIZINDA)
     async function barkodKatalogundaAra(barkod) {
       if (!barkod) return;
       barkod = String(barkod).trim();
       const d = document.getElementById('barkodDurum');
-      d.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Katalog taranıyor...';
+      d.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-blue-400"></i> Dev Katalog Taranıyor...';
       d.className = "text-[12px] text-blue-400 font-semibold block px-1";
 
       const kilerdeVar = (appVerisi.kiler || []).find(u => String(u[1]).trim() === barkod);
@@ -425,7 +458,7 @@
           const data = await res.json();
           if (data && data.bulundu && data.ad) {
             urunBilgileriniDoldur(data.ad, data.kategori, data.birim, data.resim, data.resimler || []);
-            d.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Bulundu (${data.kaynak}): <b>${data.ad}</b>`;
+            d.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Bulundu: <b>${data.ad}</b>`;
             d.className = "text-[12px] text-emerald-400 font-semibold block px-1";
             return;
           }
@@ -435,7 +468,7 @@
         }
       }
 
-      d.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400"></i> Barkod listede yok. Lütfen ürün adını elle yazın (Kaydedilince E-Tablonuza eklenecektir).`;
+      d.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400"></i> Barkod listede yok. Lütfen ürün adını elle yazın.`;
       d.className = "text-[12px] text-blue-400 font-medium block px-1";
     }
 
@@ -504,8 +537,11 @@
       document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
       document.getElementById('gorselSeceneklerAlani').classList.remove('hidden');
       document.getElementById('f_onizlemeAd').innerText = urunAdi;
-      document.getElementById('f_onizlemeKat').innerText = document.getElementById('f_kategori').value;
-      gDurum.innerText = "Görseller taranıyor...";
+      
+      // Kategori null olmaması için koruma
+      const katEl = document.getElementById('f_kategori');
+      document.getElementById('f_onizlemeKat').innerText = katEl ? katEl.value : "Gıda & Mutfak";
+      gDurum.innerText = "Görseller aranıyor...";
 
       let bulunanlar = [];
       const mevcut = document.getElementById('f_resim').value;
@@ -641,10 +677,14 @@
     // 💾 KAYDET BUTONU - DOĞRUDAN SUNUCUYA POST ATAR (SENKRONİZASYON)
     function formKaydet() {
       let payload = { islem: '' };
+      
       if (aktifSekme === 'kiler') {
+        const adEl = document.getElementById('f_ad');
+        if (!adEl || !adEl.value.trim()) return alert("Lütfen ürün adını giriniz.");
+        
         payload = { 
           islem: 'kilerEkle', 
-          ad: document.getElementById('f_ad').value, 
+          ad: adEl.value.trim(), 
           barkod: document.getElementById('f_barkod').value, 
           stok: document.getElementById('f_stok').value, 
           birim: document.getElementById('f_birim').value, 
@@ -653,8 +693,6 @@
           kategori: document.getElementById('f_kategori').value, 
           kritik: '1' 
         };
-        
-        if (!payload.ad) return alert("Lütfen ürün adını giriniz.");
 
         let index = -1; 
         if (payload.barkod) index = appVerisi.kiler.findIndex(u => String(u[1]).trim() === String(payload.barkod).trim()); 
@@ -669,11 +707,14 @@
         }
       } 
       else if (aktifSekme === 'finans') {
+        const katEl = document.getElementById('f_kategori');
+        if(!katEl || !katEl.value) return alert("Lütfen bir harcama kategorisi seçiniz.");
+
         payload = { 
           islem: 'finansEkle', 
           tip: document.getElementById('f_tip').value, 
           tarih: document.getElementById('f_tarih').value, 
-          kategori: document.getElementById('f_kategori').value || 'Diğer', 
+          kategori: katEl.value, 
           tutar: document.getElementById('f_tutar').value, 
           taksit: document.getElementById('f_taksit').value, 
           kisi: document.getElementById('f_kisi').value, 
@@ -802,7 +843,7 @@
         });
         document.getElementById('sktUyariAlani').innerHTML = kilerKritikHtml ? `<div class="bg-red-500/10 border border-red-500/20 p-3.5 rounded-2xl text-[12px] text-red-400 font-semibold mb-2 leading-relaxed"><i class="fa-solid fa-triangle-exclamation mr-1"></i> <b>SKT Uyarıları</b><br>${kilerKritikHtml}</div>` : '';
 
-        // FİNANS
+        // FİNANS KATEGORİSİ
         const donemFiltre = `${document.getElementById('finansYilSec').value}-${document.getElementById('finansAySec').value}`;
         let mBen=0, mEsim=0, ftr=0, gdr=0, kirilim={}; const fBox = document.getElementById('finansListe'); fBox.innerHTML = '';
         (appVerisi.finans || []).forEach(item => {
