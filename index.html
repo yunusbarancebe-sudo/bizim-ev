@@ -162,7 +162,7 @@
     // ==========================================
     // ⚙️ APPS SCRIPT BAĞLANTISI BURAYA YAPIŞTIRILACAK:
     // ==========================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbx1ywnVa6Pr_bzIOV47qY3O_kVS9obF-n0hM9TwLWGZuYgxlbWkTALm2f4WxkwudxY/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbx2OiQHnYsBAKNYJaBt74PrNqBrG5x2ZTQzdLxAmQI_t6q6iqsx5hI63uYbZ9AI33L1/exec";
 
     let aktifSekme = 'ozet', seciliKilerKategori = 'Tümü', html5QrCode = null, barkodTimer = null, linkDebounceTimer = null;
     let akilliSiralamaAcik = false;
@@ -287,7 +287,8 @@
 
             <div class="space-y-2 mt-2 bg-[#1c1c1e] p-3 rounded-xl border border-white/5">
               <span class="text-[11px] font-semibold text-gray-400 block px-1">Kendi Resmini Yükle veya Link Yapıştır:</span>
-              <input type="text" id="f_manuel_link" placeholder="Kopyaladığın resim linkini buraya yapıştır..." class="${inputClass} text-[13px] py-3" oninput="resimLinkiniUygula(this.value)">
+              
+              <input type="text" id="f_manuel_link" placeholder="Resim Adresini buraya yapıştır..." class="${inputClass} text-[13px] py-3" oninput="resimLinkiniUygula(this.value)">
               
               <input type="file" id="fotoUploadInput" accept="image/*" capture="environment" class="hidden" onchange="kullaniciFotoSecildi(event)">
               <button type="button" onclick="document.getElementById('fotoUploadInput').click()" class="w-full bg-[#2c2c2e] hover:bg-[#333336] border border-dashed border-white/20 py-2.5 rounded-xl flex items-center justify-center gap-2 text-[12px] font-semibold text-gray-300">
@@ -331,7 +332,7 @@
     function modalKapat() { try { kameraKapat(); } catch(e){} document.getElementById('formModal').classList.add('hidden'); document.getElementById('formModal').classList.remove('flex'); }
 
     // ==========================================
-    // ✨ YENİ MANUEL GOOGLE RESİM ARAMA & EKLEME
+    // ✨ MANUEL GOOGLE RESİM ARAMA & EKLEME
     // ==========================================
     function googleGorsellerdeAc() {
       const ad = document.getElementById('f_ad').value;
@@ -340,10 +341,22 @@
     }
 
     function resimLinkiniUygula(url) {
-      if (!url || !url.startsWith('http')) return;
-      document.getElementById('f_resim').value = url;
-      document.getElementById('f_onizlemeResim').src = url;
-      document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
+      if (!url || url.length < 5) return;
+      
+      // Google Arama sayfası kopyalanmışsa engelle
+      if (url.includes("google.com/search")) {
+        alert("Hata: Resmin sayfasını kopyaladınız. Lütfen resmin üzerine basılı tutup 'Resim Adresini Kopyala' (Copy Image Address) diyerek tekrar yapıştırın.");
+        return;
+      }
+      
+      // Http veya data:image tabanlı base64'leri kabul et
+      if (url.startsWith('http') || url.startsWith('data:image')) {
+        document.getElementById('f_resim').value = url;
+        document.getElementById('f_onizlemeResim').src = url;
+        document.getElementById('urunOnizlemeKutusu').classList.remove('hidden');
+      } else {
+        alert("Lütfen geçerli bir resim adresi yapıştırın.");
+      }
     }
 
     async function sihirliIsimBul() {
@@ -441,9 +454,11 @@
           document.getElementById('f_barkod').value = txt; kameraKapat(); barkodHizliYazma(txt); 
       }, () => {}).catch(() => alert("Kamera izni gerekli.")); 
     }
-    
     function kameraKapat() { try { if (html5QrCode) { html5QrCode.stop(); html5QrCode.clear(); } } catch(e){} document.getElementById('kameraKutusu').classList.add('hidden'); }
 
+    // ==========================================
+    // YENİDEN AKTİF EDİLEN EYLEM BUTONLARI (KAYDET, SİL, ALIŞVERİŞE EKLE)
+    // ==========================================
     function formKaydet() {
       let payload = { islem: '' };
       
@@ -477,6 +492,38 @@
 
       sunucuyaVeriGonder(payload);
       modalKapat();
+    }
+
+    function kilerUrunBitti(index, ad) { 
+      if (confirm(`Stoğu sıfırlanıp Alışveriş Listesine aktarılsın mı?`)) { 
+        appVerisi.kiler[index][2] = "0"; 
+        appVerisi.alisveris.push([ad, '1', 'Kiler', 'Bugün', 'Bekliyor']); 
+        yerelBellegeKaydet(); 
+        ekraniGuncelle(); 
+        if (API_URL && !API_URL.includes("BURAYA_EXEC")) sunucuyaVeriGonder({ islem: 'kilerBitti', index: index, ad: ad }); 
+      } 
+    }
+
+    function alisverisDurumDegistir(urunAd, mevcutDurum) { 
+      const idx = appVerisi.alisveris.findIndex(u => u[0] === urunAd); 
+      if (idx === -1) return; 
+      const yeniDurum = mevcutDurum === 'Alındı' ? 'Bekliyor' : 'Alındı'; 
+      appVerisi.alisveris[idx][4] = yeniDurum; 
+      yerelBellegeKaydet(); 
+      ekraniGuncelle(); 
+      if (API_URL && !API_URL.includes("BURAYA_EXEC")) sunucuyaVeriGonder({ islem: 'alisverisDurum', index: idx, durum: yeniDurum }); 
+    }
+    
+    function satirSil(tablo, silAd, islemAdi) { 
+      if (confirm("Silmek istediğinize emin misiniz?")) { 
+        const idx = appVerisi[tablo].findIndex(u => (tablo === 'alisveris' || tablo === 'kiler' ? u[0] === silAd : u[1] === silAd)); 
+        if (idx !== -1) { 
+          appVerisi[tablo].splice(idx, 1); 
+          yerelBellegeKaydet(); 
+          ekraniGuncelle(); 
+          if (API_URL && !API_URL.includes("BURAYA_EXEC")) sunucuyaVeriGonder({ islem: islemAdi, index: idx }); 
+        } 
+      } 
     }
 
     function ekraniGuncelle() {
